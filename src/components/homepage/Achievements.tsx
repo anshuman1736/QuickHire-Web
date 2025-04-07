@@ -1,5 +1,5 @@
 import React from 'react'
-import { ArrowRight, ChevronLeft, ChevronRight, User, BookOpen, Building, MapPin, Play, Heart, CheckCircle, Star } from 'lucide-react';
+import {  User, BookOpen, Building, MapPin, } from 'lucide-react';
 
 
 function Achievements() {

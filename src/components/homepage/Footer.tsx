@@ -18,8 +18,8 @@ import {
   Cloud,
   Layers,
   Briefcase,
-  RocketIcon,
-  TypingAnimation,
+  
+  
 } from "lucide-react";
 
 function Footer() {

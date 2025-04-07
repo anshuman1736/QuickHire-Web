@@ -52,7 +52,7 @@ const UserRegistration = () => {
       setRegistrationSuccess(data.STS === "200");
       setResponseMessage(data.MSG);
     },
-    onError: (error: any) => {
+    onError: (error) => {
       console.log(error);
       const errorData = error.response?.data || {
         STS: "500",
@@ -127,7 +127,7 @@ const UserRegistration = () => {
   const selectCategory = (categoryId: number) => {
     setFormData({
       ...formData,
-      categoryId: categoryId.toString(),
+      categoryId: categoryId,
     });
     setCategoryOpen(false);
     if (errors.categoryId) {
@@ -273,7 +273,7 @@ const UserRegistration = () => {
         majorIntrest: formData.majorIntrest.toString(),
         categoryId: formData.categoryId,
         resume: "",
-        profile_pic: "",
+        profile_pic: "2123",
         categoryName: "",
         address: "",
         completeProfile: true,

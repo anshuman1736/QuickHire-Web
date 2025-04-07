@@ -1,10 +1,9 @@
 "use client"
 
-import { ArrowRight, Briefcase, Building, MapPin, Heart ,} from "lucide-react";
 import Features from "./Features";
 import CTA from "./CTA";
 import Footer from "./Footer";
-import About from "./About";
+
 import NavBar from "./Navbar";
 import Hero from "../../components/homepage/Hero";
 

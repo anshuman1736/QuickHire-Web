@@ -1,5 +1,6 @@
 "use client"
 import Link from 'next/link';
+import Image from 'next/image';
 import React from 'react';
 
 function JobView() {
@@ -53,14 +54,12 @@ function JobView() {
     });
   };
 
-  
-
   return (
     <div className="bg-gradient-to-b from-gray-50 mt-10 to-gray-100 w-full p-4 pt-16 md:p-6 md:pt-16">
       <div className="max-w-7xl mx-auto">
         {/* Back Button */}
         <Link
-        href="/user"
+          href="/user"
           className="flex items-center mb-6 text-gray-700 hover:text-[#FFBF2F] font-medium transition duration-300 group"
         >
           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 group-hover:-translate-x-1 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -76,11 +75,15 @@ function JobView() {
             <div className="flex flex-col md:flex-row md:items-center justify-between">
               <div className="flex flex-col md:flex-row md:items-center">
                 <div className="relative -mt-16 md:mr-6">
-                  <img 
-                    src={company.profile_Pic}
-                    alt={company.companyName}
-                    className="w-24 h-24 rounded-xl border-4 border-white bg-white shadow-lg object-cover"
-                  />
+                  <div className="w-24 h-24 rounded-xl border-4 border-white bg-white shadow-lg overflow-hidden">
+                    <Image 
+                      src={company.profile_Pic}
+                      alt={company.companyName}
+                      width={96}
+                      height={96}
+                      className="object-cover"
+                    />
+                  </div>
                 </div>
                 <div className="mt-4 md:mt-0">
                   <h1 className="text-3xl font-bold text-gray-800">{job.jobTitle}</h1>
@@ -110,59 +113,59 @@ function JobView() {
         </div>
 
         {/* Key Stats Bar */}
-        {/* Key Stats Bar */}
-<div className="bg-white rounded-2xl shadow-lg mb-8 p-1 overflow-hidden">
-  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4">
-    <div className="flex items-center p-4 sm:border-r sm:border-b md:border-b-0 border-gray-100">
-      <div className="bg-amber-50 p-3 rounded-full mr-3 flex-shrink-0">
-        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-[#FFBF2F]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-        </svg>
-      </div>
-      <div className="min-w-0">
-        <p className="text-xs text-gray-500 font-medium">Location</p>
-        <p className="text-gray-800 font-medium truncate">{job.jobLocation}</p>
-      </div>
-    </div>
-    
-    <div className="flex items-center p-4 sm:border-b md:border-b-0 md:border-r border-gray-100">
-      <div className="bg-green-50 p-3 rounded-full mr-3 flex-shrink-0">
-        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-      </div>
-      <div className="min-w-0">
-        <p className="text-xs text-gray-500 font-medium">Salary</p>
-        <p className="text-gray-800 font-medium truncate">${Number(job.salary).toLocaleString()}</p>
-      </div>
-    </div>
-    
-    <div className="flex items-center p-4 sm:border-r md:border-r border-gray-100">
-      <div className="bg-yellow-50 p-3 rounded-full mr-3 flex-shrink-0">
-        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-[#FFBF2F]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-        </svg>
-      </div>
-      <div className="min-w-0">
-        <p className="text-xs text-gray-500 font-medium">Job Type</p>
-        <p className="text-gray-800 font-medium truncate">{job.jobType}</p>
-      </div>
-    </div>
-    
-    <div className="flex items-center p-4">
-      <div className="bg-blue-50 p-3 rounded-full mr-3 flex-shrink-0">
-        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-        </svg>
-      </div>
-      <div className="min-w-0">
-        <p className="text-xs text-gray-500 font-medium">Posted On</p>
-        <p className="text-gray-800 font-medium truncate">{formatDate(job.creationDate)}</p>
-      </div>
-    </div>
-  </div>
-</div>
+        <div className="bg-white rounded-2xl shadow-lg mb-8 p-1 overflow-hidden">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4">
+            <div className="flex items-center p-4 sm:border-r sm:border-b md:border-b-0 border-gray-100">
+              <div className="bg-amber-50 p-3 rounded-full mr-3 flex-shrink-0">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-[#FFBF2F]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+              </div>
+              <div className="min-w-0">
+                <p className="text-xs text-gray-500 font-medium">Location</p>
+                <p className="text-gray-800 font-medium truncate">{job.jobLocation}</p>
+              </div>
+            </div>
+            
+            <div className="flex items-center p-4 sm:border-b md:border-b-0 md:border-r border-gray-100">
+              <div className="bg-green-50 p-3 rounded-full mr-3 flex-shrink-0">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <div className="min-w-0">
+                <p className="text-xs text-gray-500 font-medium">Salary</p>
+                <p className="text-gray-800 font-medium truncate">${Number(job.salary).toLocaleString()}</p>
+              </div>
+            </div>
+            
+            <div className="flex items-center p-4 sm:border-r md:border-r border-gray-100">
+              <div className="bg-yellow-50 p-3 rounded-full mr-3 flex-shrink-0">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-[#FFBF2F]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+              </div>
+              <div className="min-w-0">
+                <p className="text-xs text-gray-500 font-medium">Job Type</p>
+                <p className="text-gray-800 font-medium truncate">{job.jobType}</p>
+              </div>
+            </div>
+            
+            <div className="flex items-center p-4">
+              <div className="bg-blue-50 p-3 rounded-full mr-3 flex-shrink-0">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+              </div>
+              <div className="min-w-0">
+                <p className="text-xs text-gray-500 font-medium">Posted On</p>
+                <p className="text-gray-800 font-medium truncate">{formatDate(job.creationDate)}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Job Details */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
           {/* Left Column - Job Information */}
@@ -296,10 +299,12 @@ function JobView() {
               
               <div className="flex flex-col items-center mb-6">
                 <div className="w-24 h-24 rounded-xl mb-4 overflow-hidden border-4 border-white shadow-md">
-                  <img 
+                  <Image 
                     src={company.profile_Pic}
                     alt={company.companyName}
-                    className="w-full h-full object-cover"
+                    width={96}
+                    height={96}
+                    className="object-cover"
                   />
                 </div>
                 <h3 className="text-lg font-semibold text-gray-800">{company.companyName}</h3>

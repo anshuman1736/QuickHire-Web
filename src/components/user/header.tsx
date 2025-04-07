@@ -1,8 +1,9 @@
 "use client"
 
 import React, { useState, useEffect } from "react";
-import { Briefcase, Bell, MessageSquare, User, Menu, X, ChevronDown, Bookmark, Settings, LogOut } from "lucide-react";
+import { Briefcase, Bell, MessageSquare, User, Menu, X, ChevronDown, Bookmark, LogOut } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 
 function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -21,10 +22,10 @@ function Header() {
   };
 
   // Get user initials for avatar placeholder
-  const getInitials = (name) => {
+  const getInitials = (name: string): string => {
     return name
       .split(' ')
-      .map(part => part[0])
+      .map((part: string) => part[0])
       .join('')
       .toUpperCase();
   };
@@ -37,7 +38,11 @@ function Header() {
   }, []);
 
   // Function to determine active tab styles
-  const getTabStyles = (path) => {
+  interface TabStylesProps {
+    path: string;
+  }
+
+  const getTabStyles = (path: TabStylesProps["path"]): string => {
     const baseStyles = "font-medium px-3 py-2 rounded-md transition-colors duration-200";
     if (path === activePath) {
       return `${baseStyles} bg-blue-50 text-black`;
@@ -46,7 +51,11 @@ function Header() {
   };
 
   // Function for mobile tab styles
-  const getMobileTabStyles = (path) => {
+  interface MobileTabStylesProps {
+    path: string;
+  }
+
+  const getMobileTabStyles = (path: MobileTabStylesProps["path"]): string => {
     const baseStyles = "font-medium py-2 px-4 hover:bg-blue-50 rounded-lg";
     if (path === activePath) {
       return `${baseStyles} bg-blue-50 text-black`;
@@ -71,9 +80,9 @@ function Header() {
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-1">
-            <a href="/user" className={getTabStyles("/user")}>Dashboard</a>
-            <a href="/user/applications" className={getTabStyles("/user/applications")}>My Applications</a>
-            <a href="/saved" className={getTabStyles("/saved")}>Saved Jobs</a>
+            <Link href="/user" className={getTabStyles("/user")}>Dashboard</Link>
+            <Link href="/user/applications" className={getTabStyles("/user/applications")}>My Applications</Link>
+            <Link href="/saved" className={getTabStyles("/saved")}>Saved Jobs</Link>
           </nav>
 
           {/* User Actions */}
@@ -103,7 +112,7 @@ function Header() {
                     <button className="text-xs text-black hover:underline">Mark all read</button>
                   </div>
                   <div className="max-h-80 overflow-y-auto">
-                    <a href="#" className="block px-4 py-3 hover:bg-blue-50 border-l-2 border-blue-500">
+                    <Link href="#" className="block px-4 py-3 hover:bg-blue-50 border-l-2 border-blue-500">
                       <div className="flex items-start">
                         <div className="bg-blue-100 p-2 rounded-full">
                           <User className="w-4 h-4 text-black" />
@@ -113,8 +122,8 @@ function Header() {
                           <p className="text-xs text-gray-500 mt-1">2 hours ago</p>
                         </div>
                       </div>
-                    </a>
-                    <a href="#" className="block px-4 py-3 hover:bg-blue-50 border-l-2 border-blue-500">
+                    </Link>
+                    <Link href="#" className="block px-4 py-3 hover:bg-blue-50 border-l-2 border-blue-500">
                       <div className="flex items-start">
                         <div className="bg-green-100 p-2 rounded-full">
                           <Briefcase className="w-4 h-4 text-green-600" />
@@ -124,8 +133,8 @@ function Header() {
                           <p className="text-xs text-gray-500 mt-1">Yesterday</p>
                         </div>
                       </div>
-                    </a>
-                    <a href="#" className="block px-4 py-3 hover:bg-blue-50">
+                    </Link>
+                    <Link href="#" className="block px-4 py-3 hover:bg-blue-50">
                       <div className="flex items-start">
                         <div className="bg-purple-100 p-2 rounded-full">
                           <Bookmark className="w-4 h-4 text-purple-600" />
@@ -135,10 +144,10 @@ function Header() {
                           <p className="text-xs text-gray-500 mt-1">2 days ago</p>
                         </div>
                       </div>
-                    </a>
+                    </Link>
                   </div>
                   <div className="border-t border-gray-100 px-4 py-2">
-                    <a href="/notifications" className="text-sm text-black hover:underline">View all notifications</a>
+                    <Link href="/notifications" className="text-sm text-black hover:underline">View all notifications</Link>
                   </div>
                 </div>
               )}
@@ -168,33 +177,33 @@ function Header() {
                     <h3 className="font-medium">Messages</h3>
                   </div>
                   <div className="max-h-80 overflow-y-auto">
-                    <a href="#" className="block px-4 py-3 hover:bg-blue-50 border-l-2 border-blue-500">
+                    <Link href="#" className="block px-4 py-3 hover:bg-blue-50 border-l-2 border-blue-500">
                       <div className="flex items-center">
                         <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 font-medium">
                           RS
                         </div>
                         <div className="ml-3">
                           <p className="text-sm font-medium">Rachel Smith</p>
-                          <p className="text-xs text-gray-500 truncate">Hi Alex, I'd like to discuss the position...</p>
+                          <p className="text-xs text-gray-500 truncate">Hi Alex, I&apos;d like to discuss the position...</p>
                           <p className="text-xs text-gray-500 mt-1">30 minutes ago</p>
                         </div>
                       </div>
-                    </a>
-                    <a href="#" className="block px-4 py-3 hover:bg-blue-50 border-l-2 border-blue-500">
+                    </Link>
+                    <Link href="#" className="block px-4 py-3 hover:bg-blue-50 border-l-2 border-blue-500">
                       <div className="flex items-center">
                         <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 font-medium">
                           TT
                         </div>
                         <div className="ml-3">
                           <p className="text-sm font-medium">TechCorp Team</p>
-                          <p className="text-xs text-gray-500 truncate">Thanks for your application! We'd like to schedule...</p>
+                          <p className="text-xs text-gray-500 truncate">Thanks for your application! We&apos;d like to schedule...</p>
                           <p className="text-xs text-gray-500 mt-1">Yesterday</p>
                         </div>
                       </div>
-                    </a>
+                    </Link>
                   </div>
                   <div className="border-t border-gray-100 px-4 py-2">
-                    <a href="/messages" className="text-sm text-black hover:underline">View all messages</a>
+                    <Link href="/messages" className="text-sm text-black hover:underline">View all messages</Link>
                   </div>
                 </div>
               )}
@@ -211,7 +220,17 @@ function Header() {
                 }}
               >
                 <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-black font-medium">
-                  {user.avatar ? <img src={user.avatar} alt={user.name} className="w-full h-full rounded-full" /> : getInitials(user.name)}
+                  {user.avatar ? (
+                    <div className="relative w-8 h-8">
+                      <Image 
+                        src={user.avatar} 
+                        alt={user.name} 
+                        fill
+                        sizes="32px"
+                        className="rounded-full object-cover"
+                      />
+                    </div>
+                  ) : getInitials(user.name)}
                 </div>
                 <div className="hidden lg:block text-left">
                   <p className="text-sm font-medium text-gray-700">{user.name}</p>
@@ -222,18 +241,18 @@ function Header() {
               
               {profileDropdownOpen && (
                 <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 z-10 border border-gray-100">
-                  <a href="/user/account" className="flex items-center px-4 py-2 text-gray-700 hover:bg-blue-50">
+                  <Link href="/user/account" className="flex items-center px-4 py-2 text-gray-700 hover:bg-blue-50">
                     <User className="w-4 h-4 mr-2" />
                     <span>Account </span>
-                  </a>
+                  </Link>
                  
                   
                   
                   <div className="border-t border-gray-100 mt-1 pt-1">
-                    <a href="/" className="flex items-center px-4 py-2 text-red-600 hover:bg-red-50">
+                    <Link href="/" className="flex items-center px-4 py-2 text-red-600 hover:bg-red-50">
                       <LogOut className="w-4 h-4 mr-2" />
                       <span>Log Out</span>
-                    </a>
+                    </Link>
                   </div>
                 </div>
               )}
@@ -275,7 +294,17 @@ function Header() {
             <div className="py-3 px-4 border-b border-gray-100">
               <div className="flex items-center space-x-3">
                 <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-black font-medium">
-                  {user.avatar ? <img src={user.avatar} alt={user.name} className="w-full h-full rounded-full" /> : getInitials(user.name)}
+                  {user.avatar ? (
+                    <div className="relative w-10 h-10">
+                      <Image 
+                        src={user.avatar} 
+                        alt={user.name} 
+                        fill
+                        sizes="40px"
+                        className="rounded-full object-cover"
+                      />
+                    </div>
+                  ) : getInitials(user.name)}
                 </div>
                 <div>
                   <p className="font-medium">{user.name}</p>
@@ -285,25 +314,25 @@ function Header() {
             </div>
             
             <nav className="flex flex-col space-y-1 py-2">
-              <a href="/user" className={getMobileTabStyles("/user")}>Dashboard</a>
-              <a href="user/applications" className={getMobileTabStyles("user/applications")}>My Applications</a>
-              <a href="/saved" className={getMobileTabStyles("/saved")}>Saved Jobs</a>
-              <a href="/messages" className={`${getMobileTabStyles("/messages")} flex items-center justify-between`}>
+              <Link href="/user" className={getMobileTabStyles("/user")}>Dashboard</Link>
+              <Link href="/user/applications" className={getMobileTabStyles("/user/applications")}>My Applications</Link>
+              <Link href="/saved" className={getMobileTabStyles("/saved")}>Saved Jobs</Link>
+              <Link href="/messages" className={`${getMobileTabStyles("/messages")} flex items-center justify-between`}>
                 Messages
                 {user.unreadMessages > 0 && (
                   <span className="bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
                     {user.unreadMessages}
                   </span>
                 )}
-              </a>
-              <a href="/user/account" className={getMobileTabStyles("/user/account")}>Account</a>
+              </Link>
+              <Link href="/user/account" className={getMobileTabStyles("/user/account")}>Account</Link>
             </nav>
             
             <div className="pt-2 border-t border-gray-100 mt-2">
-              <a href="/  " className="flex items-center px-4 py-2 text-red-600 font-medium hover:bg-red-50 rounded-lg">
+              <Link href="/" className="flex items-center px-4 py-2 text-red-600 font-medium hover:bg-red-50 rounded-lg">
                 <LogOut className="w-4 h-4 mr-2" />
                 <span>Log Out</span>
-              </a>
+              </Link>
             </div>
           </div>
         </div>
