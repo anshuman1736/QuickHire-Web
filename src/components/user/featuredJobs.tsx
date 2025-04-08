@@ -13,7 +13,7 @@ import {
   Calendar,
   DollarSign,
 } from "lucide-react";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import Header from "./header";
 import Link from "next/link";
 
@@ -47,7 +47,7 @@ function JobPortal() {
   const [salaryFilter, setSalaryFilter] = useState("all");
   const [advancedFiltersOpen, setAdvancedFiltersOpen] = useState(false);
 
-  const jobs = [
+  const jobs = useMemo(() => [
     {
       id: 1,
       title: "Senior Frontend Developer",
@@ -223,7 +223,7 @@ function JobPortal() {
         "Analyze financial data and prepare reports to guide business decisions",
       companyLogo: "GF",
     },
-  ];
+  ], []);
 
   const categories = [
     { value: "all", label: "All Categories" },
@@ -265,6 +265,112 @@ function JobPortal() {
   ];
 
   useEffect(() => {
+    const filterJobs = () => {
+      setIsLoading(true);
+
+      // Simulate API call delay
+      setTimeout(() => {
+        let filtered = [...jobs];
+
+        // Filter by tab
+        if (activeTab === "popular") {
+          filtered = filtered.sort((a, b) => b.applicants - a.applicants);
+        } else if (activeTab === "new") {
+          filtered = filtered.filter(
+            (job) => job.badge === "New" || job.postedDate.includes("day")
+          );
+        } else if (activeTab === "urgent") {
+          filtered = filtered.filter(
+            (job) => job.badge === "Urgent" || job.badge === "Featured"
+          );
+        }
+
+        // Filter by search query
+        if (searchQuery) {
+          filtered = filtered.filter(
+            (job) =>
+              job.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+              job.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+              job.company.toLowerCase().includes(searchQuery.toLowerCase()) ||
+              job.location.toLowerCase().includes(searchQuery.toLowerCase())
+          );
+        }
+
+        // Filter by category
+        if (selectedCategory !== "all") {
+          filtered = filtered.filter((job) => job.category === selectedCategory);
+        }
+
+        // Filter by experience
+        if (experienceFilter !== "all") {
+          if (experienceFilter === "entry") {
+            filtered = filtered.filter((job) => job.experience.includes("0-1"));
+          } else if (experienceFilter === "junior") {
+            filtered = filtered.filter((job) => job.experience.includes("1-3"));
+          } else if (experienceFilter === "mid") {
+            filtered = filtered.filter((job) => job.experience.includes("3-5"));
+          } else if (experienceFilter === "senior") {
+            filtered = filtered.filter(
+              (job) =>
+                job.experience.includes("5+") || job.experience.includes("4+")
+            );
+          }
+        }
+
+        // Filter by location
+        if (locationFilter !== "all") {
+          filtered = filtered.filter((job) =>
+            job.location.toLowerCase().includes(locationFilter.toLowerCase())
+          );
+        }
+
+        // Filter by salary
+        if (salaryFilter !== "all") {
+          if (salaryFilter === "under60k") {
+            filtered = filtered.filter((job) => {
+              const minSalary = parseInt(job.salary.split("$")[1].split("K")[0]);
+              return minSalary < 60;
+            });
+          } else if (salaryFilter === "60k-80k") {
+            filtered = filtered.filter((job) => {
+              const minSalary = parseInt(job.salary.split("$")[1].split("K")[0]);
+              const maxSalary = parseInt(job.salary.split("$")[2].split("K")[0]);
+              return (
+                (minSalary >= 60 && minSalary <= 80) ||
+                (maxSalary >= 60 && maxSalary <= 80)
+              );
+            });
+          } else if (salaryFilter === "80k-100k") {
+            filtered = filtered.filter((job) => {
+              const minSalary = parseInt(job.salary.split("$")[1].split("K")[0]);
+              const maxSalary = parseInt(job.salary.split("$")[2].split("K")[0]);
+              return (
+                (minSalary >= 80 && minSalary <= 100) ||
+                (maxSalary >= 80 && maxSalary <= 100)
+              );
+            });
+          } else if (salaryFilter === "100k-120k") {
+            filtered = filtered.filter((job) => {
+              const minSalary = parseInt(job.salary.split("$")[1].split("K")[0]);
+              const maxSalary = parseInt(job.salary.split("$")[2].split("K")[0]);
+              return (
+                (minSalary >= 100 && minSalary <= 120) ||
+                (maxSalary >= 100 && maxSalary <= 120)
+              );
+            });
+          } else if (salaryFilter === "above120k") {
+            filtered = filtered.filter((job) => {
+              const maxSalary = parseInt(job.salary.split("$")[2].split("K")[0]);
+              return maxSalary > 120;
+            });
+          }
+        }
+
+        setVisibleJobs(filtered);
+        setIsLoading(false);
+      }, 500);
+    };
+    
     filterJobs();
   }, [
     activeTab,
@@ -273,112 +379,17 @@ function JobPortal() {
     experienceFilter,
     locationFilter,
     salaryFilter,
+    jobs
   ]);
 
-  const filterJobs = () => {
-    setIsLoading(true);
-
-    // Simulate API call delay
-    setTimeout(() => {
-      let filtered = [...jobs];
-
-      // Filter by tab
-      if (activeTab === "popular") {
-        filtered = filtered.sort((a, b) => b.applicants - a.applicants);
-      } else if (activeTab === "new") {
-        filtered = filtered.filter(
-          (job) => job.badge === "New" || job.postedDate.includes("day")
-        );
-      } else if (activeTab === "urgent") {
-        filtered = filtered.filter(
-          (job) => job.badge === "Urgent" || job.badge === "Featured"
-        );
-      }
-
-      // Filter by search query
-      if (searchQuery) {
-        filtered = filtered.filter(
-          (job) =>
-            job.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            job.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            job.company.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            job.location.toLowerCase().includes(searchQuery.toLowerCase())
-        );
-      }
-
-      // Filter by category
-      if (selectedCategory !== "all") {
-        filtered = filtered.filter((job) => job.category === selectedCategory);
-      }
-
-      // Filter by experience
-      if (experienceFilter !== "all") {
-        if (experienceFilter === "entry") {
-          filtered = filtered.filter((job) => job.experience.includes("0-1"));
-        } else if (experienceFilter === "junior") {
-          filtered = filtered.filter((job) => job.experience.includes("1-3"));
-        } else if (experienceFilter === "mid") {
-          filtered = filtered.filter((job) => job.experience.includes("3-5"));
-        } else if (experienceFilter === "senior") {
-          filtered = filtered.filter(
-            (job) =>
-              job.experience.includes("5+") || job.experience.includes("4+")
-          );
-        }
-      }
-
-      // Filter by location
-      if (locationFilter !== "all") {
-        filtered = filtered.filter((job) =>
-          job.location.toLowerCase().includes(locationFilter.toLowerCase())
-        );
-      }
-
-      // Filter by salary
-      if (salaryFilter !== "all") {
-        if (salaryFilter === "under60k") {
-          filtered = filtered.filter((job) => {
-            const minSalary = parseInt(job.salary.split("$")[1].split("K")[0]);
-            return minSalary < 60;
-          });
-        } else if (salaryFilter === "60k-80k") {
-          filtered = filtered.filter((job) => {
-            const minSalary = parseInt(job.salary.split("$")[1].split("K")[0]);
-            const maxSalary = parseInt(job.salary.split("$")[2].split("K")[0]);
-            return (
-              (minSalary >= 60 && minSalary <= 80) ||
-              (maxSalary >= 60 && maxSalary <= 80)
-            );
-          });
-        } else if (salaryFilter === "80k-100k") {
-          filtered = filtered.filter((job) => {
-            const minSalary = parseInt(job.salary.split("$")[1].split("K")[0]);
-            const maxSalary = parseInt(job.salary.split("$")[2].split("K")[0]);
-            return (
-              (minSalary >= 80 && minSalary <= 100) ||
-              (maxSalary >= 80 && maxSalary <= 100)
-            );
-          });
-        } else if (salaryFilter === "100k-120k") {
-          filtered = filtered.filter((job) => {
-            const minSalary = parseInt(job.salary.split("$")[1].split("K")[0]);
-            const maxSalary = parseInt(job.salary.split("$")[2].split("K")[0]);
-            return (
-              (minSalary >= 100 && minSalary <= 120) ||
-              (maxSalary >= 100 && maxSalary <= 120)
-            );
-          });
-        } else if (salaryFilter === "above120k") {
-          filtered = filtered.filter((job) => {
-            const maxSalary = parseInt(job.salary.split("$")[2].split("K")[0]);
-            return maxSalary > 120;
-          });
-        }
-      }
-
-      setVisibleJobs(filtered);
-      setIsLoading(false);
-    }, 500);
+  const resetFilters = () => {
+    setSearchQuery("");
+    setSelectedCategory("all");
+    setExperienceFilter("all");
+    setLocationFilter("all");
+    setSalaryFilter("all");
+    setActiveTab("featured");
+    setAdvancedFiltersOpen(false);
   };
 
   interface Category {
@@ -389,16 +400,6 @@ function JobPortal() {
   const handleCategoryChange = (category: Category["value"]): void => {
     setSelectedCategory(category);
     setFilterOpen(false);
-  };
-
-  const resetFilters = () => {
-    setSearchQuery("");
-    setSelectedCategory("all");
-    setExperienceFilter("all");
-    setLocationFilter("all");
-    setSalaryFilter("all");
-    setActiveTab("featured");
-    setAdvancedFiltersOpen(false);
   };
 
   return (
