@@ -45,7 +45,14 @@ function JobView() {
   const category = job.categoryDTO;
 
   // Format date
-  const formatDate = (timestamp) => {
+  
+
+  
+
+
+  
+
+  const formatDate = (timestamp: number): string => {
     const date = new Date(timestamp);
     return date.toLocaleDateString('en-US', { 
       year: 'numeric', 

@@ -28,7 +28,7 @@ export default function UserApplications() {
       location: "San Francisco, CA",
       salary: "$90K - $120K",
       appliedDate: "2023-05-15",
-      status: "interview", // pending, rejected, offered
+      status: "interview" as "pending" | "interview" | "rejected" | "offered", // pending, rejected, offered
       interviewDate: "2023-06-10",
       jobType: "Full-time",
       companyLogo: "TC",
@@ -40,7 +40,7 @@ export default function UserApplications() {
       location: "Remote",
       salary: "$85K - $110K",
       appliedDate: "2023-05-20",
-      status: "pending",
+      status: "pending" as "pending" | "interview" | "rejected" | "offered",
       jobType: "Full-time",
       companyLogo: "CS",
     },
@@ -51,7 +51,7 @@ export default function UserApplications() {
       location: "Austin, TX",
       salary: "$100K - $130K",
       appliedDate: "2023-04-28",
-      status: "rejected",
+      status: "rejected" as "pending" | "interview" | "rejected" | "offered",
       jobType: "Full-time",
       companyLogo: "CS",
     },
@@ -62,7 +62,7 @@ export default function UserApplications() {
       location: "New York, NY",
       salary: "$95K - $125K",
       appliedDate: "2023-06-01",
-      status: "offered",
+      status: "offered" as "pending" | "interview" | "rejected" | "offered",
       jobType: "Contract",
       companyLogo: "AP",
     },
@@ -73,7 +73,7 @@ export default function UserApplications() {
       location: "Chicago, IL",
       salary: "$65K - $85K",
       appliedDate: "2023-05-10",
-      status: "interview",
+      status: "interview" as "pending" | "interview" | "rejected" | "offered",
       interviewDate: "2023-05-25",
       jobType: "Full-time",
       companyLogo: "GT",
@@ -96,14 +96,14 @@ export default function UserApplications() {
     })
     .sort((a, b) => {
       if (sortBy === "newest") {
-        return new Date(b.appliedDate) - new Date(a.appliedDate);
+        return new Date(b.appliedDate).getTime() - new Date(a.appliedDate).getTime();
       } else {
-        return new Date(a.appliedDate) - new Date(b.appliedDate);
+        return new Date(a.appliedDate).getTime() - new Date(b.appliedDate).getTime();
       }
     });
 
   // Status badge component
-  const StatusBadge = ({ status }) => {
+  const StatusBadge = ({ status }: { status: "pending" | "interview" | "rejected" | "offered" }) => {
     const statusConfig = {
       pending: {
         color: "bg-yellow-100 text-yellow-800",
@@ -138,9 +138,9 @@ export default function UserApplications() {
   };
 
   // Format date
-  const formatDate = (dateString : number) => {
-    const options = { year: 'numeric', month: 'short', day: 'numeric' };
-    return new Date(dateString).toLocaleDateString(undefined, options);
+  const formatDate = (dateString: number) => {
+      const options: Intl.DateTimeFormatOptions = { year: "numeric", month: "short", day: "numeric" };
+      return new Date(dateString).toLocaleDateString(undefined, options);
   };
 
   return (
@@ -320,12 +320,12 @@ export default function UserApplications() {
                       <div className="flex items-center text-xs sm:text-sm text-gray-500">
                         <Calendar className="flex-shrink-0 mr-1 h-3 w-3 sm:h-4 sm:w-4 text-gray-400" />
                         <p>
-                          Applied on <time dateTime={application.appliedDate}>{formatDate(application.appliedDate)}</time>
+                          Applied on <time dateTime={application.appliedDate}>{formatDate(Date.parse(application.appliedDate))}</time>
                           {application.interviewDate && (
                             <>
                               {' • '}
                               <span className="font-medium">
-                                Interview: {formatDate(application.interviewDate)}
+                                Interview: {formatDate(Date.parse(application.interviewDate))}
                               </span>
                             </>
                           )}

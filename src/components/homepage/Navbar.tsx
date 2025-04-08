@@ -20,9 +20,13 @@ export default function NavBar() {
 
   // Close mobile menu when clicking outside
   useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (mobileMenuOpen && menuRef.current && !menuRef.current.contains(event.target)) {
-        setMobileMenuOpen(false);
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+      mobileMenuOpen &&
+      menuRef.current &&
+      !(menuRef.current as HTMLElement).contains(event.target as Node)
+      ) {
+      setMobileMenuOpen(false);
       }
     };
 

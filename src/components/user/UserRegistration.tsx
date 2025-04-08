@@ -52,9 +52,9 @@ const UserRegistration = () => {
       setRegistrationSuccess(data.STS === "200");
       setResponseMessage(data.MSG);
     },
-    onError: (error) => {
-      console.log(error);
-      const errorData = error.response?.data || {
+    onError: (error ) => {
+      console.log(error );
+      const errorData = error?.response?.data || {
         STS: "500",
         MSG: "Failed To Register Either this is Because of Server Error or User Already Exists",
       };
