@@ -28,7 +28,6 @@ export default function Login() {
     onError(error) {
       if (error) {
         console.error(error);
-        alert("Error!");
       }
     },
   });
