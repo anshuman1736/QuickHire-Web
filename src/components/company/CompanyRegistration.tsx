@@ -8,6 +8,16 @@ import Link from "next/link";
 import Image from "next/image";
 import { ICompanyRegister } from "@/types/auth";
 
+
+interface ErrorResponse {
+  response?: {
+    data?: {
+      STS: string;
+      MSG: string;
+    };
+  };
+}
+
 export default function CompanyRegistration() {
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState({
@@ -40,11 +50,12 @@ export default function CompanyRegistration() {
       setRegistrationSuccess(data.STS === "200");
       setResponseMessage(data.MSG);
     },
-    onError: (error) => {
-      const errorData = error.response?.data || {
+    onError: (error: unknown) => {
+      const errorData = (error as ErrorResponse)?.response?.data || {
         STS: "500",
         MSG: "Network error. Please check your connection",
       };
+    
 
       setErrors({
         formError: errorData.MSG,
@@ -126,7 +137,14 @@ export default function CompanyRegistration() {
     e.preventDefault();
     const file = e.dataTransfer.files[0];
     if (file) {
-      handleFileChange({ target: { files: [file] } } as any, "cinCertificate");
+      // Create a properly typed synthetic event
+      const syntheticEvent = {
+        target: {
+          files: [file]
+        }
+      } as unknown as React.ChangeEvent<HTMLInputElement>;
+      
+      handleFileChange(syntheticEvent, "cinCertificate");
     }
   };
 
@@ -204,8 +222,8 @@ export default function CompanyRegistration() {
         email: formData.email || "",
         phoneNo: formData.phoneNo || "",
         cinNumber: formData.cinNumber || 0,
-        profile_pic: "123",
-        cinCertificate: formData.cinCertificate || "123",
+        profile_pic: "1234"  ,
+        cinCertificate: formData.cinCertificate || "1234",
         password: formData.password || "",
         fullName: formData.companyName || "",
         categoryId: 1,
@@ -473,8 +491,10 @@ export default function CompanyRegistration() {
             >
               {formData.profile_pic ? (
                 <Image
-                  src={URL.createObjectURL()}
+                  src={URL.createObjectURL(formData.profile_pic )}
                   alt="Company Logo Preview"
+                  width={128}
+                  height={128}
                   className="w-full h-full object-cover"
                 />
               ) : (

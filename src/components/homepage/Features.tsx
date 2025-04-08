@@ -1,10 +1,10 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { 
-  ArrowRight, ChevronLeft, ChevronRight, User, 
-  BookOpen, Building, MapPin, Play, Heart, 
-  CheckCircle, Star, Zap, Globe, Briefcase,
-  BarChart, Award, Shield, Clock
+  ArrowRight, 
+   Building,  Heart, 
+  CheckCircle,  Globe, 
+  BarChart, Award,  Clock
 } from 'lucide-react';
 
 function Features() {

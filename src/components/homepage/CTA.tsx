@@ -1,10 +1,10 @@
-'use client'
+"use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { 
-  ArrowRight,  
+import {
+  ArrowRight,
   Briefcase,
-  Zap, 
+  Zap,
   ChevronRight,
   Star,
   Shield,
@@ -12,38 +12,37 @@ import {
   Globe,
   Rocket,
   Award,
-  Code2
+  Code2,
 } from "lucide-react";
-import { motion, useScroll, useTransform } from 'framer-motion';
+import { motion, useScroll, useTransform } from "framer-motion";
 
-
-const TypingAnimation = ({ 
-  text, 
-  duration = 50, 
-  className = '', 
-  delay = 0
-}) => {
-  const [displayedText, setDisplayedText] = useState('');
+const TypingAnimation: React.FC<{
+  text: string;
+  duration?: number;
+  className?: string;
+  delay?: number;
+}> = ({ text, duration = 50, className = "", delay = 0 }) => {
+  const [displayedText, setDisplayedText] = useState("");
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isTyping, setIsTyping] = useState(false);
 
   useEffect(() => {
     // Reset when text changes
-    setDisplayedText('');
+    setDisplayedText("");
     setCurrentIndex(0);
     setIsTyping(true);
   }, [text]);
 
   useEffect(() => {
-    let timeout;
+    let timeout: NodeJS.Timeout | undefined;
 
     if (isTyping && currentIndex < text.length) {
       // Set a delay for the first character if needed
       const initialDelay = currentIndex === 0 ? delay : 0;
-      
+
       timeout = setTimeout(() => {
-        setDisplayedText(prev => prev + text[currentIndex]);
-        setCurrentIndex(prevIndex => prevIndex + 1);
+        setDisplayedText((prev) => prev + text[currentIndex]);
+        setCurrentIndex((prevIndex) => prevIndex + 1);
       }, initialDelay + duration);
     } else if (currentIndex >= text.length) {
       setIsTyping(false);
@@ -55,24 +54,28 @@ const TypingAnimation = ({
   return (
     <span className={className}>
       {displayedText}
-      {isTyping && <span className="inline-block w-1 h-4 ml-0.5 bg-current animate-pulse"></span>}
+      {isTyping && (
+        <span className="inline-block w-1 h-4 ml-0.5 bg-current animate-pulse"></span>
+      )}
     </span>
   );
 };
 
-
-
 function CTA() {
   const [isVisible, setIsVisible] = useState(false);
-  const containerRef = useRef(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
   const { scrollYProgress } = useScroll({
     target: containerRef,
-    offset: ["start end", "end start"]
+    offset: ["start end", "end start"],
   });
 
   // Scroll-based animations
   const y = useTransform(scrollYProgress, [0, 1], [50, -20]);
-  const opacity = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], [0, 1, 1, 0.8]);
+  const opacity = useTransform(
+    scrollYProgress,
+    [0, 0.2, 0.8, 1],
+    [0, 1, 1, 0.8]
+  );
 
   useEffect(() => {
     const handleScroll = () => {
@@ -83,19 +86,19 @@ function CTA() {
       }
     };
 
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener("scroll", handleScroll);
     handleScroll();
 
-    return () => window.removeEventListener('scroll', handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   return (
-    <section 
+    <section
       ref={containerRef}
       className="bg-gradient-to-r from-white to-gray-50 py-20 px-4 sm:px-6 lg:px-8 overflow-hidden relative"
     >
       {/* Decorative elements */}
-      <motion.div 
+      <motion.div
         style={{ opacity }}
         className="absolute top-0 left-0 w-full h-full pointer-events-none"
       >
@@ -103,12 +106,9 @@ function CTA() {
         <div className="absolute bottom-20 right-20 w-80 h-80 rounded-full bg-blue-100 blur-3xl opacity-30"></div>
       </motion.div>
 
-      <motion.div 
-        className="max-w-6xl mx-auto relative z-10"
-        style={{ y }}
-      >
+      <motion.div className="max-w-6xl mx-auto relative z-10" style={{ y }}>
         {/* Header */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: isVisible ? 1 : 0, y: isVisible ? 0 : 30 }}
           transition={{ duration: 0.8 }}
@@ -117,9 +117,9 @@ function CTA() {
           <div className="inline-flex items-center justify-center mb-4">
             <Rocket className="w-7 h-7 text-amber-500 mr-3 animate-pulse" />
             <h2 className="text-4xl sm:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-amber-200 to-amber-500">
-              <TypingAnimation 
-                text="Transform Your Career" 
-                duration={50} 
+              <TypingAnimation
+                text="Transform Your Career"
+                duration={50}
                 className="inline-block"
               />
             </h2>
@@ -133,7 +133,7 @@ function CTA() {
         </motion.div>
 
         {/* Main Card Container */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 50 }}
           animate={{ opacity: isVisible ? 1 : 0, y: isVisible ? 0 : 50 }}
           transition={{ duration: 0.7, delay: 0.2 }}
@@ -144,66 +144,91 @@ function CTA() {
             <div className="bg-gradient-to-br from-amber-400 via-amber-500 to-amber-600 text-white p-8 lg:p-12 lg:w-3/5 relative overflow-hidden">
               {/* Animated decorative elements */}
               <div className="absolute inset-0 pointer-events-none overflow-hidden">
-                <motion.div 
-                  animate={{ 
+                <motion.div
+                  animate={{
                     x: [0, 10, 0],
                     y: [0, -10, 0],
-                    transition: { duration: 8, repeat: Infinity, ease: "easeInOut" }
+                    transition: {
+                      duration: 8,
+                      repeat: Infinity,
+                      ease: "easeInOut",
+                    },
                   }}
                   className="absolute right-0 bottom-0 w-96 h-96 bg-white/10 rounded-full transform translate-x-1/3 translate-y-1/3 blur-md"
                 />
-                <motion.div 
-                  animate={{ 
+                <motion.div
+                  animate={{
                     x: [0, -10, 0],
                     y: [0, 10, 0],
-                    transition: { duration: 10, repeat: Infinity, ease: "easeInOut" }
+                    transition: {
+                      duration: 10,
+                      repeat: Infinity,
+                      ease: "easeInOut",
+                    },
                   }}
                   className="absolute left-0 top-0 w-64 h-64 bg-white/10 rounded-full transform -translate-x-1/3 -translate-y-1/3 blur-md"
                 />
               </div>
-              
+
               <div className="relative z-10">
-                <motion.span 
+                <motion.span
                   initial={{ opacity: 0, y: -20 }}
-                  animate={{ opacity: isVisible ? 1 : 0, y: isVisible ? 0 : -20 }}
+                  animate={{
+                    opacity: isVisible ? 1 : 0,
+                    y: isVisible ? 0 : -20,
+                  }}
                   transition={{ delay: 0.3 }}
                   className="inline-flex items-center px-3 py-1 rounded-full bg-white/20 text-white text-xs font-medium mb-6"
                 >
                   <Zap className="w-3.5 h-3.5 mr-1.5" />
                   Take the next step
                 </motion.span>
-                
+
                 <motion.h3
                   initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: isVisible ? 1 : 0, y: isVisible ? 0 : 20 }}
+                  animate={{
+                    opacity: isVisible ? 1 : 0,
+                    y: isVisible ? 0 : 20,
+                  }}
                   transition={{ delay: 0.4, duration: 0.5 }}
                   className="text-3xl md:text-4xl font-bold mb-6 leading-tight"
                 >
-                  Ready to discover your <span className="text-white underline decoration-2 decoration-white/40">perfect</span> opportunity?
+                  Ready to discover your{" "}
+                  <span className="text-white underline decoration-2 decoration-white/40">
+                    perfect
+                  </span>{" "}
+                  opportunity?
                 </motion.h3>
-                
+
                 <motion.p
                   initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: isVisible ? 1 : 0, y: isVisible ? 0 : 20 }}
+                  animate={{
+                    opacity: isVisible ? 1 : 0,
+                    y: isVisible ? 0 : 20,
+                  }}
                   transition={{ delay: 0.5, duration: 0.5 }}
                   className="text-white/90 mb-8 text-lg max-w-lg"
                 >
-                  Our AI-powered platform connects you with personalized job matches based on your unique skills and career aspirations.
+                  Our AI-powered platform connects you with personalized job
+                  matches based on your unique skills and career aspirations.
                 </motion.p>
-                
+
                 {/* Stats Cards */}
-                <motion.div 
+                <motion.div
                   initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: isVisible ? 1 : 0, y: isVisible ? 0 : 20 }}
+                  animate={{
+                    opacity: isVisible ? 1 : 0,
+                    y: isVisible ? 0 : 20,
+                  }}
                   transition={{ delay: 0.6, duration: 0.5 }}
                   className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-6"
                 >
                   {[
                     { value: "30K+", label: "Open Positions", icon: Briefcase },
                     { value: "92%", label: "Success Rate", icon: Award },
-                    { value: "24hr", label: "Response Time", icon: Shield }
+                    { value: "24hr", label: "Response Time", icon: Shield },
                   ].map((stat, index) => (
-                    <motion.div 
+                    <motion.div
                       key={index}
                       whileHover={{ scale: 1.05 }}
                       className="bg-white/10 rounded-xl p-4 backdrop-blur-sm"
@@ -214,9 +239,9 @@ function CTA() {
                     </motion.div>
                   ))}
                 </motion.div>
-                
+
                 {/* Testimonial */}
-                <motion.div 
+                <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: isVisible ? 1 : 0 }}
                   transition={{ delay: 0.7, duration: 0.5 }}
@@ -228,35 +253,37 @@ function CTA() {
                     ))}
                   </div>
                   <p className="text-sm italic mb-2">
-                    "JobPro matched me with opportunities I never would have found otherwise. The personalized approach made all the difference."
+  {"\"JobPro matched me with opportunities I never would have found otherwise. The personalized approach made all the difference.\""}
+</p>
+                  <p className="text-xs text-white/70">
+                    — Sarah T., Software Developer
                   </p>
-                  <p className="text-xs text-white/70">— Sarah T., Software Developer</p>
                 </motion.div>
               </div>
             </div>
-            
+
             {/* Right CTA Section */}
             <div className="bg-white p-8 lg:p-12 lg:w-2/5 flex flex-col justify-center">
               <h3 className="font-bold text-xl mb-6 text-gray-800">
                 Get started in minutes
               </h3>
-              
+
               {/* Feature List */}
               <ul className="mb-8 space-y-4">
                 {[
                   "AI-powered job matching",
                   "Direct connections with hiring managers",
                   "Personalized career guidance",
-                  "Exclusive job opportunities"
+                  "Exclusive job opportunities",
                 ].map((item, index) => (
-                  <motion.li 
+                  <motion.li
                     key={index}
                     initial={{ opacity: 0, x: 20 }}
-                    animate={{ 
-                      opacity: isVisible ? 1 : 0, 
-                      x: isVisible ? 0 : 20 
+                    animate={{
+                      opacity: isVisible ? 1 : 0,
+                      x: isVisible ? 0 : 20,
                     }}
-                    transition={{ delay: 0.3 + (index * 0.1) }}
+                    transition={{ delay: 0.3 + index * 0.1 }}
                     className="flex items-center text-gray-700"
                   >
                     <div className="bg-amber-100 p-1 rounded-full mr-3">
@@ -266,15 +293,15 @@ function CTA() {
                   </motion.li>
                 ))}
               </ul>
-              
+
               {/* CTA Buttons */}
-              <motion.div 
+              <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: isVisible ? 1 : 0, y: isVisible ? 0 : 20 }}
                 transition={{ delay: 0.7 }}
                 className="space-y-4"
               >
-                <motion.button 
+                <motion.button
                   whileHover={{ scale: 1.03 }}
                   whileTap={{ scale: 0.97 }}
                   className="w-full py-3 px-6 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-xl hover:shadow-lg transition-all font-medium flex items-center justify-center group"
@@ -282,11 +309,11 @@ function CTA() {
                   <span>Create Your Profile</span>
                   <Briefcase className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
                 </motion.button>
-                
-                <motion.button 
-                  whileHover={{ 
-                    scale: 1.03, 
-                    backgroundColor: "rgba(251, 191, 36, 0.1)" 
+
+                <motion.button
+                  whileHover={{
+                    scale: 1.03,
+                    backgroundColor: "rgba(251, 191, 36, 0.1)",
                   }}
                   whileTap={{ scale: 0.97 }}
                   className="w-full py-3 px-6 bg-transparent border border-amber-500/30 rounded-xl text-amber-600 transition-all font-medium flex items-center justify-center group"
@@ -295,23 +322,25 @@ function CTA() {
                   <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
                 </motion.button>
               </motion.div>
-              
+
               {/* Trust Indicator */}
-              <motion.div 
+              <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: isVisible ? 1 : 0 }}
                 transition={{ delay: 0.8, duration: 0.5 }}
                 className="flex items-center mt-8 pt-6 border-t border-gray-100"
               >
                 <Shield className="w-5 h-5 text-gray-400 mr-2" />
-                <span className="text-sm text-gray-500">Trusted by 10,000+ companies worldwide</span>
+                <span className="text-sm text-gray-500">
+                  Trusted by 10,000+ companies worldwide
+                </span>
               </motion.div>
             </div>
           </div>
         </motion.div>
-        
+
         {/* Animated footer text */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: isVisible ? 1 : 0, y: isVisible ? 0 : 20 }}
           transition={{ duration: 0.5, delay: 0.9 }}

@@ -2,14 +2,11 @@
 
 import {
   Briefcase,
-  Users,
   MapPin,
   Star,
   Search,
   Filter,
   ChevronDown,
-  Clock,
-  Building,
   ArrowRight,
   LucideSearch,
   BookmarkPlus,
@@ -25,7 +22,25 @@ function JobPortal() {
   const [searchQuery, setSearchQuery] = useState("");
   const [filterOpen, setFilterOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState("all");
-  const [visibleJobs, setVisibleJobs] = useState([]);
+  const [visibleJobs, setVisibleJobs] = useState<
+    {
+      id: number;
+      title: string;
+      level: string;
+      applicants: number;
+      rating: number;
+      salary: string;
+      category: string;
+      badge?: string;
+      company: string;
+      location: string;
+      experience: string;
+      type: string;
+      postedDate: string;
+      description: string;
+      companyLogo: string;
+    }[]
+  >([]);
   const [isLoading, setIsLoading] = useState(false);
   const [experienceFilter, setExperienceFilter] = useState("all");
   const [locationFilter, setLocationFilter] = useState("all");
@@ -366,7 +381,12 @@ function JobPortal() {
     }, 500);
   };
 
-  const handleCategoryChange = (category) => {
+  interface Category {
+    value: string;
+    label: string;
+  }
+
+  const handleCategoryChange = (category: Category["value"]): void => {
     setSelectedCategory(category);
     setFilterOpen(false);
   };
@@ -572,8 +592,8 @@ function JobPortal() {
                 </div>
                 <h3 className="text-xl font-bold mb-2">No jobs found</h3>
                 <p className="text-gray-500 mb-4">
-                  Try adjusting your search or filters to find what you're
-                  looking for
+                  {"Try adjusting your search or filters to find what you're"}
+                  {"looking for"}
                 </p>
                 <button
                   className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"

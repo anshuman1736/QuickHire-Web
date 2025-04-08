@@ -1,6 +1,7 @@
 "use client";
 import React, { useState } from 'react';
 import { User, Mail, Phone, Tag, Upload, Camera, Save, X, Plus, Briefcase, Award, Eye, ChevronDown, ChevronUp, MapPin, Globe, Linkedin, Github, Twitter } from 'lucide-react';
+import Image from 'next/image'; // Import Next.js Image component
 
 const UserAccount = () => {
   // State management
@@ -30,15 +31,41 @@ const UserAccount = () => {
   
   const [newSkill, setNewSkill] = useState("");
 
+  // Type Definitions
+  type FormData = {
+    fullName: string;
+    email: string;
+    phoneNo: string;
+    jobTitle: string;
+    location: string;
+    bio: string;
+    skills: string[];
+    experienceLevel: string;
+    workType: string[];
+    website: string;
+    linkedin: string;
+    github: string;
+    twitter: string;
+    resume: File | null;
+    portfolio: File | null;
+    profile_pic: File | null;
+  }
+
+  // Use type instead of empty interfaces
+  type InputChangeEvent = React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>;
+  type CheckboxChangeEvent = React.ChangeEvent<HTMLInputElement>;
+  type FileChangeEvent = React.ChangeEvent<HTMLInputElement>;
+  type SubmitEvent = React.FormEvent<HTMLFormElement>;
+
   // Handlers
-  const handleInputChange = (e) => {
+  const handleInputChange = (e: InputChangeEvent): void => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
   
-  const handleCheckboxChange = (e) => {
+  const handleCheckboxChange = (e: CheckboxChangeEvent): void => {
     const { name, checked, value } = e.target;
-    let updatedValues = [...formData[name]];
+    let updatedValues: string[] = [...formData[name as keyof typeof formData] as string[]];
     
     if (checked) {
       updatedValues.push(value);
@@ -59,14 +86,18 @@ const UserAccount = () => {
     }
   };
   
-  const handleRemoveSkill = (skillToRemove) => {
+  type RemoveSkillHandler = (skillToRemove: string) => void;
+
+  const handleRemoveSkill: RemoveSkillHandler = (skillToRemove) => {
     setFormData({
       ...formData,
       skills: formData.skills.filter(skill => skill !== skillToRemove)
     });
   };
   
-  const handleFileChange = async (e, fileType) => {
+  type HandleFileChange = (e: FileChangeEvent, fileType: keyof Pick<FormData, 'resume' | 'portfolio' | 'profile_pic'>) => Promise<void>;
+
+  const handleFileChange: HandleFileChange = async (e, fileType) => {
     if (e.target.files && e.target.files[0]) {
       setIsUploading(true);
       // Simulate upload
@@ -79,7 +110,7 @@ const UserAccount = () => {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: SubmitEvent): void => {
     e.preventDefault();
     console.log('Profile updated:', formData);
     // API call would go here
@@ -105,9 +136,11 @@ const UserAccount = () => {
     { id: "onsite", label: "On-site" }
   ];
 
-  function toggleSection(section) {
+  type ToggleSectionHandler = (section: string) => void;
+
+  const toggleSection: ToggleSectionHandler = (section) => {
     setActiveSection((prevSection) => (prevSection === section ? '' : section));
-  }
+  };
 
   return (
     <div className="w-full bg-gray-50 min-h-screen py-4 sm:py-6 md:py-8 px-2 sm:px-4 mt-12 sm:mt-20 md:mt-16">
@@ -125,11 +158,15 @@ const UserAccount = () => {
             {/* Profile Picture */}
             <div className="relative mx-auto md:mx-0">
               <div className="w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 rounded-full bg-white p-1 shadow-xl overflow-hidden border-4 border-white">
-                <img 
-                  src="/placeholder-profile.jpg" 
-                  alt="Profile" 
-                  className="w-full h-full object-cover rounded-full"
-                />
+                {/* Replace img with Next.js Image component */}
+                <div className="relative w-full h-full">
+                  <Image 
+                    src="/api/placeholder/400/400" 
+                    alt="Profile" 
+                    fill
+                    className="object-cover rounded-full"
+                  />
+                </div>
               </div>
               <button 
                 onClick={() => setIsEditingPhoto(true)}

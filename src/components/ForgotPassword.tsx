@@ -1,8 +1,18 @@
 "use client"
 import { ChangePwd, SendOTP, VerifyOTP } from '@/hooks/changePwd';
 import { useRouter } from 'next/navigation';
-import React, { use } from 'react'
+import React from 'react'
 import { useState } from 'react'
+
+interface ApiError {
+  response?: {
+    data?: {
+      message?: string;
+    };
+  };
+  message?: string;
+}
+
 const ForgotPassword = () => {
   const [otpsend, setotpsend] = useState(false);
   const [verifyotp, setverifyotp] = useState(false);
@@ -16,7 +26,6 @@ const ForgotPassword = () => {
 
   const router = useRouter()
 
-  // Handler for sending OTP
   const handleSendOTP = async (e: React.MouseEvent<HTMLButtonElement>) => {
       e.preventDefault();
       if (!email) {
@@ -27,11 +36,12 @@ const ForgotPassword = () => {
       setLoading(true);
       setError('');
       try {
-          const response = await SendOTP(email);
+          await SendOTP(email);
           setotpsend(true);
           setSuccess('OTP has been sent to your email');
-      } catch (err: any) {
-          setError(err.response?.data?.message || 'Failed to send OTP. Please try again.');
+      } catch (err: unknown) {
+          const apiError = err as ApiError;
+          setError(apiError.response?.data?.message || 'Failed to send OTP. Please try again.');
       } finally {
           setLoading(false);
       }
@@ -47,11 +57,12 @@ const ForgotPassword = () => {
       setLoading(true);
       setError('');
       try {
-          const response = await VerifyOTP(email, otp);
+          await VerifyOTP(email, otp);
           setverifyotp(true);
           setSuccess('OTP verified successfully');
-      } catch (err: any) {
-          setError(err.response?.data?.message || 'Invalid OTP. Please try again.');
+      } catch (err: unknown) {
+          const apiError = err as ApiError;
+          setError(apiError.response?.data?.message || 'Invalid OTP. Please try again.');
       } finally {
           setLoading(false);
       }
@@ -79,13 +90,12 @@ const ForgotPassword = () => {
       setLoading(true);
       setError('');
       try {
-          const response = await ChangePwd(email, password);
+          await ChangePwd(email, password);
           setSuccess('Password changed successfully. You can now login with your new password.');
           router.push('/login'); // Redirect to login page after successful password change
-          // Optionally redirect to login page after successful password change
-          // window.location.href = '/login';
-      } catch (err: any) {
-          setError(err.response?.data?.message || 'Failed to change password. Please try again.');
+      } catch (err: unknown) {
+          const apiError = err as ApiError;
+          setError(apiError.response?.data?.message || 'Failed to change password. Please try again.');
       } finally {
           setLoading(false);
       }
