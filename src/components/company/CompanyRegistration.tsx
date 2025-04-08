@@ -28,7 +28,7 @@ export default function CompanyRegistration() {
     cinCertificate: "",
     password: "",
     confirmPassword: "",
-    profile_pic: "",
+    profile_pic: null as string | null,
     categoryId: 1,
     categoryName: "",
     creationData: "",
@@ -491,7 +491,7 @@ export default function CompanyRegistration() {
             >
               {formData.profile_pic ? (
                 <Image
-                  src={URL.createObjectURL(formData.profile_pic )}
+                  src={formData.profile_pic || ""}
                   alt="Company Logo Preview"
                   width={128}
                   height={128}
