@@ -1,12 +1,14 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { User, ChevronDown, File, Check, X, Plus } from "lucide-react";
 import { RegisterUser } from "@/hooks/user/Registration";
 import { useMutation } from "@tanstack/react-query";
 import Link from "next/link";
 import Image from "next/image";
-import { IUserRegister } from "@/types/auth";
+import { ICategory, ICategoryResponse, IUserRegister } from "@/types/auth";
+import axios from "axios";
+import { BACKEND_URL } from "@/lib/config";
 
 const UserRegistration = () => {
   const [currentStep, setCurrentStep] = useState(1);
@@ -33,17 +35,33 @@ const UserRegistration = () => {
   const [registrationSuccess, setRegistrationSuccess] = useState(false);
   const [responseMessage, setResponseMessage] = useState("");
 
+  const [categories, setCategories] = useState<ICategory[]>();
+
   const fileInputRef = useRef<HTMLInputElement>(null);
   const interestInputRef = useRef<HTMLInputElement>(null);
 
-  const categories = [
-    { id: 1, name: "Android Developer" },
-    { id: 2, name: "Cloud Computing" },
-    { id: 3, name: "AI Engineer" },
-    { id: 4, name: "Web Developer" },
-    { id: 5, name: "Data Scientist" },
-    { id: 6, name: "UI/UX Designer" },
-  ];
+  const fetchCategories = async () => {
+    try {
+      const response = await axios.get(`${BACKEND_URL}/category/`);
+
+      if (response.data.STS === "200") {
+        setCategories(
+          response.data.CONTENT.map((category: ICategoryResponse) => {
+            return {
+              id: category.id,
+              name: category.categoryName,
+            };
+          })
+        );
+      }
+    } catch (error) {
+      console.log("Error fetching categories:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchCategories();
+  }, []);
 
   const { mutate: userRegister, isPending: isLoading } = useMutation({
     mutationFn: RegisterUser,
@@ -54,7 +72,9 @@ const UserRegistration = () => {
     },
     onError: (error: Error | unknown) => {
       console.log(error);
-      const errorData = (error as { response?: { data: { STS: string, MSG: string } } })?.response?.data || {
+      const errorData = (
+        error as { response?: { data: { STS: string; MSG: string } } }
+      )?.response?.data || {
         STS: "500",
         MSG: "Failed To Register Either this is Because of Server Error or User Already Exists",
       };
@@ -124,10 +144,11 @@ const UserRegistration = () => {
     }, 100);
   };
 
-  const selectCategory = (categoryId: number) => {
+  const selectCategory = (category: ICategory) => {
     setFormData({
       ...formData,
-      categoryId: categoryId,
+      categoryId: category.id,
+      categoryName: category.name,
     });
     setCategoryOpen(false);
     if (errors.categoryId) {
@@ -274,7 +295,7 @@ const UserRegistration = () => {
         categoryId: formData.categoryId,
         resume: "",
         profile_pic: "2123",
-        categoryName: "",
+        categoryName: formData.categoryName,
         address: "",
         completeProfile: true,
       };
@@ -448,10 +469,10 @@ const UserRegistration = () => {
                     formData.categoryId ? "text-gray-800" : "text-gray-400"
                   }
                 >
-                  {formData.categoryId
-                    ? categories.find(
+                  {formData.categoryName
+                    ? categories?.find(
                         (cat) => cat.id === Number(formData.categoryId)
-                      )?.name
+                      )?.name ?? "Select Category"
                     : "Select Category"}
                 </span>
                 <ChevronDown className="w-5 h-5 text-gray-400" />
@@ -462,17 +483,18 @@ const UserRegistration = () => {
 
               {categoryOpen && (
                 <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg">
-                  {categories.map((category, index) => (
-                    <div
-                      key={index}
-                      className={`p-3 cursor-pointer hover:bg-gray-50 ${
-                        index % 2 === 1 ? "bg-gray-50" : ""
-                      }`}
-                      onClick={() => selectCategory(category.id)}
-                    >
-                      {category.name}
-                    </div>
-                  ))}
+                  {categories &&
+                    categories.map((category, index) => (
+                      <div
+                        key={index}
+                        className={`p-3 cursor-pointer hover:bg-gray-50 ${
+                          index % 2 === 1 ? "bg-gray-50" : ""
+                        }`}
+                        onClick={() => selectCategory(category)}
+                      >
+                        {category.name}
+                      </div>
+                    ))}
                 </div>
               )}
             </div>

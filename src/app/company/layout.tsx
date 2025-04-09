@@ -1,5 +1,5 @@
+import CmpHeader from "@/components/company/CmpHeader";
 import Footer from "@/components/user/footer";
-import Header from "@/components/user/header";
 
 export default function UserLayout({
   children,
@@ -8,7 +8,7 @@ export default function UserLayout({
 }>) {
   return (
     <div className="flex flex-col min-h-screen">
-      <Header/>
+      <CmpHeader/>
       {children}
       <Footer />
     </div>

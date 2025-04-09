@@ -6,8 +6,13 @@ import { useMutation } from "@tanstack/react-query";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useRef } from "react";
+import { useState } from "react";
+import { Eye } from 'lucide-react';
+import { EyeOff } from 'lucide-react';
+
 
 export default function Login() {
+  const [showpwd, setshowpwd] = useState(false);
   const email = useRef<HTMLInputElement>(null);
   const password = useRef<HTMLInputElement>(null);
   const rememberMe = useRef<HTMLInputElement>(null);
@@ -123,8 +128,9 @@ export default function Login() {
                   </Link>
                 </div>
                 <div className="relative">
+                  <span onClick={()=>setshowpwd(!showpwd )} className="text-xs text-red-400  cursor-pointer absolute right-5 top-3.5">{showpwd? <Eye />: <EyeOff />}</span>
                   <input
-                    type="password"
+                    type={`${showpwd ? 'text':'password'}`}
                     id="password"
                     name="password"
                     ref={password}

@@ -1,17 +1,24 @@
 import axios from "axios";
 import { BACKEND_URL } from "./config";
+import { ICategoryResponse } from "@/types/auth";
 
 export async function getCatogory() {
   try {
-    const res = await axios.get(`${BACKEND_URL}/category`);
-    return res.data;
-  } catch (error) {
-    if (axios.isAxiosError(error)) {
-      throw new Error(
-        error.response?.data?.message || "Failed to fetch categories"
-      );
+    const response = await axios.get(`${BACKEND_URL}/category/`);
+
+    if (response.data.STS === "200") {
+      
+       const data = response.data.CONTENT.map((category: ICategoryResponse) => {
+          return {
+            id: category.id,
+            name: category.categoryName,
+          };
+        })
+      
+        return data;
     }
-    throw new Error("An unexpected error occurred");
+  } catch (error) {
+    console.error("Error fetching categories:", error);
   }
 }
 
