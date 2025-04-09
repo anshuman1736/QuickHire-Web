@@ -1,10 +1,11 @@
-import JobPortal from '@/components/user/featuredJobs'
 import React from 'react'
 
 function User() {
   return (
     
-    <JobPortal/>
+      <div className='p-20 bg-red-300'>
+       coming soon
+      </div>
   )
 }
 
