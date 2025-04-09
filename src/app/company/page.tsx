@@ -4,7 +4,7 @@ function User() {
   return (
     
       <div className='p-20 bg-red-300'>
-       coming soon
+       coming soon......
       </div>
   )
 }
