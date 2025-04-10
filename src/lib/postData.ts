@@ -6,6 +6,7 @@ import axios from "axios";
 
 interface IJobPostfn extends IJobPost {
   token: string;
+  companyId: number;
 }
 
 export const RegisterUser = async (form: IUserRegister) => {
@@ -59,7 +60,7 @@ export const postJob = async (form: IJobPostfn) => {
       categoryId: form.categoryId,
     };
     const response = await axios.post(
-      `${BACKEND_URL}/job/{companyId}`,
+      `${BACKEND_URL}/job/${form.companyId}`,
       finalForm,
       {
         headers: {

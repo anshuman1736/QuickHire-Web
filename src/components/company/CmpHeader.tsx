@@ -10,18 +10,16 @@ function CmpHeader() {
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [messagesOpen, setMessagesOpen] = useState(false);
-  const [activePath, setActivePath] = useState("/user"); // Default active path
+  const [activePath, setActivePath] = useState("/user");
 
-  // Sample user data
   const user = {
     name: "Quick-Hire pvt Ltd",
-    avatar: null, // If null, we'll use initials
+    avatar: null, 
     role: "Software Developer",
     unreadNotifications: 3,
     unreadMessages: 2
   };
 
-  // Get user initials for avatar placeholder
   const getInitials = (name: string): string => {
     return name
       .split(' ')
@@ -30,14 +28,12 @@ function CmpHeader() {
       .toUpperCase();
   };
 
-  // Set active path based on current URL
   useEffect(() => {
     if (typeof window !== 'undefined') {
       setActivePath(window.location.pathname);
     }
   }, []);
 
-  // Function to determine active tab styles
   interface TabStylesProps {
     path: string;
   }
@@ -50,7 +46,6 @@ function CmpHeader() {
     return `${baseStyles} text-gray-700 hover:text-black hover:bg-gray-50`;
   };
 
-  // Function for mobile tab styles
   interface MobileTabStylesProps {
     path: string;
   }
@@ -78,16 +73,13 @@ function CmpHeader() {
           </div>
         </Link>
 
-          {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-1">
             <Link href="/company" className={getTabStyles("/company")}>Dashboard</Link>
             <Link href="/company/postjobs" className={getTabStyles("/company/postjobs")}>post Jobs</Link>
             <Link href="/history" className={getTabStyles("/history")}>History</Link>
           </nav>
 
-          {/* User Actions */}
           <div className="hidden md:flex items-center space-x-5">
-            {/* Notifications */}
             <div className="relative">
               <button 
                 className="relative text-gray-500 hover:text-black"
@@ -153,7 +145,6 @@ function CmpHeader() {
               )}
             </div>
             
-            {/* Messages */}
             <div className="relative">
               <button 
                 className="relative text-gray-500 hover:text-black"
@@ -209,7 +200,6 @@ function CmpHeader() {
               )}
             </div>
             
-            {/* User Profile */}
             <div className="relative">
               <button 
                 className="flex items-center space-x-2"
@@ -287,7 +277,6 @@ function CmpHeader() {
         </div>
       </div>
 
-      {/* Mobile Menu */}
       {mobileMenuOpen && (
         <div className="md:hidden bg-white border-t border-gray-100 py-2">
           <div className="container mx-auto px-4">

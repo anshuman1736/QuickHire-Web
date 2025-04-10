@@ -76,7 +76,6 @@ export default function CompanyRegistration() {
     fetchCategories();
   }, []);
 
-  // Refs for form inputs
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const companyRegister = useMutation({
@@ -109,7 +108,6 @@ export default function CompanyRegistration() {
       [name]: value,
     }));
 
-    // Clear error when user types
     if (errors[name]) {
       setErrors((prev) => ({
         ...prev,
@@ -124,7 +122,6 @@ export default function CompanyRegistration() {
   ) => {
     const file = e.target.files?.[0];
     if (file) {
-      // Validate file size (5MB limit)
       if (file.size > 5 * 1024 * 1024) {
         setErrors((prev) => ({
           ...prev,
@@ -140,7 +137,6 @@ export default function CompanyRegistration() {
             ? uploadCinCertificate
             : uploadProfilePic;
 
-        // Start the file upload process
         uploadFunction(file).then((url) => {
           if (url) {
             setFormData((prev) => ({
@@ -259,7 +255,6 @@ export default function CompanyRegistration() {
   const nextStep = () => {
     if (validateStep(currentStep)) {
       setCurrentStep((prev) => prev + 1);
-      // Clear form-level errors when moving to next step
       if (errors.formError) {
         setErrors((prev) => ({ ...prev, formError: "" }));
       }
@@ -268,7 +263,6 @@ export default function CompanyRegistration() {
 
   const prevStep = () => {
     setCurrentStep((prev) => prev - 1);
-    // Clear form-level errors when going back
     if (errors.formError) {
       setErrors((prev) => ({ ...prev, formError: "" }));
     }
