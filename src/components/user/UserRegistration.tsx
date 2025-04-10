@@ -9,6 +9,7 @@ import Image from "next/image";
 import { ICategory, ICategoryResponse, IUserRegister } from "@/types/auth";
 import axios from "axios";
 import { BACKEND_URL } from "@/lib/config";
+import { uploadProfilePic, uploadResume } from "@/lib/uploadTofirebase";
 
 const UserRegistration = () => {
   const [currentStep, setCurrentStep] = useState(1);
@@ -21,7 +22,9 @@ const UserRegistration = () => {
     majorIntrest: [] as string[],
     categoryId: 0,
     resume: null as File | null,
+    resumeUrl: "",
     profile_pic: null as File | null,
+    profile_picUrl: "",
     address: "",
     categoryName: "",
     completeProfile: false,
@@ -126,13 +129,51 @@ const UserRegistration = () => {
       }
 
       if (fieldName === "resume") {
-        simulateUpload();
+        simulateUpload(file, fieldName);
+      }
+
+      if (fieldName === "profile_pic") {
+        simulateUpload(file, fieldName);
       }
     }
   };
 
-  const simulateUpload = () => {
+  const simulateUpload = async (
+    file: File,
+    fieldName: "resume" | "profile_pic"
+  ) => {
     setUploadProgress(0);
+    if (fieldName === "resume") {
+      console.log("Uploading resume...");
+      const url = await uploadResume(file);
+      if (url) {
+        setFormData({
+          ...formData,
+          resumeUrl: url,
+        });
+      } else {
+        setErrors({
+          ...errors,
+          resume: "Failed to upload resume",
+        });
+      }
+    }
+    if (fieldName === "profile_pic") {
+      console.log("Uploading profile picture...");
+      const url = await uploadProfilePic(file);
+      if (url) {
+        setFormData({
+          ...formData,
+          profile_picUrl: url,
+        });
+      } else {
+        setErrors({
+          ...errors,
+          profile_pic: "Failed to upload profile picture",
+        });
+      }
+    }
+
     const interval = setInterval(() => {
       setUploadProgress((prev) => {
         if (prev >= 100) {
@@ -293,8 +334,8 @@ const UserRegistration = () => {
         password: formData.password,
         majorIntrest: formData.majorIntrest.toString(),
         categoryId: formData.categoryId,
-        resume: "",
-        profile_pic: "2123",
+        resume: formData.resumeUrl,
+        profile_pic: formData.profile_picUrl,
         categoryName: formData.categoryName,
         address: "",
         completeProfile: true,
@@ -656,6 +697,8 @@ const UserRegistration = () => {
                   src={URL.createObjectURL(formData.profile_pic)}
                   alt="Profile Preview"
                   className="w-full h-full object-cover"
+                  width={128}
+                  height={128}
                 />
               ) : (
                 <User className="w-16 h-16 text-gray-300" />
