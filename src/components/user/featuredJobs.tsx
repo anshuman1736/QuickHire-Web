@@ -268,11 +268,9 @@ function JobPortal() {
     const filterJobs = () => {
       setIsLoading(true);
 
-      // Simulate API call delay
       setTimeout(() => {
         let filtered = [...jobs];
 
-        // Filter by tab
         if (activeTab === "popular") {
           filtered = filtered.sort((a, b) => b.applicants - a.applicants);
         } else if (activeTab === "new") {
@@ -285,7 +283,6 @@ function JobPortal() {
           );
         }
 
-        // Filter by search query
         if (searchQuery) {
           filtered = filtered.filter(
             (job) =>
@@ -296,7 +293,6 @@ function JobPortal() {
           );
         }
 
-        // Filter by category
         if (selectedCategory !== "all") {
           filtered = filtered.filter((job) => job.category === selectedCategory);
         }
@@ -317,14 +313,12 @@ function JobPortal() {
           }
         }
 
-        // Filter by location
         if (locationFilter !== "all") {
           filtered = filtered.filter((job) =>
             job.location.toLowerCase().includes(locationFilter.toLowerCase())
           );
         }
 
-        // Filter by salary
         if (salaryFilter !== "all") {
           if (salaryFilter === "under60k") {
             filtered = filtered.filter((job) => {
@@ -578,14 +572,12 @@ function JobPortal() {
           </div>
         </div>
 
-        {/* Loading State */}
         {isLoading ? (
           <div className="flex justify-center items-center h-64">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
           </div>
         ) : (
           <>
-            {/* No Results State */}
             {visibleJobs.length === 0 && (
               <div className="flex flex-col items-center justify-center h-64 text-center">
                 <div className="bg-gray-100 p-4 rounded-full mb-4">
@@ -605,7 +597,6 @@ function JobPortal() {
               </div>
             )}
 
-            {/* Jobs Grid */}
             {visibleJobs.length > 0 && (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {visibleJobs.map((job) => (
@@ -689,7 +680,6 @@ function JobPortal() {
           </>
         )}
 
-        {/* View More Button */}
         {visibleJobs.length > 0 && (
           <div className="mt-12 text-center">
             <button className="px-6 py-3 bg-white text-blue-600 rounded-xl font-medium border border-blue-200 hover:bg-blue-50 transition-colors flex items-center justify-center mx-auto">

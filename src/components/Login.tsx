@@ -63,7 +63,6 @@ export default function Login() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 flex items-center justify-center px-4 sm:px-6 lg:px-8">
       <div className="w-full max-w-md space-y-6 bg-white/90 backdrop-blur-sm p-8 rounded-2xl shadow-xl border border-gray-200 mx-4 relative overflow-hidden">
-        {/* Decorative elements */}
         <div className="absolute -top-10 -right-10 w-40 h-40 bg-yellow-400/20 rounded-full blur-2xl"></div>
         <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-yellow-400/20 rounded-full blur-2xl"></div>
 
@@ -144,7 +143,6 @@ export default function Login() {
               </div>
             )}
 
-            {/* Remember Me Checkbox */}
             {rememberMe && (
               <div className="flex items-center">
                 <input

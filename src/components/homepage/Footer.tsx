@@ -25,7 +25,6 @@ import {
 function Footer() {
   const currentYear = new Date().getFullYear();
 
-  // Footer sections with icons matching the style of SkillsCategory
   const footerSections = [
     {
       icon: Layers,
@@ -92,9 +91,7 @@ function Footer() {
       </div>
 
       <div className="max-w-7xl mx-auto px-8 relative z-10">
-        {/* Footer header with branding and newsletter */}
         <div className="flex flex-col md:flex-row justify-between gap-12 mb-16">
-          {/* Branding section */}
           <motion.div
             initial={{ opacity: 0, y: 50 }}
             animate={{ opacity: 1, y: 0 }}
@@ -129,7 +126,6 @@ function Footer() {
             </motion.a>
           </motion.div>
 
-          {/* Newsletter subscription */}
           <motion.div
             initial={{ opacity: 0, y: 50 }}
             animate={{ opacity: 1, y: 0 }}
@@ -169,7 +165,6 @@ function Footer() {
           </motion.div>
         </div>
 
-        {/* Footer sections grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-10 border-t border-gray-200 pt-10">
           {footerSections.map((section, index) => (
             <motion.div
@@ -214,7 +209,6 @@ function Footer() {
           ))}
         </div>
 
-        {/* Social and buttons section */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
@@ -257,7 +251,6 @@ function Footer() {
           </div>
         </motion.div>
 
-        {/* Copyright section */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}

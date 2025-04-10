@@ -12,7 +12,6 @@ export default function Register() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100">
-      {/* Account Type Selector */}
       <div className="flex justify-center space-x-4 pt-8">
         <button
           type="button"
@@ -40,7 +39,6 @@ export default function Register() {
         </button>
       </div>
 
-      {/* Render appropriate registration form based on user type */}
       {userType === "individual" ? (
         <UserRegistration />
       ) : (

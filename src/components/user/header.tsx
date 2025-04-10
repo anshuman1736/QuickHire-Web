@@ -10,18 +10,16 @@ function Header() {
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [messagesOpen, setMessagesOpen] = useState(false);
-  const [activePath, setActivePath] = useState("/user"); // Default active path
+  const [activePath, setActivePath] = useState("/user");
 
-  // Sample user data
   const user = {
     name: "Alex Johnson",
-    avatar: null, // If null, we'll use initials
+    avatar: null,
     role: "Software Developer",
     unreadNotifications: 3,
     unreadMessages: 2
   };
 
-  // Get user initials for avatar placeholder
   const getInitials = (name: string): string => {
     return name
       .split(' ')
@@ -30,14 +28,12 @@ function Header() {
       .toUpperCase();
   };
 
-  // Set active path based on current URL
   useEffect(() => {
     if (typeof window !== 'undefined') {
       setActivePath(window.location.pathname);
     }
   }, []);
 
-  // Function to determine active tab styles
   interface TabStylesProps {
     path: string;
   }
@@ -50,7 +46,6 @@ function Header() {
     return `${baseStyles} text-gray-700 hover:text-black hover:bg-gray-50`;
   };
 
-  // Function for mobile tab styles
   interface MobileTabStylesProps {
     path: string;
   }
@@ -67,7 +62,6 @@ function Header() {
     <header className="bg-white w-screen shadow-sm fixed top-0 left-0 right-0 z-10">
       <div className="container mx-auto px-4 md:px-6">
         <div className="flex items-center justify-between h-16">
-          {/* Logo */}
           <Link href="/user" className="font-bold text-xl md:text-2xl flex items-center">
           <div className="flex items-center">
             <span className="text-[#FFBF2F]">Q</span>
@@ -78,16 +72,13 @@ function Header() {
           </div>
         </Link>
 
-          {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-1">
             <Link href="/user" className={getTabStyles("/user")}>Dashboard</Link>
             <Link href="/user/applications" className={getTabStyles("/user/applications")}>My Applications</Link>
             <Link href="/saved" className={getTabStyles("/saved")}>Saved Jobs</Link>
           </nav>
 
-          {/* User Actions */}
           <div className="hidden md:flex items-center space-x-5">
-            {/* Notifications */}
             <div className="relative">
               <button 
                 className="relative text-gray-500 hover:text-black"
@@ -287,7 +278,6 @@ function Header() {
         </div>
       </div>
 
-      {/* Mobile Menu */}
       {mobileMenuOpen && (
         <div className="md:hidden bg-white border-t border-gray-100 py-2">
           <div className="container mx-auto px-4">
