@@ -17,6 +17,7 @@ export default function Login() {
   const password = useRef<HTMLInputElement>(null);
   const rememberMe = useRef<HTMLInputElement>(null);
   const router = useRouter();
+
   const loginMutation = useMutation({
     mutationFn: loginUser,
     onSuccess: (data) => {
@@ -24,6 +25,7 @@ export default function Login() {
       localStorage.setItem("sessionId", data.CONTENT.token);
       localStorage.setItem("role", data.CONTENT.userRole);
       if (data.CONTENT.userRole === "ROLE_COMPANY") {
+        localStorage.setItem("companyId", data.CONTENT.userId);
         router.push("/company");
       }
       if (data.CONTENT.userRole === "ROLE_USER") {
