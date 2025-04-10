@@ -1,7 +1,12 @@
 import { BACKEND_URL } from "@/lib/config";
 import { ILogin, IUserRegister } from "@/types/auth";
 import { ICompanyRegister } from "@/types/auth";
+import { IJobPost } from "@/types/job";
 import axios from "axios";
+
+interface IJobPostfn extends IJobPost {
+  token: string;
+}
 
 export const RegisterUser = async (form: IUserRegister) => {
   try {
@@ -29,8 +34,7 @@ export const RegisterCompany = async (form: ICompanyRegister) => {
   }
 };
 
-
-export const loginUser = async(form: ILogin) => {
+export const loginUser = async (form: ILogin) => {
   try {
     const response = await axios.post(`${BACKEND_URL}/auth/login`, form);
     return response.data;
@@ -41,4 +45,35 @@ export const loginUser = async(form: ILogin) => {
     }
     throw error;
   }
-}
+};
+
+export const postJob = async (form: IJobPostfn) => {
+  try {
+    const finalForm: IJobPost = {
+      jobTitle: form.jobTitle,
+      jobDescription: form.jobDescription,
+      jobAddress: form.jobAddress,
+      jobLocation: form.jobLocation,
+      salary: form.salary,
+      jobType: form.jobType,
+      categoryId: form.categoryId,
+    };
+    const response = await axios.post(
+      `${BACKEND_URL}/job/{companyId}`,
+      finalForm,
+      {
+        headers: {
+          Authorization: `Bearer ${form.token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      const serverMessage = error.response?.data?.message || error.message;
+      throw new Error(serverMessage);
+    }
+    throw error;
+  }
+};

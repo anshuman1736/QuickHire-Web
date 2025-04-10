@@ -1,13 +1,14 @@
 "use client";
 
-import { useRef, useState } from "react";
-import { Building2, Info, Check, File, X } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Building2, Info, Check, File, X, ChevronDown } from "lucide-react";
 import { RegisterCompany } from "@/hooks/recruiter/Registration";
 import { useMutation } from "@tanstack/react-query";
 import Link from "next/link";
-import Image from "next/image";
-import { ICompanyRegister } from "@/types/auth";
-
+import { ICategory, ICategoryResponse, ICompanyRegister } from "@/types/auth";
+import { uploadCinCertificate, uploadProfilePic } from "@/lib/uploadTofirebase";
+import axios from "axios";
+import { BACKEND_URL } from "@/lib/config";
 
 interface ErrorResponse {
   response?: {
@@ -28,10 +29,10 @@ export default function CompanyRegistration() {
     cinCertificate: "",
     password: "",
     confirmPassword: "",
-    profile_pic: null as string | null,
+    profile_pic: "",
     categoryId: 1,
     categoryName: "",
-    creationData: "",
+    creationData: new Date().toISOString(),
     fullName: "",
     completeProfile: false,
   });
@@ -39,6 +40,41 @@ export default function CompanyRegistration() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [registrationSuccess, setRegistrationSuccess] = useState(false);
   const [responseMessage, setResponseMessage] = useState("");
+  const [categories, setCategories] = useState<ICategory[]>([]);
+
+  const [categoryOpen, setCategoryOpen] = useState(false);
+
+  const selectCategory = (category: ICategory) => {
+    setFormData((prev) => ({
+      ...prev,
+      categoryId: category.id,
+      categoryName: category.name,
+    }));
+    setCategoryOpen(false);
+  };
+
+  const fetchCategories = async () => {
+    try {
+      const response = await axios.get(`${BACKEND_URL}/category/`);
+
+      if (response.data.STS === "200") {
+        setCategories(
+          response.data.CONTENT.map((category: ICategoryResponse) => {
+            return {
+              id: category.id,
+              name: category.categoryName,
+            };
+          })
+        );
+      }
+    } catch (error) {
+      console.log("Error fetching categories:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchCategories();
+  }, []);
 
   // Refs for form inputs
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -55,7 +91,6 @@ export default function CompanyRegistration() {
         STS: "500",
         MSG: "Network error. Please check your connection",
       };
-    
 
       setErrors({
         formError: errorData.MSG,
@@ -83,7 +118,7 @@ export default function CompanyRegistration() {
     }
   };
 
-  const handleFileChange = (
+  const handleFileChange = async (
     e: React.ChangeEvent<HTMLInputElement>,
     fieldName: "companyProfilePic" | "cinCertificate"
   ) => {
@@ -98,35 +133,50 @@ export default function CompanyRegistration() {
         return;
       }
 
-      setFormData((prev) => ({
-        ...prev,
-        [fieldName]: file,
-      }));
+      try {
+        setUploadProgress(0);
+        const uploadFunction =
+          fieldName === "cinCertificate"
+            ? uploadCinCertificate
+            : uploadProfilePic;
 
-      if (errors[fieldName]) {
+        // Start the file upload process
+        uploadFunction(file).then((url) => {
+          if (url) {
+            setFormData((prev) => ({
+              ...prev,
+              [fieldName === "cinCertificate"
+                ? "cinCertificate"
+                : "profile_pic"]: url,
+            }));
+          }
+        });
+
+        // Separately simulate upload progress
+        const interval = setInterval(() => {
+          setUploadProgress((prev) => {
+            if (prev >= 100) {
+              clearInterval(interval);
+              return 100;
+            }
+            return prev + 5;
+          });
+        }, 100);
+
+        if (errors[fieldName]) {
+          setErrors((prev) => ({
+            ...prev,
+            [fieldName]: "",
+          }));
+        }
+      } catch (error) {
         setErrors((prev) => ({
           ...prev,
-          [fieldName]: "",
+          [fieldName]: "Failed to upload file",
         }));
-      }
-
-      if (fieldName === "cinCertificate") {
-        simulateUpload();
+        console.log(error);
       }
     }
-  };
-
-  const simulateUpload = () => {
-    setUploadProgress(0);
-    const interval = setInterval(() => {
-      setUploadProgress((prev) => {
-        if (prev >= 100) {
-          clearInterval(interval);
-          return 100;
-        }
-        return prev + 5;
-      });
-    }, 100);
   };
 
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
@@ -140,10 +190,10 @@ export default function CompanyRegistration() {
       // Create a properly typed synthetic event
       const syntheticEvent = {
         target: {
-          files: [file]
-        }
+          files: [file],
+        },
       } as unknown as React.ChangeEvent<HTMLInputElement>;
-      
+
       handleFileChange(syntheticEvent, "cinCertificate");
     }
   };
@@ -189,6 +239,17 @@ export default function CompanyRegistration() {
         newErrors.cinNumber = "CIN number is required";
         isValid = false;
       }
+      if (!formData.cinCertificate) {
+        newErrors.cinCertificate = "CIN certificate is required";
+        isValid = false;
+      }
+    }
+
+    if (step === 3) {
+      if (!formData.profile_pic) {
+        newErrors.companyProfilePic = "Company logo is required";
+        isValid = false;
+      }
     }
 
     setErrors(newErrors);
@@ -213,28 +274,28 @@ export default function CompanyRegistration() {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (validateStep(3)) {
       const companyForm: ICompanyRegister = {
-        companyName: formData.companyName || "",
-        email: formData.email || "",
-        phoneNo: formData.phoneNo || "",
-        cinNumber: formData.cinNumber || 0,
-        profile_pic: "1234"  ,
-        cinCertificate: formData.cinCertificate || "1234",
-        password: formData.password || "",
-        fullName: formData.companyName || "",
-        categoryId: 1,
+        ...formData,
+        categoryId: formData.categoryId,
         creationData: new Date().toISOString(),
         completeProfile: true,
-        categoryName: "Default",
+        categoryName: formData.companyName,
+        profile_Pic: formData.profile_pic,
       };
-      companyRegister.mutate(companyForm);
+
+      try {
+        await companyRegister.mutateAsync(companyForm);
+      } catch (error) {
+        console.error("Registration failed:", error);
+      }
     }
-    // Additional schema validation
   };
+
+  console.log(formData.profile_pic);
 
   const renderStep = () => {
     switch (currentStep) {
@@ -255,7 +316,7 @@ export default function CompanyRegistration() {
               <input
                 type="text"
                 name="companyName"
-                value={formData.companyName || ""}
+                value={formData.companyName}
                 onChange={handleInputChange}
                 placeholder="Company Name"
                 className={`w-full px-4 py-3 rounded-lg bg-gray-50 border ${
@@ -274,7 +335,7 @@ export default function CompanyRegistration() {
               <input
                 type="email"
                 name="email"
-                value={formData.email || ""}
+                value={formData.email}
                 onChange={handleInputChange}
                 placeholder="Company Email"
                 className={`w-full px-4 py-3 rounded-lg bg-gray-50 border ${
@@ -291,7 +352,7 @@ export default function CompanyRegistration() {
               <input
                 type="password"
                 name="password"
-                value={formData.password || ""}
+                value={formData.password}
                 onChange={handleInputChange}
                 placeholder="Password"
                 className={`w-full px-4 py-3 rounded-lg bg-gray-50 border ${
@@ -348,11 +409,53 @@ export default function CompanyRegistration() {
               </div>
             )}
 
+            <div className="relative">
+              <div
+                className={`w-full p-3 border ${
+                  errors.categoryId ? "border-red-500" : "border-gray-200"
+                } rounded-lg bg-white flex justify-between items-center cursor-pointer`}
+                onClick={() => setCategoryOpen(!categoryOpen)}
+              >
+                <span
+                  className={
+                    formData.categoryId ? "text-gray-800" : "text-gray-400"
+                  }
+                >
+                  {formData.categoryName
+                    ? categories?.find(
+                        (cat) => cat.id === Number(formData.categoryId)
+                      )?.name ?? "Select Category"
+                    : "Select Category"}
+                </span>
+                <ChevronDown className="w-5 h-5 text-gray-400" />
+              </div>
+              {errors.categoryId && (
+                <p className="mt-1 text-xs text-red-500">{errors.categoryId}</p>
+              )}
+
+              {categoryOpen && (
+                <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg">
+                  {categories &&
+                    categories.map((category, index) => (
+                      <div
+                        key={index}
+                        className={`p-3 cursor-pointer hover:bg-gray-50 ${
+                          index % 2 === 1 ? "bg-gray-50" : ""
+                        }`}
+                        onClick={() => selectCategory(category)}
+                      >
+                        {category.name}
+                      </div>
+                    ))}
+                </div>
+              )}
+            </div>
+
             <div>
               <input
                 type="tel"
                 name="phoneNo"
-                value={formData.phoneNo || ""}
+                value={formData.phoneNo}
                 onChange={handleInputChange}
                 placeholder="Phone Number"
                 className={`w-full px-4 py-3 rounded-lg bg-gray-50 border ${
@@ -373,7 +476,7 @@ export default function CompanyRegistration() {
                 <input
                   type="text"
                   name="cinNumber"
-                  value={formData.cinNumber || ""}
+                  value={formData.cinNumber}
                   onChange={handleInputChange}
                   placeholder="Company Identification Number"
                   className={`w-full px-4 py-3 rounded-lg bg-gray-50 border ${
@@ -423,26 +526,28 @@ export default function CompanyRegistration() {
 
               {formData.cinCertificate && !errors.cinCertificate && (
                 <p className="mt-2 text-sm text-green-600">
-                  File selected: {formData.cinCertificate}
+                  File uploaded successfully
                 </p>
               )}
 
-              {uploadProgress > 0 && !errors.cinCertificate && (
-                <div className="mt-2">
-                  <p className="text-sm mb-1">Your File is Uploading</p>
-                  <div className="w-full bg-gray-200 rounded-full h-2.5">
-                    <div
-                      className="bg-gradient-to-r from-blue-400 to-blue-600 h-2.5 rounded-full transition-all duration-300 ease-out shadow-sm"
-                      style={{ width: `${uploadProgress}%` }}
-                    ></div>
+              {uploadProgress > 0 &&
+                uploadProgress < 100 &&
+                !errors.cinCertificate && (
+                  <div className="mt-2">
+                    <p className="text-sm mb-1">Your File is Uploading</p>
+                    <div className="w-full bg-gray-200 rounded-full h-2.5">
+                      <div
+                        className="bg-gradient-to-r from-blue-400 to-blue-600 h-2.5 rounded-full transition-all duration-300 ease-out shadow-sm"
+                        style={{ width: `${uploadProgress}%` }}
+                      ></div>
+                    </div>
+                    <div className="flex justify-end mt-1">
+                      <span className="text-sm text-gray-500">
+                        {uploadProgress}%
+                      </span>
+                    </div>
                   </div>
-                  <div className="flex justify-end mt-1">
-                    <span className="text-sm text-gray-500">
-                      {uploadProgress}%
-                    </span>
-                  </div>
-                </div>
-              )}
+                )}
             </div>
 
             <div className="flex space-x-2">
@@ -490,8 +595,8 @@ export default function CompanyRegistration() {
               } flex items-center justify-center overflow-hidden`}
             >
               {formData.profile_pic ? (
-                <Image
-                  src={formData.profile_pic || ""}
+                <img
+                  src={`${formData.profile_pic}`}
                   alt="Company Logo Preview"
                   width={128}
                   height={128}

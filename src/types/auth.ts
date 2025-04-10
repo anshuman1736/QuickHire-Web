@@ -1,21 +1,22 @@
 interface IRegisterForm {
-  fullName: string;
   email: string;
   password: string;
   phoneNo: string;
-  profile_pic?: string;
   completeProfile: boolean;
   categoryId: number;
   categoryName: string;
 }
 
 export interface IUserRegister extends IRegisterForm {
+  fullName: string;
   resume?: string;
   majorIntrest: string;
   address: string;
+  profile_pic?: string;
 }
 
 export interface ICompanyRegister extends IRegisterForm {
+  profile_Pic?: string;
   companyName: string;
   cinNumber: number;
   cinCertificate: string;
@@ -37,4 +38,3 @@ export interface ICategoryResponse {
   categoryName: string;
   categoryDescription: string;
 }
-  
