@@ -11,7 +11,6 @@ const Homepage = () => {
   return (
     <div className="flex flex-col min-h-screen overflow-hidden font-sans bg-white">
       <NavBar/>
-      {/* Hero Section with improved visual hierarchy and gradient accent */}
       <Hero/>
 
       {/* Stats Banner */}

@@ -8,7 +8,6 @@ export default function NavBar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const menuRef = useRef(null);
 
-  // Add scroll event listener for header style changes
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 10);
@@ -18,7 +17,6 @@ export default function NavBar() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Close mobile menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -54,7 +52,6 @@ export default function NavBar() {
           </div>
         </Link>
 
-        {/* Desktop Auth Buttons - Consistent Design */}
         <div className="hidden md:flex items-center space-x-3">
           <Link
             href="/login"
@@ -70,7 +67,6 @@ export default function NavBar() {
           </Link>
         </div>
 
-        {/* Mobile menu toggle */}
         <div className="md:hidden relative" ref={menuRef}>
           <button
             className="flex items-center focus:outline-none"
@@ -84,7 +80,6 @@ export default function NavBar() {
             )}
           </button>
           
-          {/* Mobile dropdown menu - Consistent Design */}
           {mobileMenuOpen && (
             <div className="absolute right-0 top-10 w-56 bg-white rounded-lg shadow-lg overflow-hidden">
               <div className="p-3 space-y-2">

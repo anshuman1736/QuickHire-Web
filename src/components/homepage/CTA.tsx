@@ -27,7 +27,6 @@ const TypingAnimation: React.FC<{
   const [isTyping, setIsTyping] = useState(false);
 
   useEffect(() => {
-    // Reset when text changes
     setDisplayedText("");
     setCurrentIndex(0);
     setIsTyping(true);
@@ -37,7 +36,6 @@ const TypingAnimation: React.FC<{
     let timeout: NodeJS.Timeout | undefined;
 
     if (isTyping && currentIndex < text.length) {
-      // Set a delay for the first character if needed
       const initialDelay = currentIndex === 0 ? delay : 0;
 
       timeout = setTimeout(() => {

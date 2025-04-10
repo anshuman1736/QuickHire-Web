@@ -28,7 +28,6 @@ function Hero() {
   ]
   
   useEffect(() => {
-    // Using requestAnimationFrame for smoother initial animation
     const animationFrame = requestAnimationFrame(() => {
       setIsVisible(true)
     })
@@ -37,14 +36,11 @@ function Hero() {
   }, [])
 
   const handleSearch = () => {
-    // Placeholder for search functionality
     console.log('Searching for:', searchTerm, 'in', location)
-    // Here you would typically redirect to search results page
   }
 
   return (
     <section className="relative overflow-hidden py-16 lg:py-24 bg-gradient-to-b from-white to-gray-50">
-      {/* Enhanced decorative elements */}
       <div className="absolute top-0 left-0 w-full h-full pointer-events-none">
         <div className="absolute top-20 left-10 w-64 h-64 rounded-full bg-amber-100 blur-3xl opacity-20"></div>
         <div className="absolute bottom-40 right-10 w-80 h-80 rounded-full bg-blue-100 blur-3xl opacity-20"></div>
@@ -68,7 +64,6 @@ function Hero() {
       
       <div className="max-w-6xl mx-auto px-4 sm:px-6 relative z-10">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-12">
-          {/* Left content column - improved animations */}
           <motion.div
             className="w-full lg:w-1/2 lg:pr-8"
             initial={{ opacity: 0, x: -50 }}
@@ -97,7 +92,6 @@ function Hero() {
               that match your skills, experience, and career aspirations with our AI-powered matching system.
             </motion.p>
             
-            {/* Stats row - improved layout and animations */}
             <motion.div 
               className="flex flex-wrap gap-8 mb-10"
               initial={{ opacity: 0, y: 20 }}
@@ -148,7 +142,6 @@ function Hero() {
             </motion.div>
           </motion.div>
           
-          {/* Right search card - improved UI and functionality */}
           <motion.div
             className="w-full lg:w-5/12"
             initial={{ opacity: 0, y: 50 }}
@@ -156,7 +149,6 @@ function Hero() {
             transition={{ duration: 0.8, delay: 0.2 }}
           >
             <div className="bg-white shadow-xl rounded-3xl border border-gray-100 overflow-hidden relative">
-              {/* Tab switches with improved animations */}
               <div className="flex border-b border-gray-100">
                 <button
                   className={`flex-1 py-4 font-medium text-center relative transition-colors ${activeTab === 'jobseeker' ? 'text-amber-600' : 'text-gray-500 hover:text-gray-700'}`}
@@ -191,7 +183,6 @@ function Hero() {
                 </button>
               </div>
               
-              {/* Card content with improved animations and functionality */}
               <div className="p-6">
                 <AnimatePresence mode="wait">
                   {activeTab === 'jobseeker' ? (
@@ -205,7 +196,6 @@ function Hero() {
                     >
                       <h3 className="text-lg font-semibold mb-4 text-gray-800">Find Your Next Opportunity</h3>
                       
-                      {/* Job search inputs with improved functionality */}
                       <div className="mb-4 relative">
                         <div className={`flex items-center border ${searchFocused ? 'border-amber-400 shadow-sm' : 'border-gray-200'} rounded-xl px-3 py-3 bg-gray-50 transition-all`}>
                           <Search className="w-5 h-5 text-gray-400 mr-2" />
@@ -308,7 +298,6 @@ function Hero() {
           </motion.div>
         </div>
         
-        {/* Featured companies - improved animations and layout */}
         <motion.div
           className="mt-16 text-center"
           initial={{ opacity: 0, y: 20 }}
