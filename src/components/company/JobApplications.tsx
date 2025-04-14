@@ -215,7 +215,7 @@ const JobHstry = () => {
                     Update Post
                   </button>
                   <Link
-                    href="/company/jobhstry/candiates"
+                    href="/company/job-application/candiates"
                     className="px-6 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 transition duration-200 shadow-md"
                   >
                     View Candidates
