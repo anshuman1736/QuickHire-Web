@@ -1,3 +1,6 @@
+import { Route } from 'lucide-react';
+import Link from 'next/link';
+
 import React from 'react'
 
 const JobHstry = () => {
@@ -97,7 +100,12 @@ const JobHstry = () => {
                 {/* buttons */}
                 <div className='space-x-7'>
                     <button className='px-8 py-2 rounded-md cursor-pointer hover:bg-blue-500 text-white font-semibold bg-blue-400 text-lg '>Update post</button>
-                    <button className='px-8 py-2 rounded-md cursor-pointer hover:bg-blue-500 text-white font-semibold bg-blue-400 text-lg '>Candiates</button>
+                    <Link
+                      href="/company/jobhstry/candiates"
+                      className="px-8 py-2 rounded-md cursor-pointer hover:bg-blue-500 text-white font-semibold bg-blue-400 text-lg"
+                    >
+                      Candidates
+                    </Link>
                 </div>
             </div>
             ))
