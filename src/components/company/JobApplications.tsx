@@ -7,7 +7,7 @@ import Link from "next/link";
 const JobHstry = () => {
   // const { isPending, isError, data, error } = useQuery({
   //   queryKey: ["todos"],
-  //   queryFn: getEnableJob,
+  //   queryFn: getEnableJob
   // });
 
   // if (isPending) {
