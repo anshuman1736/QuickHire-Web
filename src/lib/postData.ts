@@ -49,6 +49,7 @@ export const loginUser = async (form: ILogin) => {
 };
 
 export const postJob = async (form: IJobPostfn) => {
+  console.log("form", form);
   try {
     const finalForm: IJobPost = {
       jobTitle: form.jobTitle,

@@ -1,5 +1,5 @@
 
-import JobHstry from '@/components/company/JobHstry'
+import JobHstry from '@/components/company/JobApplications'
 import React from 'react'
 
 const page = () => {

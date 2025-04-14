@@ -75,8 +75,8 @@ function CmpHeader() {
 
           <nav className="hidden md:flex items-center space-x-1">
             <Link href="/company" className={getTabStyles("/company")}>Dashboard</Link>
-            <Link href="/company/postjobs" className={getTabStyles("/company/postjobs")}>post Jobs</Link>
-            <Link href="/company/jobhstry" className={getTabStyles("/company/jobhstry")}>History</Link>
+            <Link href="/company/create-job" className={getTabStyles("/company/postjobs")}>Create Job</Link>
+            <Link href="/company/job-application" className={getTabStyles("/company/jobhstry")}>Job Application</Link>
           </nav>
 
           <div className="hidden md:flex items-center space-x-5">
