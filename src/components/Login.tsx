@@ -26,6 +26,7 @@ export default function Login() {
       localStorage.setItem("role", data.CONTENT.userRole);
       if (data.CONTENT.userRole === "ROLE_COMPANY") {
         localStorage.setItem("companyId", data.CONTENT.userId);
+        localStorage.setItem("companyName", data.CONTENT.userName);
         router.push("/company");
       }
       if (data.CONTENT.userRole === "ROLE_USER") {
