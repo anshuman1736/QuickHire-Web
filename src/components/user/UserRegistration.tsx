@@ -33,10 +33,12 @@ const UserRegistration = () => {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [uploadProgress, setUploadProgress] = useState(0);
   const [categoryOpen, setCategoryOpen] = useState(false);
-  const [currentInterest, setCurrentInterest] = useState("");
+  const [currentInterest, setCurrentInterest] = useState<string>("");
   const [interests, setInterests] = useState<string[]>([]);
   const [registrationSuccess, setRegistrationSuccess] = useState(false);
-  const [responseMessage, setResponseMessage] = useState("");
+  const [responseMessage, setResponseMessage] = useState<string>("");
+  const [emailVarificationMsg, setEmailVarificationMsg] =
+    useState<boolean>(false);
 
   const [categories, setCategories] = useState<ICategory[]>();
 
@@ -72,6 +74,7 @@ const UserRegistration = () => {
       setCurrentStep(4);
       setRegistrationSuccess(data.STS === "200");
       setResponseMessage(data.MSG);
+      setEmailVarificationMsg(true);
     },
     onError: (error: Error | unknown) => {
       console.log(error);
@@ -796,12 +799,10 @@ const UserRegistration = () => {
             </div>
 
             {registrationSuccess ? (
-              <Link
-                href="/login"
-                className="w-full max-w-xs py-3 px-4 bg-blue-500 hover:bg-blue-600 text-white font-medium rounded-lg text-center"
-              >
-                Login Now
-              </Link>
+              <p className="text-md font-bold">
+                {emailVarificationMsg &&
+                  "Please check your email for verification."}
+              </p>
             ) : (
               <button
                 onClick={() => setCurrentStep(1)}

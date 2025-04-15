@@ -32,6 +32,10 @@ export const loginSchema = z.object({
   password: z.string().min(8, "Password must be at least 8 characters"),
 });
 
+export const emailVerify = z.object({
+  email: z.string().email("Invalid email format"),
+});
+
 export const jobPostSchema = z.object({
   jobTitle: z.string().min(1, "Job title is required"),
   jobDescription: z.string().min(1, "Job description is required"),

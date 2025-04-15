@@ -1,15 +1,12 @@
 "use client";
-import { loginUser } from "@/lib/postData";
-import { ILogin } from "@/types/auth";
-import { loginSchema } from "@/types/schema";
 import { useMutation } from "@tanstack/react-query";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useRef } from "react";
-import { useState } from "react";
-import { Eye } from 'lucide-react';
-import { EyeOff } from 'lucide-react';
-
+import { useRef, useState } from "react";
+import { Eye, EyeOff } from "lucide-react";
+import { loginUser } from "@/lib/postData";
+import { ILogin } from "@/types/auth";
+import { loginSchema } from "@/types/schema";
 
 export default function Login() {
   const [showpwd, setshowpwd] = useState(false);
@@ -21,7 +18,10 @@ export default function Login() {
   const loginMutation = useMutation({
     mutationFn: loginUser,
     onSuccess: (data) => {
-      console.log(data.CONTENT.token);
+      if (data.CONTENT.isEmailVerified !== true) {
+        router.push("/verify-email");
+        return;
+      }
       localStorage.setItem("sessionId", data.CONTENT.token);
       localStorage.setItem("role", data.CONTENT.userRole);
       if (data.CONTENT.userRole === "ROLE_COMPANY") {
@@ -30,6 +30,7 @@ export default function Login() {
         router.push("/company");
       }
       if (data.CONTENT.userRole === "ROLE_USER") {
+        localStorage.setItem("userId", data.CONTENT.userId);
         router.push("/user");
       }
     },
@@ -130,9 +131,14 @@ export default function Login() {
                   </Link>
                 </div>
                 <div className="relative">
-                  <span onClick={()=>setshowpwd(!showpwd )} className="text-xs text-red-400  cursor-pointer absolute right-5 top-3.5">{showpwd? <Eye />: <EyeOff />}</span>
+                  <span
+                    onClick={() => setshowpwd(!showpwd)}
+                    className="text-xs text-red-400  cursor-pointer absolute right-5 top-3.5"
+                  >
+                    {showpwd ? <Eye /> : <EyeOff />}
+                  </span>
                   <input
-                    type={`${showpwd ? 'text':'password'}`}
+                    type={`${showpwd ? "text" : "password"}`}
                     id="password"
                     name="password"
                     ref={password}
