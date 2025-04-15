@@ -48,6 +48,21 @@ export const loginUser = async (form: ILogin) => {
   }
 };
 
+export const verifyEmail = async (email: string) => {
+  try {
+    const response = await axios.post(`${BACKEND_URL}/auth/send-verficationEmail`, {}, {
+      params: { email: email },
+    } );
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      const serverMessage = error.response?.data?.message || error.message;
+      throw new Error(serverMessage);
+    }
+    throw error;
+  } 
+}
+
 export const postJob = async (form: IJobPostfn) => {
   console.log("form", form);
   try {

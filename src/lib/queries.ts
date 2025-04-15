@@ -1,7 +1,7 @@
 import axios from "axios";
-import { BACKEND_URL } from "./config";
+import { BACKEND_URL, ML_BACKEND_URL } from "./config";
 import { ICategoryResponse } from "@/types/auth";
-import { JobPosting } from "@/types/job";
+import { JobPosting, MatchedJob } from "@/types/job";
 
 export async function getCatogory() {
   try {
@@ -74,6 +74,20 @@ export async function getEnableJob(): Promise<JobPosting[]> {
     if (axios.isAxiosError(error)) {
       throw new Error(
         error.response?.data?.message || "Failed to fetch enabled jobs"
+      );
+    }
+    throw new Error("An unexpected error occurred");
+  }
+}
+
+export async function getRecomdedJob(userId: number): Promise<MatchedJob[]> {
+  try {
+    const res = await axios.get(`${ML_BACKEND_URL}/api/match-jobs-ai/${userId}`);
+    return res.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      throw new Error(
+        error.response?.data?.message || "Failed to fetch recommended jobs"
       );
     }
     throw new Error("An unexpected error occurred");
