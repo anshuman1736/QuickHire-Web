@@ -20,7 +20,7 @@ import { MatchedJob } from "../../types/job";
 import { useQuery } from "@tanstack/react-query";
 import { getRecomdedJob } from "@/lib/queries";
 
-function JobPortal() {
+export default function JobPortal() {
   const [activeTab, setActiveTab] = useState("featured");
   const [searchQuery, setSearchQuery] = useState("");
   const [filterOpen, setFilterOpen] = useState(false);
@@ -39,7 +39,7 @@ function JobPortal() {
       return getRecomdedJob(Number(userId));
     },
     enabled: typeof window !== "undefined" && !!localStorage.getItem("userId"),
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 5 * 60 * 1000,
     retry: 2,
   });
 
@@ -71,15 +71,18 @@ function JobPortal() {
     return `${Math.floor(diffDays / 30)} months ago`;
   };
 
-  const categoryMap = useMemo<Record<number, string>>(() => ({
-    1: "development",
-    2: "datascience",
-    3: "design",
-    4: "marketing",
-    5: "security",
-    6: "management",
-    7: "finance",
-  }), []);
+  const categoryMap = useMemo<Record<number, string>>(
+    () => ({
+      1: "development",
+      2: "datascience",
+      3: "design",
+      4: "marketing",
+      5: "security",
+      6: "management",
+      7: "finance",
+    }),
+    []
+  );
 
   const categories = [
     { value: "all", label: "All Categories" },
@@ -124,7 +127,26 @@ function JobPortal() {
     const filterJobs = () => {
       if (isPending) return;
 
-      let filtered = [...(data || [])];
+      if (!data) {
+        setVisibleJobs([]);
+        return;
+      }
+
+      let jobsArray: MatchedJob[] = [];
+
+      if ("matched_jobs" in data && Array.isArray(data.matched_jobs)) {
+        jobsArray = data.matched_jobs;
+      } else {
+        setVisibleJobs([]);
+        return;
+      }
+
+      if (jobsArray.length === 0) {
+        setVisibleJobs([]);
+        return;
+      }
+
+      let filtered = jobsArray;
 
       if (activeTab === "popular") {
         filtered = filtered.sort(
@@ -601,5 +623,3 @@ function JobPortal() {
     </section>
   );
 }
-
-export default JobPortal;
