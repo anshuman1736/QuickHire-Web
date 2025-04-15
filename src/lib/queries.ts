@@ -1,7 +1,7 @@
 import axios from "axios";
 import { BACKEND_URL, ML_BACKEND_URL } from "./config";
 import { ICategoryResponse } from "@/types/auth";
-import { JobPosting, MatchedJob } from "@/types/job";
+import { JobPosting, MatchJobResponse } from "@/types/job";
 
 export async function getCatogory() {
   try {
@@ -80,7 +80,7 @@ export async function getEnableJob(): Promise<JobPosting[]> {
   }
 }
 
-export async function getRecomdedJob(userId: number): Promise<MatchedJob[]> {
+export async function getRecomdedJob(userId: number): Promise<MatchJobResponse[]> {
   try {
     const res = await axios.get(`${ML_BACKEND_URL}/api/match-jobs-ai/${userId}`);
     return res.data;
