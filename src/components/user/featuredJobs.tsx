@@ -16,214 +16,70 @@ import {
 import React, { useState, useEffect, useMemo } from "react";
 import Header from "./header";
 import Link from "next/link";
+import { MatchedJob } from "../../types/job";
+import { useQuery } from "@tanstack/react-query";
+import { getRecomdedJob } from "@/lib/queries";
 
 function JobPortal() {
   const [activeTab, setActiveTab] = useState("featured");
   const [searchQuery, setSearchQuery] = useState("");
   const [filterOpen, setFilterOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState("all");
-  const [visibleJobs, setVisibleJobs] = useState<
-    {
-      id: number;
-      title: string;
-      level: string;
-      applicants: number;
-      rating: number;
-      salary: string;
-      category: string;
-      badge?: string;
-      company: string;
-      location: string;
-      experience: string;
-      type: string;
-      postedDate: string;
-      description: string;
-      companyLogo: string;
-    }[]
-  >([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [visibleJobs, setVisibleJobs] = useState<MatchedJob[]>([]);
   const [experienceFilter, setExperienceFilter] = useState("all");
   const [locationFilter, setLocationFilter] = useState("all");
   const [salaryFilter, setSalaryFilter] = useState("all");
   const [advancedFiltersOpen, setAdvancedFiltersOpen] = useState(false);
 
-  const jobs = useMemo(() => [
-    {
-      id: 1,
-      title: "Senior Frontend Developer",
-      level: "Senior",
-      applicants: 48,
-      rating: 4.8,
-      salary: "$90K - $120K",
-      category: "development",
-      badge: "Urgent",
-      company: "TechCorp Solutions",
-      location: "San Francisco, CA",
-      experience: "5+ years",
-      type: "Full-time",
-      postedDate: "2 days ago",
-      description:
-        "Lead the development of modern web applications using React and Next.js",
-      companyLogo: "TC",
+  const { data, isPending, isError, error } = useQuery({
+    queryKey: ["getRecomdedJob"],
+    queryFn: () => {
+      const userId = localStorage.getItem("userId");
+      if (!userId) throw new Error("User ID not found");
+      return getRecomdedJob(Number(userId));
     },
-    {
-      id: 2,
-      title: "Data Scientist",
-      level: "Mid-Level",
-      applicants: 36,
-      rating: 4.7,
-      salary: "$85K - $110K",
-      category: "datascience",
-      badge: "New",
-      company: "Analytics Pro",
-      location: "Remote",
-      experience: "3-5 years",
-      type: "Full-time",
-      postedDate: "1 day ago",
-      description:
-        "Analyze complex datasets and build predictive models for business intelligence",
-      companyLogo: "AP",
-    },
-    {
-      id: 3,
-      title: "UX/UI Designer",
-      level: "Junior",
-      applicants: 64,
-      rating: 4.5,
-      salary: "$65K - $85K",
-      category: "design",
-      company: "Creative Studio",
-      location: "New York, NY",
-      experience: "1-3 years",
-      type: "Full-time",
-      postedDate: "5 days ago",
-      description:
-        "Create user-centered designs and prototypes for web and mobile applications",
-      companyLogo: "CS",
-    },
-    {
-      id: 4,
-      title: "DevOps Engineer",
-      level: "Senior",
-      applicants: 29,
-      rating: 4.9,
-      salary: "$100K - $130K",
-      category: "development",
-      company: "Cloud Systems Inc.",
-      location: "Austin, TX",
-      experience: "5+ years",
-      type: "Full-time",
-      postedDate: "3 days ago",
-      description:
-        "Manage CI/CD pipelines and cloud infrastructure on AWS and Azure",
-      companyLogo: "CS",
-    },
-    {
-      id: 5,
-      title: "Machine Learning Engineer",
-      level: "Senior",
-      applicants: 42,
-      rating: 4.8,
-      salary: "$110K - $150K",
-      category: "datascience",
-      badge: "Featured",
-      company: "AI Innovations",
-      location: "Seattle, WA",
-      experience: "4+ years",
-      type: "Full-time",
-      postedDate: "1 week ago",
-      description:
-        "Develop and deploy machine learning models for real-world applications",
-      companyLogo: "AI",
-    },
-    {
-      id: 6,
-      title: "Marketing Specialist",
-      level: "Mid-Level",
-      applicants: 53,
-      rating: 4.4,
-      salary: "$60K - $80K",
-      category: "marketing",
-      company: "Growth Tactics",
-      location: "Chicago, IL",
-      experience: "2-4 years",
-      type: "Full-time",
-      postedDate: "4 days ago",
-      description:
-        "Plan and execute digital marketing campaigns and analyze performance metrics",
-      companyLogo: "GT",
-    },
-    {
-      id: 7,
-      title: "Cybersecurity Analyst",
-      level: "Senior",
-      applicants: 31,
-      rating: 4.7,
-      salary: "$95K - $125K",
-      category: "security",
-      badge: "Urgent",
-      company: "SecureNet Defense",
-      location: "Washington, DC",
-      experience: "5+ years",
-      type: "Full-time",
-      postedDate: "3 days ago",
-      description:
-        "Monitor and protect systems from cyber threats and implement security protocols",
-      companyLogo: "SN",
-    },
-    {
-      id: 8,
-      title: "Product Manager",
-      level: "Senior",
-      applicants: 47,
-      rating: 4.6,
-      salary: "$100K - $130K",
-      category: "management",
-      company: "Innovate Products",
-      location: "Boston, MA",
-      experience: "4+ years",
-      type: "Full-time",
-      postedDate: "1 week ago",
-      description:
-        "Lead product development from concept to launch and manage the roadmap",
-      companyLogo: "IP",
-    },
-    {
-      id: 9,
-      title: "Backend Developer",
-      level: "Mid-Level",
-      applicants: 39,
-      rating: 4.5,
-      salary: "$80K - $100K",
-      category: "development",
-      company: "ServerTech Solutions",
-      location: "Denver, CO",
-      experience: "3-5 years",
-      type: "Remote",
-      postedDate: "6 days ago",
-      description:
-        "Build scalable APIs and microservices using Node.js and Python",
-      companyLogo: "ST",
-    },
-    {
-      id: 10,
-      title: "Financial Analyst",
-      level: "Junior",
-      applicants: 58,
-      rating: 4.3,
-      salary: "$55K - $75K",
-      category: "finance",
-      badge: "New",
-      company: "Global Finance Corp",
-      location: "Miami, FL",
-      experience: "1-3 years",
-      type: "Full-time",
-      postedDate: "2 days ago",
-      description:
-        "Analyze financial data and prepare reports to guide business decisions",
-      companyLogo: "GF",
-    },
-  ], []);
+    enabled: typeof window !== "undefined" && !!localStorage.getItem("userId"),
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    retry: 2,
+  });
+
+  const getJobLevelFromExperience = (experience: string | null): string => {
+    if (!experience) return "Entry-Level";
+
+    if (experience.includes("5+") || experience.includes("4+")) {
+      return "Senior";
+    } else if (experience.includes("3-5")) {
+      return "Mid-Level";
+    } else if (experience.includes("1-3")) {
+      return "Junior";
+    } else {
+      return "Entry-Level";
+    }
+  };
+
+  const getPostedDateText = (dateString: string): string => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffTime = Math.abs(now.getTime() - date.getTime());
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+    if (diffDays === 0) return "Today";
+    if (diffDays === 1) return "1 day ago";
+    if (diffDays < 7) return `${diffDays} days ago`;
+    if (diffDays < 14) return "1 week ago";
+    if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
+    return `${Math.floor(diffDays / 30)} months ago`;
+  };
+
+  const categoryMap = useMemo<Record<number, string>>(() => ({
+    1: "development",
+    2: "datascience",
+    3: "design",
+    4: "marketing",
+    5: "security",
+    6: "management",
+    7: "finance",
+  }), []);
 
   const categories = [
     { value: "all", label: "All Categories" },
@@ -266,105 +122,121 @@ function JobPortal() {
 
   useEffect(() => {
     const filterJobs = () => {
-      setIsLoading(true);
+      if (isPending) return;
 
-      setTimeout(() => {
-        let filtered = [...jobs];
+      let filtered = [...(data || [])];
 
-        if (activeTab === "popular") {
-          filtered = filtered.sort((a, b) => b.applicants - a.applicants);
-        } else if (activeTab === "new") {
-          filtered = filtered.filter(
-            (job) => job.badge === "New" || job.postedDate.includes("day")
+      if (activeTab === "popular") {
+        filtered = filtered.sort(
+          (a, b) =>
+            parseInt(b.job_vacancies || "0") - parseInt(a.job_vacancies || "0")
+        );
+      } else if (activeTab === "new") {
+        const recentJobs = filtered.filter((job) => {
+          const postedDate = getPostedDateText(job.creation_date);
+          return postedDate.includes("day") || postedDate === "Today";
+        });
+        filtered = recentJobs.length > 0 ? recentJobs : filtered;
+      } else if (activeTab === "urgent") {
+        // Find jobs with urgent or featured badges in metadata
+        filtered = filtered.filter((job) => {
+          // Check for urgent job types
+          return (
+            job.job_type?.toLowerCase().includes("urgent") ||
+            job.job_type?.toLowerCase().includes("featured")
           );
-        } else if (activeTab === "urgent") {
-          filtered = filtered.filter(
-            (job) => job.badge === "Urgent" || job.badge === "Featured"
-          );
-        }
+        });
+      }
 
-        if (searchQuery) {
+      if (searchQuery) {
+        filtered = filtered.filter(
+          (job) =>
+            job.job_title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            job.job_description
+              .toLowerCase()
+              .includes(searchQuery.toLowerCase()) ||
+            job.job_location.toLowerCase().includes(searchQuery.toLowerCase())
+        );
+      }
+
+      if (selectedCategory !== "all") {
+        filtered = filtered.filter(
+          (job) => categoryMap[job.category_id] === selectedCategory
+        );
+      }
+
+      if (experienceFilter !== "all") {
+        if (experienceFilter === "entry") {
+          filtered = filtered.filter(
+            (job) => job.job_experience?.includes("0-1") || !job.job_experience
+          );
+        } else if (experienceFilter === "junior") {
+          filtered = filtered.filter((job) =>
+            job.job_experience?.includes("1-3")
+          );
+        } else if (experienceFilter === "mid") {
+          filtered = filtered.filter((job) =>
+            job.job_experience?.includes("3-5")
+          );
+        } else if (experienceFilter === "senior") {
           filtered = filtered.filter(
             (job) =>
-              job.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-              job.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-              job.company.toLowerCase().includes(searchQuery.toLowerCase()) ||
-              job.location.toLowerCase().includes(searchQuery.toLowerCase())
+              job.job_experience?.includes("5+") ||
+              job.job_experience?.includes("4+")
           );
         }
+      }
 
-        if (selectedCategory !== "all") {
-          filtered = filtered.filter((job) => job.category === selectedCategory);
-        }
+      if (locationFilter !== "all") {
+        filtered = filtered.filter((job) =>
+          job.job_location.toLowerCase().includes(locationFilter.toLowerCase())
+        );
+      }
 
-        // Filter by experience
-        if (experienceFilter !== "all") {
-          if (experienceFilter === "entry") {
-            filtered = filtered.filter((job) => job.experience.includes("0-1"));
-          } else if (experienceFilter === "junior") {
-            filtered = filtered.filter((job) => job.experience.includes("1-3"));
-          } else if (experienceFilter === "mid") {
-            filtered = filtered.filter((job) => job.experience.includes("3-5"));
-          } else if (experienceFilter === "senior") {
-            filtered = filtered.filter(
-              (job) =>
-                job.experience.includes("5+") || job.experience.includes("4+")
+      if (salaryFilter !== "all") {
+        if (salaryFilter === "under60k") {
+          filtered = filtered.filter((job) => {
+            const minSalary = parseInt(job.salary.split("$")[1].split("K")[0]);
+            return minSalary < 60;
+          });
+        } else if (salaryFilter === "60k-80k") {
+          filtered = filtered.filter((job) => {
+            const minSalary = parseInt(job.salary.split("$")[1].split("K")[0]);
+            const maxSalary = parseInt(job.salary.split("$")[2].split("K")[0]);
+            return (
+              (minSalary >= 60 && minSalary <= 80) ||
+              (maxSalary >= 60 && maxSalary <= 80)
             );
-          }
+          });
+        } else if (salaryFilter === "80k-100k") {
+          filtered = filtered.filter((job) => {
+            const minSalary = parseInt(job.salary.split("$")[1].split("K")[0]);
+            const maxSalary = parseInt(job.salary.split("$")[2].split("K")[0]);
+            return (
+              (minSalary >= 80 && minSalary <= 100) ||
+              (maxSalary >= 80 && maxSalary <= 100)
+            );
+          });
+        } else if (salaryFilter === "100k-120k") {
+          filtered = filtered.filter((job) => {
+            const minSalary = parseInt(job.salary.split("$")[1].split("K")[0]);
+            const maxSalary = parseInt(job.salary.split("$")[2].split("K")[0]);
+            return (
+              (minSalary >= 100 && minSalary <= 120) ||
+              (maxSalary >= 100 && maxSalary <= 120)
+            );
+          });
+        } else if (salaryFilter === "above120k") {
+          filtered = filtered.filter((job) => {
+            const maxSalary = parseInt(job.salary.split("$")[2].split("K")[0]);
+            return maxSalary > 120;
+          });
         }
+      }
 
-        if (locationFilter !== "all") {
-          filtered = filtered.filter((job) =>
-            job.location.toLowerCase().includes(locationFilter.toLowerCase())
-          );
-        }
-
-        if (salaryFilter !== "all") {
-          if (salaryFilter === "under60k") {
-            filtered = filtered.filter((job) => {
-              const minSalary = parseInt(job.salary.split("$")[1].split("K")[0]);
-              return minSalary < 60;
-            });
-          } else if (salaryFilter === "60k-80k") {
-            filtered = filtered.filter((job) => {
-              const minSalary = parseInt(job.salary.split("$")[1].split("K")[0]);
-              const maxSalary = parseInt(job.salary.split("$")[2].split("K")[0]);
-              return (
-                (minSalary >= 60 && minSalary <= 80) ||
-                (maxSalary >= 60 && maxSalary <= 80)
-              );
-            });
-          } else if (salaryFilter === "80k-100k") {
-            filtered = filtered.filter((job) => {
-              const minSalary = parseInt(job.salary.split("$")[1].split("K")[0]);
-              const maxSalary = parseInt(job.salary.split("$")[2].split("K")[0]);
-              return (
-                (minSalary >= 80 && minSalary <= 100) ||
-                (maxSalary >= 80 && maxSalary <= 100)
-              );
-            });
-          } else if (salaryFilter === "100k-120k") {
-            filtered = filtered.filter((job) => {
-              const minSalary = parseInt(job.salary.split("$")[1].split("K")[0]);
-              const maxSalary = parseInt(job.salary.split("$")[2].split("K")[0]);
-              return (
-                (minSalary >= 100 && minSalary <= 120) ||
-                (maxSalary >= 100 && maxSalary <= 120)
-              );
-            });
-          } else if (salaryFilter === "above120k") {
-            filtered = filtered.filter((job) => {
-              const maxSalary = parseInt(job.salary.split("$")[2].split("K")[0]);
-              return maxSalary > 120;
-            });
-          }
-        }
-
-        setVisibleJobs(filtered);
-        setIsLoading(false);
-      }, 500);
+      setVisibleJobs(filtered);
     };
-    
+
     filterJobs();
   }, [
     activeTab,
@@ -373,7 +245,9 @@ function JobPortal() {
     experienceFilter,
     locationFilter,
     salaryFilter,
-    jobs
+    data,
+    isPending,
+    categoryMap,
   ]);
 
   const resetFilters = () => {
@@ -572,11 +446,48 @@ function JobPortal() {
           </div>
         </div>
 
-        {isLoading ? (
+        {/* Loading state */}
+        {isPending && (
           <div className="flex justify-center items-center h-64">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
           </div>
-        ) : (
+        )}
+
+        {/* Error state */}
+        {isError && (
+          <div className="flex flex-col items-center justify-center h-64 text-center">
+            <div className="bg-red-100 p-4 rounded-full mb-4">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={1.5}
+                stroke="currentColor"
+                className="w-8 h-8 text-red-500"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"
+                />
+              </svg>
+            </div>
+            <h3 className="text-xl font-bold mb-2">Error loading jobs</h3>
+            <p className="text-gray-500 mb-4">
+              {error instanceof Error
+                ? error.message
+                : "Something went wrong. Please try again later."}
+            </p>
+            <button
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+              onClick={() => resetFilters()}
+            >
+              Reset Filters
+            </button>
+          </div>
+        )}
+
+        {!isPending && !isError && (
           <>
             {visibleJobs.length === 0 && (
               <div className="flex flex-col items-center justify-center h-64 text-center">
@@ -585,7 +496,7 @@ function JobPortal() {
                 </div>
                 <h3 className="text-xl font-bold mb-2">No jobs found</h3>
                 <p className="text-gray-500 mb-4">
-                  {"Try adjusting your search or filters to find what you're"}
+                  {"Try adjusting your search or filters to find what you're "}
                   {"looking for"}
                 </p>
                 <button
@@ -599,88 +510,86 @@ function JobPortal() {
 
             {visibleJobs.length > 0 && (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {visibleJobs.map((job) => (
-                  <div
-                    key={job.id}
-                    className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow overflow-hidden border border-gray-100 flex flex-col"
-                  >
-                    <div className="h-20 bg-gradient-to-r from-blue-500 to-blue-700 relative">
-                      {job.badge && (
-                        <span className="absolute top-4 right-4 bg-white text-blue-600 text-xs font-bold px-2 py-1 rounded-full">
-                          {job.badge}
-                        </span>
-                      )}
-                      <div className="absolute bottom-4 left-4 bg-white backdrop-blur-sm px-3 py-1 rounded-full text-black text-sm font-medium">
-                        {job.level}
+                {visibleJobs.map((job) => {
+                  const jobLevel = getJobLevelFromExperience(
+                    job.job_experience
+                  );
+                  const postedDate = getPostedDateText(job.creation_date);
+                  const jobRating = Math.floor(Math.random() * 5) / 10 + 4.5; // Random rating between 4.5-5.0
+
+                  return (
+                    <div
+                      key={job.id}
+                      className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow overflow-hidden border border-gray-100 flex flex-col"
+                    >
+                      <div className="h-20 bg-gradient-to-r from-blue-500 to-blue-700 relative">
+                        <div className="absolute bottom-4 left-4 bg-white backdrop-blur-sm px-3 py-1 rounded-full text-black text-sm font-medium">
+                          {jobLevel}
+                        </div>
+                      </div>
+
+                      <div className="p-6 flex-grow flex flex-col">
+                        <div className="flex justify-between items-start mb-2">
+                          <h3 className="font-bold text-lg">{job.job_title}</h3>
+                          <div className="bg-blue-50 text-blue-700 text-xs font-medium px-2 py-1 rounded">
+                            {job.job_type}
+                          </div>
+                        </div>
+
+                        <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+                          {job.job_description}
+                        </p>
+
+                        <div className="text-sm text-gray-500 mb-4">
+                          <div className="flex items-center mb-1">
+                            <MapPin className="w-4 h-4 mr-2 text-gray-400" />
+                            <span>{job.job_location}</span>
+                          </div>
+                          <div className="flex items-center mb-1">
+                            <DollarSign className="w-4 h-4 mr-2 text-gray-400" />
+                            <span>{job.salary}</span>
+                          </div>
+                          <div className="flex items-center mb-1">
+                            <Briefcase className="w-4 h-4 mr-2 text-gray-400" />
+                            <span>{job.job_experience || "Entry Level"}</span>
+                          </div>
+                          <div className="flex items-center">
+                            <Calendar className="w-4 h-4 mr-2 text-gray-400" />
+                            <span>Posted {postedDate}</span>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-2 mt-auto mb-2">
+                          <Star className="w-4 h-4 text-blue-600 fill-blue-600" />
+                          <span className="font-medium">
+                            {jobRating.toFixed(1)}
+                          </span>
+                          <span className="text-gray-500 text-sm">
+                            ({job.job_vacancies || "0"} applicants)
+                          </span>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                          <Link
+                            href={`/user/${jobLevel}/${job.id}`}
+                            className="flex-1 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center"
+                          >
+                            Apply Now
+                          </Link>
+                          <button className="w-10 h-10 flex items-center justify-center rounded-lg border border-gray-200 hover:bg-gray-50">
+                            <BookmarkPlus className="w-5 h-5 text-gray-500" />
+                          </button>
+                        </div>
                       </div>
                     </div>
-
-                    <div className="p-6 flex-grow flex flex-col">
-                      <div className="flex justify-between items-start mb-2">
-                        <h3 className="font-bold text-lg">{job.title}</h3>
-                        <div className="bg-blue-50 text-blue-700 text-xs font-medium px-2 py-1 rounded">
-                          {job.type}
-                        </div>
-                      </div>
-
-                      <p className="text-gray-600 text-sm mb-4 line-clamp-2">
-                        {job.description}
-                      </p>
-
-                      <div className="flex items-center gap-2 mb-3">
-                        <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-xs font-medium text-blue-600">
-                          {job.companyLogo}
-                        </div>
-                        <span className="font-medium">{job.company}</span>
-                      </div>
-
-                      <div className="text-sm text-gray-500 mb-4">
-                        <div className="flex items-center mb-1">
-                          <MapPin className="w-4 h-4 mr-2 text-gray-400" />
-                          <span>{job.location}</span>
-                        </div>
-                        <div className="flex items-center mb-1">
-                          <DollarSign className="w-4 h-4 mr-2 text-gray-400" />
-                          <span>{job.salary}</span>
-                        </div>
-                        <div className="flex items-center mb-1">
-                          <Briefcase className="w-4 h-4 mr-2 text-gray-400" />
-                          <span>{job.experience}</span>
-                        </div>
-                        <div className="flex items-center">
-                          <Calendar className="w-4 h-4 mr-2 text-gray-400" />
-                          <span>Posted {job.postedDate}</span>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-2 mt-auto mb-2">
-                        <Star className="w-4 h-4 text-blue-600 fill-blue-600" />
-                        <span className="font-medium">{job.rating}</span>
-                        <span className="text-gray-500 text-sm">
-                          ({job.applicants} applicants)
-                        </span>
-                      </div>
-
-                      <div className="flex items-center gap-2">
-                        <Link
-                          href={`/user/${job.level}/${job.id}`}
-                          className="flex-1 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center"
-                        >
-                          Apply Now
-                        </Link>
-                        <button className="w-10 h-10 flex items-center justify-center rounded-lg border border-gray-200 hover:bg-gray-50">
-                          <BookmarkPlus className="w-5 h-5 text-gray-500" />
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </>
         )}
 
-        {visibleJobs.length > 0 && (
+        {!isPending && !isError && visibleJobs.length > 0 && (
           <div className="mt-12 text-center">
             <button className="px-6 py-3 bg-white text-blue-600 rounded-xl font-medium border border-blue-200 hover:bg-blue-50 transition-colors flex items-center justify-center mx-auto">
               Browse All Jobs
