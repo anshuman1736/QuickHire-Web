@@ -13,8 +13,11 @@ import {
   Rocket,
   Award,
   Code2,
+  Router,
 } from "lucide-react";
 import { motion, useScroll, useTransform } from "framer-motion";
+import axios from "axios";
+import { useRouter } from "next/navigation";
 
 const TypingAnimation: React.FC<{
   text: string;
@@ -61,6 +64,7 @@ const TypingAnimation: React.FC<{
 
 function CTA() {
   const [isVisible, setIsVisible] = useState(false);
+  const [browseData, setbrowseData] = useState(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const { scrollYProgress } = useScroll({
     target: containerRef,
@@ -89,6 +93,24 @@ function CTA() {
 
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  //browse data when click on browse data
+
+				
+  const onBrowsehandle=async()=>{
+    try{
+     const res= await axios.get(`https://qh.api.quick-hire.in/home/browseJobs`);
+       setbrowseData(res.data);
+        
+    }catch(error){ 
+     if(axios.isAxiosError(error)){
+         throw new Error(
+           error.response?.data?.message || "Failed to browse jobs"
+         )
+     }
+     throw new Error("An Unexpected error occurred");
+    }
+ }
 
   return (
     <section
@@ -261,11 +283,33 @@ function CTA() {
             </div>
 
             {/* Right CTA Section */}
-            <div className="bg-white p-8 lg:p-12 lg:w-2/5 flex flex-col justify-center">
+              <div className="bg-white relative p-8 lg:p-12 lg:w-2/5 flex flex-col justify-center">
               <h3 className="font-bold text-xl mb-6 text-gray-800">
                 Get started in minutes
               </h3>
 
+              {
+                  browseData &&
+                    <div className="absolute h-full w-full overflow-scroll  p-5 bg-blue-300">
+                        <button className="text-2xl font-bold right-16  fixed  cursor-pointer" onClick={()=>setbrowseData(null)}>X</button>
+                      <div>
+                          <div>
+                              {browseData.CONTENT.map((data,idx)=>(
+                                <div className="bg-white border mt-3 p-2 rounded-2xl max-w-2/3 space-y-1" key={idx}>
+                                    <p className="text-lg font-semibold  rounded-full text-center py-1">{data.jobTitle}</p>
+                                    <p className="text-sm text-shadow-gray-600 font-medium">{data.jobDescription}</p>
+                                      <p className="text-sm ">{data.jobAddress}</p>
+                                      <p className="text-sm "> ₹ {data.salary}</p>
+                                      <button  className="bg-amber-500 rounded-full px-3 text-white cursor-pointer">See more ....</button>
+                                </div>
+                                
+                              ))
+                              }
+                          </div>
+                      </div>
+                    </div> 
+                }
+				
               {/* Feature List */}
               <ul className="mb-8 space-y-4">
                 {[
@@ -309,6 +353,7 @@ function CTA() {
                 </motion.button>
 
                 <motion.button
+                onClick={onBrowsehandle}
                   whileHover={{
                     scale: 1.03,
                     backgroundColor: "rgba(251, 191, 36, 0.1)",
@@ -319,8 +364,9 @@ function CTA() {
                   <span>Browse Opportunities</span>
                   <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
                 </motion.button>
-              </motion.div>
+               
 
+              </motion.div>               
               {/* Trust Indicator */}
               <motion.div
                 initial={{ opacity: 0 }}
