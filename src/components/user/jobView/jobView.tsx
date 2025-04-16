@@ -1,6 +1,5 @@
 "use client";
 import Link from "next/link";
-import Image from "next/image";
 import React from "react";
 
 function JobView() {
@@ -86,7 +85,7 @@ function JobView() {
               <div className="flex flex-col md:flex-row md:items-center">
                 <div className="relative -mt-16 md:mr-6">
                   <div className="w-24 h-24 rounded-xl border-4 border-white bg-white shadow-lg overflow-hidden">
-                    <Image
+                    <img
                       src={company.profile_Pic}
                       alt={company.companyName}
                       width={96}
@@ -521,7 +520,7 @@ function JobView() {
 
               <div className="flex flex-col items-center mb-6">
                 <div className="w-24 h-24 rounded-xl mb-4 overflow-hidden border-4 border-white shadow-md">
-                  <Image
+                  <img
                     src={company.profile_Pic}
                     alt={company.companyName}
                     width={96}

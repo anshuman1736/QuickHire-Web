@@ -4,13 +4,14 @@ import React, { useState, useEffect } from "react";
 import { Briefcase, Bell, MessageSquare, User, Menu, X, ChevronDown, Bookmark, LogOut } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 
 function CmpHeader() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [messagesOpen, setMessagesOpen] = useState(false);
-  const [activePath, setActivePath] = useState("/user");
+  const pathname = usePathname(); // Use Next.js's usePathname hook
 
   const user = {
     name: "Quick-Hire pvt Ltd",
@@ -28,19 +29,13 @@ function CmpHeader() {
       .toUpperCase();
   };
 
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      setActivePath(window.location.pathname);
-    }
-  }, []);
-
   interface TabStylesProps {
     path: string;
   }
 
   const getTabStyles = (path: TabStylesProps["path"]): string => {
     const baseStyles = "font-medium px-3 py-2 rounded-md transition-colors duration-200";
-    if (path === activePath) {
+    if (path === pathname) {
       return `${baseStyles} bg-blue-50 text-black`;
     }
     return `${baseStyles} text-gray-700 hover:text-black hover:bg-gray-50`;
@@ -52,7 +47,7 @@ function CmpHeader() {
 
   const getMobileTabStyles = (path: MobileTabStylesProps["path"]): string => {
     const baseStyles = "font-medium py-2 px-4 hover:bg-blue-50 rounded-lg";
-    if (path === activePath) {
+    if (path === pathname) {
       return `${baseStyles} bg-blue-50 text-black`;
     }
     return `${baseStyles} text-gray-700 hover:text-black`;
@@ -75,8 +70,8 @@ function CmpHeader() {
 
           <nav className="hidden md:flex items-center space-x-1">
             <Link href="/company" className={getTabStyles("/company")}>Dashboard</Link>
-            <Link href="/company/create-job" className={getTabStyles("/company/postjobs")}>Create Job</Link>
-            <Link href="/company/job-application" className={getTabStyles("/company/jobhstry")}>Job Application</Link>
+            <Link href="/company/create-job" className={getTabStyles("/company/create-job")}>Create Job</Link>
+            <Link href="/company/job-application" className={getTabStyles("/company/job-application")}>Job Application</Link>
           </nav>
 
           <div className="hidden md:flex items-center space-x-5">
