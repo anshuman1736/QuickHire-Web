@@ -15,6 +15,7 @@ import {
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
+import { useRouter } from "next/navigation";
 
 function CmpHeader() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -22,6 +23,8 @@ function CmpHeader() {
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [messagesOpen, setMessagesOpen] = useState(false);
   const pathname = usePathname(); // Use Next.js's usePathname hook
+
+  const router = useRouter();
 
   const user = {
     name: "Quick-Hire pvt Ltd",
@@ -62,6 +65,10 @@ function CmpHeader() {
       return `${baseStyles} bg-blue-50 text-black`;
     }
     return `${baseStyles} text-gray-700 hover:text-black`;
+  };
+  const handleLogout = () => {
+    localStorage.clear();
+    router.push("/");
   };
 
   return (
@@ -312,13 +319,13 @@ function CmpHeader() {
                   </Link>
 
                   <div className="border-t border-gray-100 mt-1 pt-1">
-                    <Link
-                      href="/"
+                    <button
+                      onClick={() => handleLogout()}
                       className="flex items-center px-4 py-2 text-red-600 hover:bg-red-50"
                     >
                       <LogOut className="w-4 h-4 mr-2" />
                       <span>Log Out</span>
-                    </Link>
+                    </button>
                   </div>
                 </div>
               )}
@@ -415,13 +422,13 @@ function CmpHeader() {
             </nav>
 
             <div className="pt-2 border-t border-gray-100 mt-2">
-              <Link
-                href="/"
+              <button
+                onClick={() => handleLogout()}
                 className="flex items-center px-4 py-2 text-red-600 font-medium hover:bg-red-50 rounded-lg"
               >
                 <LogOut className="w-4 h-4 mr-2" />
                 <span>Log Out</span>
-              </Link>
+              </button>
             </div>
           </div>
         </div>
