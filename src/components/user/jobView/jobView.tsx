@@ -1,62 +1,95 @@
 "use client";
+
 import Link from "next/link";
-import React from "react";
+import { useQuery } from "@tanstack/react-query";
+import { getJobById } from "@/lib/queries";
+import { JobPosting } from "@/types/job";
+import { useState, useEffect } from "react";
 
-function JobView() {
-  const mockData = {
-    STS: "200",
-    MSG: "Job Fetched Successfully",
-    CONTENT: {
-      id: 1,
-      jobTitle: "Android developer ",
-      jobDescription: "this is the description ",
-      jobAddress: "address",
-      jobLocation: "Google mcom ",
-      salary: "12345",
-      jobType: "Remote",
-      enabled: true,
-      categoryId: 1,
-      creationDate: 1727981098972,
-      companyDTO: {
-        id: 1,
-        companyName: "Quickhire",
-        cinNumber: "123456789",
-        cinCertificate:
-          "https://firebasestorage.googleapis.com/v0/b/quickhire-1eba1.appspot.com/o/Certificates%2F1727930086740?alt=media&token=040d184b-e340-488c-8598-aa56d6b5debe",
-        email: "quickhire@gmail.com",
-        phoneNo: null,
-        creationDate: 1727930096128,
-        profile_Pic:
-          "https://firebasestorage.googleapis.com/v0/b/quickhire-1eba1.appspot.com/o/ProfilePic%2FProvider%2F1727930073319?alt=media&token=7cea6270-74e7-4234-b656-c1b49228df48",
-        completeProfile: false,
-        categoryId: 1,
-        categoryName: "Technology",
-      },
-      categoryDTO: {
-        id: 1,
-        categoryName: "Technology",
-        categoryDescription: "This is the Technology",
-      },
-    },
-  };
+interface IJobByIDResponse {
+  STS: string;
+  MSG: string;
+  CONTENT: JobPosting;
+}
 
-  const job = mockData.CONTENT;
-  const company = job.companyDTO;
-  const category = job.categoryDTO;
+export default function JobView({ jobId }: { jobId: number }) {
+  const [token, setToken] = useState<string>("");
 
-  const formatDate = (timestamp: number): string => {
-    const date = new Date(timestamp);
-    return date.toLocaleDateString("en-US", {
+  useEffect(() => {
+    const sessionToken = localStorage.getItem("sessionId");
+    if (sessionToken) {
+      setToken(sessionToken);
+    }
+  }, []);
+
+  const { isPending, isError, data, error } = useQuery<IJobByIDResponse>({
+    queryKey: ["getJobById", jobId],
+    queryFn: () => getJobById(jobId, token),
+    enabled: !!token,
+  });
+
+  const formatDate = (timestamp: number) => {
+    if (!timestamp) return "N/A";
+    return new Date(timestamp).toLocaleDateString("en-US", {
       year: "numeric",
       month: "long",
       day: "numeric",
     });
   };
 
+  if (isPending) {
+    return (
+      <div className="flex justify-center items-center min-h-[60vh]">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#FFBF2F]"></div>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh]">
+        <div className="bg-red-50 p-4 rounded-lg text-red-700 max-w-md">
+          <h3 className="font-bold mb-2">Error loading job details</h3>
+          <p>
+            {error instanceof Error
+              ? error.message
+              : "An unknown error occurred"}
+          </p>
+        </div>
+        <Link href="/user" className="mt-4 text-blue-600 hover:underline">
+          Return to jobs list
+        </Link>
+      </div>
+    );
+  }
+
+  if (!data) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh]">
+        <div className="bg-amber-50 p-4 rounded-lg text-amber-700 max-w-md">
+          <h3 className="font-bold mb-2">Job not found</h3>
+          <p>
+            The job posting you&apos;re looking for doesn&apos;t exist or has
+            been removed.
+          </p>
+        </div>
+        <Link href="/user" className="mt-4 text-blue-600 hover:underline">
+          Browse available jobs
+        </Link>
+      </div>
+    );
+  }
+
+  const dataResponse: IJobByIDResponse = data;
+  const job = dataResponse.CONTENT;
+  const company = job.companyDTO;
+  const category = job.categoryDTO;
+
+  console.log(company.profile_Pic);
+
   return (
     <div className="bg-gradient-to-b from-gray-50 mt-10 to-gray-100 w-full p-4 pt-16 md:p-6 md:pt-16">
       <div className="max-w-7xl mx-auto">
-
         <Link
           href="/user"
           className="flex items-center mb-6 text-gray-700 hover:text-[#FFBF2F] font-medium transition duration-300 group"
@@ -90,7 +123,7 @@ function JobView() {
                       alt={company.companyName}
                       width={96}
                       height={96}
-                      className="object-cover"
+                      className="object-cover w-full h-full"
                     />
                   </div>
                 </div>
@@ -125,7 +158,7 @@ function JobView() {
                       d="M5 13l4 4L19 7"
                     />
                   </svg>
-                  Active
+                  {job.enabled ? "Active" : "Inactive"}
                 </span>
                 <button className="bg-gradient-to-r from-[#FFBF2F] to-[#FFD700] hover:from-[#F0B020] hover:to-[#F0C000] text-white font-bold py-2 px-6 rounded-xl shadow-md transition duration-300 ease-in-out transform hover:-translate-y-1 flex items-center ml-6">
                   <svg
@@ -202,7 +235,7 @@ function JobView() {
               <div className="min-w-0">
                 <p className="text-xs text-gray-500 font-medium">Salary</p>
                 <p className="text-gray-800 font-medium truncate">
-                  ${Number(job.salary).toLocaleString()}
+                  ${job.salary}
                 </p>
               </div>
             </div>
@@ -472,8 +505,8 @@ function JobView() {
                       Technical Assessment
                     </h3>
                     <p className="text-gray-600">
-                      Complete a technical assessment to demonstrate your
-                      Android development skills.
+                      Complete a technical assessment to demonstrate your skills
+                      related to {category.categoryName}.
                     </p>
                   </div>
                 </div>
@@ -525,7 +558,7 @@ function JobView() {
                     alt={company.companyName}
                     width={96}
                     height={96}
-                    className="object-cover"
+                    className="object-cover w-full h-full"
                   />
                 </div>
                 <h3 className="text-lg font-semibold text-gray-800">
@@ -554,7 +587,9 @@ function JobView() {
                       d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
                     />
                   </svg>
-                  <p className="text-gray-700">{company.email}</p>
+                  <p className="text-gray-700 truncate text-sm">
+                    {company.email}
+                  </p>
                 </div>
 
                 <div className="flex items-center p-3 bg-gray-50 rounded-lg transition-all duration-300 hover:bg-gray-100">
@@ -572,7 +607,9 @@ function JobView() {
                       d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
                     />
                   </svg>
-                  <p className="text-gray-700">CIN: {company.cinNumber}</p>
+                  <p className="text-gray-700 truncate text-sm">
+                    CIN: {company.cinNumber}
+                  </p>
                 </div>
 
                 <div className="flex items-center p-3 bg-blue-50 rounded-lg transition-all duration-300 hover:bg-blue-100">
@@ -590,7 +627,7 @@ function JobView() {
                       d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
                     />
                   </svg>
-                  <p className="text-gray-700">
+                  <p className="text-gray-700 text-sm">
                     Joined: {formatDate(company.creationDate)}
                   </p>
                 </div>
@@ -703,5 +740,3 @@ function JobView() {
     </div>
   );
 }
-
-export default JobView;

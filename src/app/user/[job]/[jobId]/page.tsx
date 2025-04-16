@@ -1,11 +1,11 @@
-import JobView from '@/components/user/jobView/jobView'
-import React from 'react'
+import JobView from "@/components/user/jobView/jobView";
 
-function page() {
-  
-  return (
-    <JobView/>
-  )
+export default async function page({
+  params,
+}: {
+  params: Promise<{ jobId: string }>;
+}) {
+  const { jobId } = await params;
+  const intId = Number(jobId); 
+  return <JobView jobId={intId} />;
 }
-
-export default page
