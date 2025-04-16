@@ -21,6 +21,7 @@ export interface JobPosting {
   creationDate: number;
   companyDTO: CompanyDTO;
   categoryDTO: CategoryDTO;
+  
 }
 
 interface CompanyDTO {
