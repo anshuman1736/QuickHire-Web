@@ -83,16 +83,7 @@ const Postjob = () => {
     onSuccess: (data) => {
       setIsSubmitting(false);
       successToast("Job posted successfully!");
-      setJobdata({
-        jobTitle: "",
-        jobDescription: "",
-        jobAddress: "",
-        jobLocation: "",
-        salary: "",
-        jobType: "",
-        categoryId: 0,
-        categoryName: "",
-      });
+      setJobdata(data);
       setActiveStep(1);
     },
     onError: (error) => {
