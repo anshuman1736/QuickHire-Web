@@ -16,6 +16,7 @@ export interface JobPosting {
   jobLocation: string;
   salary: string;
   jobType: string;
+  skills: string;
   enabled: boolean;
   categoryId: number;
   creationDate: number;
