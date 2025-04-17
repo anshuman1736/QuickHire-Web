@@ -436,28 +436,29 @@ function Hero() {
           </motion.div>
         </div>
 
-        {hasSearched && (
-          <motion.div
-            className="w-full max-w-screen mx-auto mt-16"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-          >
-            <AvailableJobs
-              jobTitle={searchParams.jobTitle}
-              skills={searchParams.skills}
-              companyName={searchParams.companyName}
-              jobAddress={searchParams.jobAddress}
-            />
-          </motion.div>
-        )}
 
+      </div>
+            {hasSearched && (
+              <motion.div
+                className="w-full max-w-screen mx-auto mt-16"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+              >
+                <AvailableJobs
+                  jobTitle={searchParams.jobTitle}
+                  skills={searchParams.skills}
+                  companyName={searchParams.companyName}
+                  jobAddress={searchParams.jobAddress}
+                />
+              </motion.div>
+            )}
         <motion.div
-          className="mt-20 text-center"
+          className="mt-20 text-center max-w-6xl mx-auto px-4 sm:px-6 relative z-10"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: isVisible ? 1 : 0, y: isVisible ? 0 : 20 }}
           transition={{ duration: 0.6, delay: 0.8 }}
-        >
+          >
           <div className="flex items-center justify-center mb-8">
             <div className="h-px w-16 bg-amber-300 mr-4"></div>
             <p className="text-sm font-semibold uppercase tracking-wider text-amber-800">
@@ -469,14 +470,14 @@ function Hero() {
           <div className="flex flex-wrap justify-center items-center gap-x-12 gap-y-8">
             {featuredCompanies.map((company, i) => (
               <motion.div
-                key={i}
-                className="flex items-center text-lg font-bold text-gray-400 hover:text-amber-600 transition-colors"
-                whileHover={{ scale: 1.05 }}
-                initial={{ opacity: 0 }}
-                animate={{
-                  opacity: isVisible ? 1 : 0,
-                  transition: { delay: 0.9 + i * 0.1 },
-                }}
+              key={i}
+              className="flex items-center text-lg font-bold text-gray-400 hover:text-amber-600 transition-colors"
+              whileHover={{ scale: 1.05 }}
+              initial={{ opacity: 0 }}
+              animate={{
+                opacity: isVisible ? 1 : 0,
+                transition: { delay: 0.9 + i * 0.1 },
+              }}
               >
                 <Star className="w-4 h-4 mr-2 text-amber-400" />
                 {company}
@@ -484,7 +485,6 @@ function Hero() {
             ))}
           </div>
         </motion.div>
-      </div>
     </section>
   );
 }
