@@ -35,6 +35,9 @@ const Postjob = () => {
     jobType: "",
     categoryId: 0,
     categoryName: "",
+    skills: "",
+    experience: "",
+    jobEligibility: "",
   });
   const [categories, setCategories] = useState<ICategory[]>([]);
   const [categoryOpen, setCategoryOpen] = useState(false);
@@ -124,6 +127,11 @@ const Postjob = () => {
       if (!jobData.jobLocation.trim())
         errors.jobLocation = "Job location is required";
       if (!jobData.salary.trim()) errors.salary = "Salary is required";
+      if (!jobData.skills.trim()) errors.skills = "Skills are required";
+      if (!jobData.experience.trim())
+        errors.experience = "Experience is required";
+      if (!jobData.jobEligibility.trim())
+        errors.jobEligibility = "Education requirement is required";
     }
 
     return errors;
@@ -141,6 +149,10 @@ const Postjob = () => {
     if (!data.salary.trim()) errors.salary = "Salary is required";
     if (!data.jobType) errors.jobType = "Please select a job type";
     if (!data.categoryId) errors.categoryId = "Please select a category";
+    if (!data.skills.trim()) errors.skills = "Skills are required";
+    if (!data.experience.trim()) errors.experience = "Experience is required";
+    if (!data.jobEligibility.trim())
+      errors.jobEligibility = "Education requirement is required";
 
     return errors;
   };
@@ -169,6 +181,9 @@ const Postjob = () => {
       salary: jobData.salary,
       jobType: jobData.jobType,
       categoryId: jobData.categoryId,
+      skills: jobData.skills, // New field
+      experience: jobData.experience, // New field
+      jobEligibility: jobData.jobEligibility, // New field
     };
 
     const validationErrors = validateForm(data);
@@ -185,7 +200,10 @@ const Postjob = () => {
       } else if (
         validationErrors.jobAddress ||
         validationErrors.jobLocation ||
-        validationErrors.salary
+        validationErrors.salary ||
+        validationErrors.skills ||
+        validationErrors.experience ||
+        validationErrors.jobEligibility
       ) {
         setActiveStep(3);
       }
@@ -210,9 +228,10 @@ const Postjob = () => {
       companyId: Number(companyId),
     };
 
+    console.log("Final Data:", finalData);
+
     jobMutation.mutate(finalData);
   };
-
   const renderError = (field: string) => {
     return formErrors[field] ? (
       <p className="text-red-500 text-xs mt-1">{formErrors[field]}</p>
@@ -538,7 +557,7 @@ const Postjob = () => {
               {activeStep === 3 && (
                 <div className="space-y-6">
                   <h2 className="text-xl font-semibold text-gray-800 mb-4">
-                    Location & Compensation
+                    Location, Qualifications & Compensation
                   </h2>
 
                   <div>
@@ -591,10 +610,99 @@ const Postjob = () => {
                             : "border-gray-300"
                         } rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
                         type="text"
-                        placeholder="City, State"
+                        placeholder="City, State or Google Maps URL"
                       />
                     </div>
                     {renderError("jobLocation")}
+                  </div>
+
+                  {/* New field for skills */}
+                  <div>
+                    <label
+                      htmlFor="skills"
+                      className="block text-sm font-medium text-gray-700 mb-1"
+                    >
+                      Required Skills <span className="text-red-500">*</span>
+                    </label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <Tag className="h-5 w-5 text-gray-400" />
+                      </div>
+                      <input
+                        id="skills"
+                        name="skills"
+                        value={jobData.skills}
+                        onChange={handleChange}
+                        className={`pl-10 w-full py-3 border ${
+                          formErrors.skills
+                            ? "border-red-300 ring-1 ring-red-300"
+                            : "border-gray-300"
+                        } rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
+                        type="text"
+                        placeholder="e.g. C, C++, HTML (comma separated)"
+                      />
+                    </div>
+                    {renderError("skills")}
+                  </div>
+
+                  {/* New field for experience */}
+                  <div>
+                    <label
+                      htmlFor="experience"
+                      className="block text-sm font-medium text-gray-700 mb-1"
+                    >
+                      Required Experience{" "}
+                      <span className="text-red-500">*</span>
+                    </label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <Clock className="h-5 w-5 text-gray-400" />
+                      </div>
+                      <input
+                        id="experience"
+                        name="experience"
+                        value={jobData.experience}
+                        onChange={handleChange}
+                        className={`pl-10 w-full py-3 border ${
+                          formErrors.experience
+                            ? "border-red-300 ring-1 ring-red-300"
+                            : "border-gray-300"
+                        } rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
+                        type="text"
+                        placeholder="e.g. 5 years"
+                      />
+                    </div>
+                    {renderError("experience")}
+                  </div>
+
+                  {/* New field for jobEligibility */}
+                  <div>
+                    <label
+                      htmlFor="jobEligibility"
+                      className="block text-sm font-medium text-gray-700 mb-1"
+                    >
+                      Education Requirement{" "}
+                      <span className="text-red-500">*</span>
+                    </label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <FileText className="h-5 w-5 text-gray-400" />
+                      </div>
+                      <input
+                        id="jobEligibility"
+                        name="jobEligibility"
+                        value={jobData.jobEligibility}
+                        onChange={handleChange}
+                        className={`pl-10 w-full py-3 border ${
+                          formErrors.jobEligibility
+                            ? "border-red-300 ring-1 ring-red-300"
+                            : "border-gray-300"
+                        } rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
+                        type="text"
+                        placeholder="e.g. Bachelor's Degree"
+                      />
+                    </div>
+                    {renderError("jobEligibility")}
                   </div>
 
                   <div>
@@ -680,6 +788,43 @@ const Postjob = () => {
                         <h3 className="font-medium text-gray-900">Address</h3>
                         <p className="text-gray-700">
                           {jobData.jobAddress || "Not specified"}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* New review items */}
+                    <div className="flex items-start">
+                      <Tag className="h-5 w-5 text-blue-500 mr-3 mt-0.5" />
+                      <div>
+                        <h3 className="font-medium text-gray-900">
+                          Required Skills
+                        </h3>
+                        <p className="text-gray-700">
+                          {jobData.skills || "Not specified"}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-start">
+                      <Clock className="h-5 w-5 text-blue-500 mr-3 mt-0.5" />
+                      <div>
+                        <h3 className="font-medium text-gray-900">
+                          Required Experience
+                        </h3>
+                        <p className="text-gray-700">
+                          {jobData.experience || "Not specified"}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-start">
+                      <FileText className="h-5 w-5 text-blue-500 mr-3 mt-0.5" />
+                      <div>
+                        <h3 className="font-medium text-gray-900">
+                          Education Requirement
+                        </h3>
+                        <p className="text-gray-700">
+                          {jobData.jobEligibility || "Not specified"}
                         </p>
                       </div>
                     </div>

@@ -44,4 +44,7 @@ export const jobPostSchema = z.object({
   salary: z.string().min(1, "Salary is required"),
   jobType: z.enum(["Remote", "Onsite", "Hybrid"]),
   categoryId: z.number().min(1, "Category is required"),
+  skills: z.string().min(1, "Skills are required"),           // New field
+  experience: z.string().min(1, "Experience is required"),     // New field
+  jobEligibility: z.string().min(1, "Education requirement is required")  // New field
 });
