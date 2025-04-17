@@ -78,6 +78,10 @@ export const postJob = async (form: IJobPostfn) => {
       salary: form.salary,
       jobType: form.jobType,
       categoryId: form.categoryId,
+      skills: form.skills,
+      experience: form.experience,
+      jobEligibility: form.jobEligibility,
+
     };
     const response = await axios.post(
       `${BACKEND_URL}/job/${form.companyId}`,
