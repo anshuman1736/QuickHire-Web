@@ -6,6 +6,9 @@ export interface IJobPost {
   salary: string;
   jobType: string;
   categoryId: number;
+  skills: string;           
+  experience: string;       
+  jobEligibility: string;   
 }
 
 export interface JobPosting {
