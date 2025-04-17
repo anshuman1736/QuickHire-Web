@@ -11,7 +11,7 @@ interface IJobPostfn extends IJobPost {
 
 export const RegisterUser = async (form: IUserRegister) => {
   try {
-    const response = await axios.post(`${BACKEND_URL}/auth/register`, form); 
+    const response = await axios.post(`${BACKEND_URL}/auth/register`, form);
     return response.data;
   } catch (error) {
     if (axios.isAxiosError(error)) {
@@ -81,7 +81,6 @@ export const postJob = async (form: IJobPostfn) => {
       skills: form.skills,
       experience: form.experience,
       jobEligibility: form.jobEligibility,
-
     };
     const response = await axios.post(
       `${BACKEND_URL}/job/${form.companyId}`,

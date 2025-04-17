@@ -23,6 +23,7 @@ export default function JobView({ jobId }: { jobId: number }) {
   const [atsScore, setAtsScore] = useState<number | null>(null);
   const [isCheckingAts, setIsCheckingAts] = useState(false);
   const [hasResume, setHasResume] = useState(false);
+  const [resume, setResume] = useState<string>("");
 
   useEffect(() => {
     const sessionToken = localStorage.getItem("sessionId");
@@ -34,6 +35,7 @@ export default function JobView({ jobId }: { jobId: number }) {
     const resumeExists = localStorage.getItem("resume");
     if (resumeExists) {
       setHasResume(true);
+      setResume(resumeExists);
     }
   }, []);
 
@@ -41,6 +43,17 @@ export default function JobView({ jobId }: { jobId: number }) {
     queryKey: ["getJobById", jobId],
     queryFn: () => getJobById(jobId, token),
     enabled: !!token,
+  });
+
+  const atsMutation = useMutation({
+    mutationFn: getATSScore,
+    onSuccess: (data) => {
+      console.log(data);
+    },
+    onError: (error) => {
+      console.error("Error fetching ATS score:", error);
+      errorToast("Failed to fetch ATS score. Please try again.");
+    },
   });
 
   const formatDate = (timestamp: number) => {
@@ -102,10 +115,10 @@ export default function JobView({ jobId }: { jobId: number }) {
 
   if (applyWarning) {
     const handleAtsCheck = () => {
-      const atsMutation = useMutation({
-        mutationFn: getATSScore
-      })
-      
+      atsMutation.mutate({
+        resume_url: resume,
+        job_description: data?.CONTENT.jobDescription,
+      });
     };
 
     return (
@@ -268,12 +281,14 @@ export default function JobView({ jobId }: { jobId: number }) {
                         type="file"
                         className="hidden"
                         accept=".pdf,.doc,.docx"
-                        onChange={async(e) => {
+                        onChange={async (e) => {
                           if (e.target.files && e.target.files[0]) {
-                            const file = e.target.files[0]
+                            const file = e.target.files[0];
                             const url = await uploadResume(file);
-                            if(!url){
-                              errorToast("Failed to upload resume. Please try again.");
+                            if (!url) {
+                              errorToast(
+                                "Failed to upload resume. Please try again."
+                              );
                               return;
                             }
                             localStorage.setItem("userResume", url);
