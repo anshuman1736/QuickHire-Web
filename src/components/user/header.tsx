@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { Briefcase, Bell, MessageSquare, User, Menu, X, ChevronDown, Bookmark, LogOut } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 
 function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -11,6 +12,8 @@ function Header() {
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [messagesOpen, setMessagesOpen] = useState(false);
   const [activePath, setActivePath] = useState("/user");
+
+  const router = useRouter()
 
   const user = {
     name: "Alex Johnson",
@@ -57,6 +60,12 @@ function Header() {
     }
     return `${baseStyles} text-gray-700 hover:text-black`;
   };
+
+
+  const handleLogout = ()=>{
+      localStorage.clear()
+      router.push('/')
+  }
 
   return (
     <header className="bg-white w-screen shadow-sm fixed top-0 left-0 right-0 z-10">
@@ -240,10 +249,10 @@ function Header() {
                   
                   
                   <div className="border-t border-gray-100 mt-1 pt-1">
-                    <Link href="/" className="flex items-center px-4 py-2 text-red-600 hover:bg-red-50">
+                    <button onClick={handleLogout} className="flex items-center px-4 py-2 text-red-600 hover:bg-red-50">
                       <LogOut className="w-4 h-4 mr-2" />
                       <span>Log Out</span>
-                    </Link>
+                    </button>
                   </div>
                 </div>
               )}
@@ -319,10 +328,10 @@ function Header() {
             </nav>
             
             <div className="pt-2 border-t border-gray-100 mt-2">
-              <Link href="/" className="flex items-center px-4 py-2 text-red-600 font-medium hover:bg-red-50 rounded-lg">
+              <button onClick={handleLogout} className="flex items-center px-4 py-2 text-red-600 font-medium hover:bg-red-50 rounded-lg">
                 <LogOut className="w-4 h-4 mr-2" />
                 <span>Log Out</span>
-              </Link>
+              </button>
             </div>
           </div>
         </div>

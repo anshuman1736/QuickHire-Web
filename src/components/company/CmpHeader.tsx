@@ -22,7 +22,7 @@ function CmpHeader() {
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [messagesOpen, setMessagesOpen] = useState(false);
-  const pathname = usePathname(); // Use Next.js's usePathname hook
+  const pathname = usePathname(); 
 
   const router = useRouter();
 

@@ -36,9 +36,13 @@ export async function getCatogoryById(categoryId: number) {
   }
 }
 
-export async function getJobNyId(jobId: number) {
+export async function getJobById(jobId: number, token: string) {
   try {
-    const res = await axios.get(`${BACKEND_URL}/job/${jobId}`);
+    const res = await axios.get(`${BACKEND_URL}/job/${jobId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
     return res.data;
   } catch (error) {
     if (axios.isAxiosError(error)) {
@@ -80,9 +84,13 @@ export async function getEnableJob(): Promise<JobPosting[]> {
   }
 }
 
-export async function getRecomdedJob(userId: number): Promise<MatchJobResponse[]> {
+export async function getRecomdedJob(
+  userId: number
+): Promise<MatchJobResponse[]> {
   try {
-    const res = await axios.get(`${ML_BACKEND_URL}/api/match-jobs-ai/${userId}`);
+    const res = await axios.get(
+      `${ML_BACKEND_URL}/api/match-jobs-ai/${userId}`
+    );
     return res.data;
   } catch (error) {
     if (axios.isAxiosError(error)) {

@@ -148,12 +148,7 @@ export default function JobPortal() {
 
       let filtered = jobsArray;
 
-      if (activeTab === "popular") {
-        filtered = filtered.sort(
-          (a, b) =>
-            parseInt(b.job_vacancies || "0") - parseInt(a.job_vacancies || "0")
-        );
-      } else if (activeTab === "new") {
+      if (activeTab === "new") {
         const recentJobs = filtered.filter((job) => {
           const postedDate = getPostedDateText(job.creation_date);
           return postedDate.includes("day") || postedDate === "Today";
@@ -373,7 +368,6 @@ export default function JobPortal() {
           </div>
         </div>
 
-        {/* Filters */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
           <div className="hidden md:flex gap-2">
             <button
@@ -418,7 +412,6 @@ export default function JobPortal() {
             </button>
           </div>
 
-          {/* Mobile Tab Select */}
           <div className="md:hidden w-full mb-4">
             <select
               className="w-full p-2 rounded-lg border border-gray-200 bg-white"
@@ -432,7 +425,6 @@ export default function JobPortal() {
             </select>
           </div>
 
-          {/* Category Filter */}
           <div className="w-full md:w-auto relative">
             <button
               className="flex items-center justify-between w-full md:w-48 px-4 py-2 bg-white border border-gray-200 rounded-lg"
@@ -468,14 +460,12 @@ export default function JobPortal() {
           </div>
         </div>
 
-        {/* Loading state */}
         {isPending && (
           <div className="flex justify-center items-center h-64">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
           </div>
         )}
 
-        {/* Error state */}
         {isError && (
           <div className="flex flex-col items-center justify-center h-64 text-center">
             <div className="bg-red-100 p-4 rounded-full mb-4">
@@ -540,70 +530,71 @@ export default function JobPortal() {
                   const jobRating = Math.floor(Math.random() * 5) / 10 + 4.5; // Random rating between 4.5-5.0
 
                   return (
-                    <div
+                    <Link
                       key={job.id}
-                      className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow overflow-hidden border border-gray-100 flex flex-col"
+                      href={`/user/${job.job_title}/${job.id}`}
                     >
-                      <div className="h-20 bg-gradient-to-r from-blue-500 to-blue-700 relative">
-                        <div className="absolute bottom-4 left-4 bg-white backdrop-blur-sm px-3 py-1 rounded-full text-black text-sm font-medium">
-                          {jobLevel}
+                      <div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow overflow-hidden border border-gray-100 flex flex-col">
+                        <div className="h-20 bg-gradient-to-r from-blue-500 to-blue-700 relative">
+                          <div className="absolute bottom-4 left-4 bg-white backdrop-blur-sm px-3 py-1 rounded-full text-black text-sm font-medium">
+                            {jobLevel}
+                          </div>
+                        </div>
+
+                        <div className="p-6 flex-grow flex flex-col">
+                          <div className="flex justify-between items-start mb-2">
+                            <h3 className="font-bold text-lg">
+                              {job.job_title}
+                            </h3>
+                            <div className="bg-blue-50 text-blue-700 text-xs font-medium px-2 py-1 rounded">
+                              {job.job_type}
+                            </div>
+                          </div>
+
+                          <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+                            {job.job_description}
+                          </p>
+
+                          <div className="text-sm text-gray-500 mb-4">
+                            <div className="flex items-center mb-1">
+                              <MapPin className="w-4 h-4 mr-2 text-gray-400" />
+                              <span>{job.job_location}</span>
+                            </div>
+                            <div className="flex items-center mb-1">
+                              <DollarSign className="w-4 h-4 mr-2 text-gray-400" />
+                              <span>{job.salary}</span>
+                            </div>
+                            <div className="flex items-center mb-1">
+                              <Briefcase className="w-4 h-4 mr-2 text-gray-400" />
+                              <span>{job.job_experience || "Entry Level"}</span>
+                            </div>
+                            <div className="flex items-center">
+                              <Calendar className="w-4 h-4 mr-2 text-gray-400" />
+                              <span>Posted {postedDate}</span>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-2 mt-auto mb-2">
+                            <Star className="w-4 h-4 text-blue-600 fill-blue-600" />
+                            <span className="font-medium">
+                              {jobRating.toFixed(1)}
+                            </span>
+                          </div>
+
+                          <div className="flex items-center gap-2">
+                            <Link
+                              href={`/user/${jobLevel}/${job.id}`}
+                              className="flex-1 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center"
+                            >
+                              Apply Now
+                            </Link>
+                            <button className="w-10 h-10 flex items-center justify-center rounded-lg border border-gray-200 hover:bg-gray-50">
+                              <BookmarkPlus className="w-5 h-5 text-gray-500" />
+                            </button>
+                          </div>
                         </div>
                       </div>
-
-                      <div className="p-6 flex-grow flex flex-col">
-                        <div className="flex justify-between items-start mb-2">
-                          <h3 className="font-bold text-lg">{job.job_title}</h3>
-                          <div className="bg-blue-50 text-blue-700 text-xs font-medium px-2 py-1 rounded">
-                            {job.job_type}
-                          </div>
-                        </div>
-
-                        <p className="text-gray-600 text-sm mb-4 line-clamp-2">
-                          {job.job_description}
-                        </p>
-
-                        <div className="text-sm text-gray-500 mb-4">
-                          <div className="flex items-center mb-1">
-                            <MapPin className="w-4 h-4 mr-2 text-gray-400" />
-                            <span>{job.job_location}</span>
-                          </div>
-                          <div className="flex items-center mb-1">
-                            <DollarSign className="w-4 h-4 mr-2 text-gray-400" />
-                            <span>{job.salary}</span>
-                          </div>
-                          <div className="flex items-center mb-1">
-                            <Briefcase className="w-4 h-4 mr-2 text-gray-400" />
-                            <span>{job.job_experience || "Entry Level"}</span>
-                          </div>
-                          <div className="flex items-center">
-                            <Calendar className="w-4 h-4 mr-2 text-gray-400" />
-                            <span>Posted {postedDate}</span>
-                          </div>
-                        </div>
-
-                        <div className="flex items-center gap-2 mt-auto mb-2">
-                          <Star className="w-4 h-4 text-blue-600 fill-blue-600" />
-                          <span className="font-medium">
-                            {jobRating.toFixed(1)}
-                          </span>
-                          <span className="text-gray-500 text-sm">
-                            ({job.job_vacancies || "0"} applicants)
-                          </span>
-                        </div>
-
-                        <div className="flex items-center gap-2">
-                          <Link
-                            href={`/user/${jobLevel}/${job.id}`}
-                            className="flex-1 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center"
-                          >
-                            Apply Now
-                          </Link>
-                          <button className="w-10 h-10 flex items-center justify-center rounded-lg border border-gray-200 hover:bg-gray-50">
-                            <BookmarkPlus className="w-5 h-5 text-gray-500" />
-                          </button>
-                        </div>
-                      </div>
-                    </div>
+                    </Link>
                   );
                 })}
               </div>
