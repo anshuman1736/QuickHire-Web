@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
+import "/styles/style.css";
 import {
   ArrowRight,
   Briefcase,
@@ -13,10 +14,14 @@ import {
   Rocket,
   Award,
   Code2,
+  MoveLeft,
+  MapPin,
 } from "lucide-react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import axios from "axios";
 import { JobPosting } from "@/types/job";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
 
 interface IBrowsResponse {
   STS: string;
@@ -68,8 +73,20 @@ const TypingAnimation: React.FC<{
 };
 
 function CTA() {
+  const [fetchJobs, setFetchJobs] = useState(false);
+  const queryClient = useQueryClient();
+  const router = useRouter();
+  const { data, isLoading } = useQuery<IBrowsResponse>({
+    queryKey: ["browseJobs"],
+    queryFn: async () => {
+      const response = await axios.get(
+        "https://qh.api.quick-hire.in/home/browseJobs"
+      );
+      return response.data;
+    },
+    enabled: fetchJobs,
+  });
   const [isVisible, setIsVisible] = useState(false);
-  const [browseData, setbrowseData] = useState<IBrowsResponse | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const { scrollYProgress } = useScroll({
     target: containerRef,
@@ -100,21 +117,6 @@ function CTA() {
   }, []);
 
   //TODO: Use Tanstack Query for API calls
-  const onBrowsehandle = async () => {
-    try {
-      const res = await axios.get(
-        `https://qh.api.quick-hire.in/home/browseJobs`
-      );
-      setbrowseData(res.data);
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        throw new Error(
-          error.response?.data?.message || "Failed to browse jobs"
-        );
-      }
-      throw new Error("An Unexpected error occurred");
-    }
-  };
 
   return (
     <section
@@ -289,111 +291,131 @@ function CTA() {
             </div>
 
             {/* Right CTA Section */}
-            <div className="bg-white relative p-8 lg:p-12 lg:w-2/5 flex flex-col justify-center">
-              <h3 className="font-bold text-xl mb-6 text-gray-800">
-                Get started in minutes
-              </h3>
-
-              {browseData && (
-                <div className="absolute h-full w-full overflow-scroll  p-5 bg-blue-300">
+            <div className="bg-white relative p-8 lg:p-12 lg:w-2/5 flex  flex-col justify-center">
+              {data ? (
+                <div className="flex flex-col gap-5 w-full justify-center">
                   <button
-                    className="text-2xl font-bold right-16  fixed  cursor-pointer"
-                    onClick={() => setbrowseData(null)}
+                    onClick={() => {
+                      queryClient.removeQueries();
+                      setFetchJobs(false);
+                    }}
+                    className="text-xl flex items-center w-fit border-2 border-amber-400 px-3 rounded-2xl bg-amber-100 cursor-pointer"
                   >
-                    X
+                    <MoveLeft /> Back
                   </button>
                   <div>
-                    <div>
-                      {browseData.CONTENT.map((data, idx) => (
+                    <div className="no-scrollbar overflow-y-auto overflow-hidden scrollbar-none w-full items-start max-h-[400px] md:max-h-[500px] pr-2">
+                      {data.CONTENT.map((data, idx) => (
                         <div
-                          className="bg-white border mt-3 p-2 rounded-2xl max-w-2/3 space-y-1"
+                          className="border-b-2 border-blue-500 mt-3 p-2 bg-gray-100 rounded-2xl space-y-3"
                           key={idx}
                         >
-                          <p className="text-lg font-semibold  rounded-full text-center py-1">
+                          <p className="text-lg font-semibold rounded-full py-1">
                             {data.jobTitle}
                           </p>
                           <p className="text-sm text-shadow-gray-600 font-medium">
                             {data.jobDescription}
                           </p>
-                          <p className="text-sm ">{data.jobAddress}</p>
-                          <p className="text-sm "> ₹ {data.salary}</p>
-                          <button className="bg-amber-500 rounded-full px-3 text-white cursor-pointer">
-                            See more ....
+                          <div className="flex gap-5">
+                            <p className="text-sm flex items-center gap-2">
+                              <MapPin size={15} /> {data.jobAddress}
+                            </p>
+                            <p className="text-sm"> ₹ {data.salary}</p>
+                          </div>
+                          <button
+                            onClick={() => router.push("/login")}
+                            className="bg-amber-500 rounded-full px-3 text-white text-lg cursor-pointer"
+                          >
+                            Apply for this position
                           </button>
                         </div>
                       ))}
                     </div>
                   </div>
                 </div>
-              )}
+              ) : (
+                <div>
+                  <h3 className="font-bold text-xl mb-6 text-gray-800">
+                    Get started in minutes
+                  </h3>
 
-              {/* Feature List */}
-              <ul className="mb-8 space-y-4">
-                {[
-                  "AI-powered job matching",
-                  "Direct connections with hiring managers",
-                  "Personalized career guidance",
-                  "Exclusive job opportunities",
-                ].map((item, index) => (
-                  <motion.li
-                    key={index}
-                    initial={{ opacity: 0, x: 20 }}
+                  {/* Feature List */}
+                  <ul className="mb-8 space-y-4">
+                    {[
+                      "AI-powered job matching",
+                      "Direct connections with hiring managers",
+                      "Personalized career guidance",
+                      "Exclusive job opportunities",
+                    ].map((item, index) => (
+                      <motion.li
+                        key={index}
+                        initial={{ opacity: 0, x: 20 }}
+                        animate={{
+                          opacity: isVisible ? 1 : 0,
+                          x: isVisible ? 0 : 20,
+                        }}
+                        transition={{ delay: 0.3 + index * 0.1 }}
+                        className="flex items-center text-gray-700"
+                      >
+                        <div className="bg-amber-100 p-1 rounded-full mr-3">
+                          <ChevronRight className="w-4 h-4 text-amber-600" />
+                        </div>
+                        {item}
+                      </motion.li>
+                    ))}
+                  </ul>
+
+                  {/* CTA Buttons */}
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
                     animate={{
                       opacity: isVisible ? 1 : 0,
-                      x: isVisible ? 0 : 20,
+                      y: isVisible ? 0 : 20,
                     }}
-                    transition={{ delay: 0.3 + index * 0.1 }}
-                    className="flex items-center text-gray-700"
+                    transition={{ delay: 0.7 }}
+                    className="space-y-4"
                   >
-                    <div className="bg-amber-100 p-1 rounded-full mr-3">
-                      <ChevronRight className="w-4 h-4 text-amber-600" />
-                    </div>
-                    {item}
-                  </motion.li>
-                ))}
-              </ul>
+                    <motion.button
+                      whileHover={{ scale: 1.03 }}
+                      whileTap={{ scale: 0.97 }}
+                      className="w-full py-3 px-6 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-xl hover:shadow-lg transition-all font-medium flex items-center justify-center group"
+                    >
+                      <span>Create Your Profile</span>
+                      <Briefcase className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                    </motion.button>
 
-              {/* CTA Buttons */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: isVisible ? 1 : 0, y: isVisible ? 0 : 20 }}
-                transition={{ delay: 0.7 }}
-                className="space-y-4"
-              >
-                <motion.button
-                  whileHover={{ scale: 1.03 }}
-                  whileTap={{ scale: 0.97 }}
-                  className="w-full py-3 px-6 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-xl hover:shadow-lg transition-all font-medium flex items-center justify-center group"
-                >
-                  <span>Create Your Profile</span>
-                  <Briefcase className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
-                </motion.button>
-
-                <motion.button
-                  onClick={onBrowsehandle}
-                  whileHover={{
-                    scale: 1.03,
-                    backgroundColor: "rgba(251, 191, 36, 0.1)",
-                  }}
-                  whileTap={{ scale: 0.97 }}
-                  className="w-full py-3 px-6 bg-transparent border border-amber-500/30 rounded-xl text-amber-600 transition-all font-medium flex items-center justify-center group"
-                >
-                  <span>Browse Opportunities</span>
-                  <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
-                </motion.button>
-              </motion.div>
-              {/* Trust Indicator */}
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: isVisible ? 1 : 0 }}
-                transition={{ delay: 0.8, duration: 0.5 }}
-                className="flex items-center mt-8 pt-6 border-t border-gray-100"
-              >
-                <Shield className="w-5 h-5 text-gray-400 mr-2" />
-                <span className="text-sm text-gray-500">
-                  Trusted by 10,000+ companies worldwide
-                </span>
-              </motion.div>
+                    <motion.button
+                      onClick={() => setFetchJobs(true)}
+                      whileHover={{
+                        scale: 1.03,
+                        backgroundColor: "rgba(251, 191, 36, 0.1)",
+                      }}
+                      whileTap={{ scale: 0.97 }}
+                      className={`cursor-pointer w-full py-3 px-6 bg-transparent border border-amber-500/30 rounded-xl text-amber-600 transition-all font-medium flex items-center justify-center group`}
+                    >
+                      {isLoading && (
+                        <div className="w-4 mr-2 h-4 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
+                      )}
+                      <span>
+                        {isLoading ? "fetching " : "Browse Opportunities"}
+                      </span>
+                      <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                    </motion.button>
+                  </motion.div>
+                  {/* Trust Indicator */}
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: isVisible ? 1 : 0 }}
+                    transition={{ delay: 0.8, duration: 0.5 }}
+                    className="flex items-center mt-8 pt-6 border-t border-gray-100"
+                  >
+                    <Shield className="w-5 h-5 text-gray-400 mr-2" />
+                    <span className="text-sm text-gray-500">
+                      Trusted by 10,000+ companies worldwide
+                    </span>
+                  </motion.div>
+                </div>
+              )}
             </div>
           </div>
         </motion.div>
