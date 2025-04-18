@@ -3,12 +3,12 @@
 import { useState, useEffect, MouseEvent } from "react";
 import Link from "next/link";
 import { X } from "lucide-react";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { getJobById } from "@/lib/queries";
+import { useMutation, useQueries } from "@tanstack/react-query";
+import { getJobById, getUserById } from "@/lib/queries";
 import { JobPosting } from "@/types/job";
 import { uploadResume } from "@/lib/uploadTofirebase";
-import { errorToast } from "@/lib/toast";
-import { getATSScore } from "@/lib/postData";
+import { errorToast, successToast } from "@/lib/toast";
+import { applyjob, getATSScore } from "@/lib/postData";
 
 interface IJobByIDResponse {
   STS: string;
@@ -24,6 +24,43 @@ export default function JobView({ jobId }: { jobId: number }) {
   const [isCheckingAts, setIsCheckingAts] = useState(false);
   const [hasResume, setHasResume] = useState(false);
   const [resume, setResume] = useState<string>("");
+  const [userId, setUserId] = useState<number>(0);
+
+  const [jobQuery, userQuery] = useQueries({
+    queries: [
+      {
+        queryKey: ["getJobById", userId],
+        queryFn: () => getJobById(jobId, token),
+        enabled: !!token,
+      },
+      {
+        queryKey: ["getUserById", userId],
+        queryFn: () => getUserById(userId, token),
+        enabled: !!token,
+      },
+    ],
+  });
+
+  const atsMutation = useMutation({
+    mutationFn: getATSScore,
+    onSuccess: (data) => {
+      setAtsScore(data.match_score);
+    },
+    onError: (error) => {
+      console.error("Error fetching ATS score:", error);
+      errorToast("Failed to fetch ATS score. Please try again.");
+    },
+  });
+
+  const jobApplyMutation = useMutation({
+    mutationFn: applyjob,
+    onSuccess: () => {
+      successToast("Job application submitted successfully!");
+    },
+    onError: () => {
+      errorToast("Failed to apply for the job. Please try again.");
+    },
+  });
 
   useEffect(() => {
     const sessionToken = localStorage.getItem("sessionId");
@@ -31,30 +68,17 @@ export default function JobView({ jobId }: { jobId: number }) {
       setToken(sessionToken);
     }
 
-    // Check if resume exists in local storage
-    const resumeExists = localStorage.getItem("resume");
-    if (resumeExists) {
-      setHasResume(true);
-      setResume(resumeExists);
+    const userId = localStorage.getItem("userId");
+    if (userId) {
+      setUserId(Number(userId));
     }
-  }, []);
 
-  const { isPending, isError, data, error } = useQuery<IJobByIDResponse>({
-    queryKey: ["getJobById", jobId],
-    queryFn: () => getJobById(jobId, token),
-    enabled: !!token,
-  });
-
-  const atsMutation = useMutation({
-    mutationFn: getATSScore,
-    onSuccess: (data) => {
-      console.log(data);
-    },
-    onError: (error) => {
-      console.error("Error fetching ATS score:", error);
-      errorToast("Failed to fetch ATS score. Please try again.");
-    },
-  });
+    const resumeExist = userQuery.data?.CONTENT.resume;
+    if (resumeExist) {
+      setResume(resumeExist);
+      setHasResume(true);
+    }
+  }, [userQuery.data]);
 
   const formatDate = (timestamp: number) => {
     if (!timestamp) return "N/A";
@@ -70,7 +94,22 @@ export default function JobView({ jobId }: { jobId: number }) {
     setApplyWarning(true);
   };
 
-  if (isPending) {
+  const handleConfirmApplyJob = () => {
+    // Add job application logic here
+    const data = {
+      userId: Number(userQuery.data?.CONTENT.id),
+      jobId: Number(jobQuery.data?.CONTENT.id),
+      token: token,
+    };
+
+    jobApplyMutation.mutate(data);
+    setApplyWarning(false);
+
+    // Show success message to user
+    successToast("Your job application has been successfully submitted.");
+  };
+
+  if (jobQuery.isPending) {
     return (
       <div className="flex justify-center items-center min-h-[60vh]">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#FFBF2F]"></div>
@@ -78,14 +117,14 @@ export default function JobView({ jobId }: { jobId: number }) {
     );
   }
 
-  if (isError) {
+  if (jobQuery.isError) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh]">
         <div className="bg-red-50 p-4 rounded-lg text-red-700 max-w-md">
           <h3 className="font-bold mb-2">Error loading job details</h3>
           <p>
-            {error instanceof Error
-              ? error.message
+            {jobQuery.error instanceof Error
+              ? jobQuery.error.message
               : "An unknown error occurred"}
           </p>
         </div>
@@ -96,7 +135,7 @@ export default function JobView({ jobId }: { jobId: number }) {
     );
   }
 
-  if (!data) {
+  if (!jobQuery.data) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh]">
         <div className="bg-amber-50 p-4 rounded-lg text-amber-700 max-w-md">
@@ -115,10 +154,28 @@ export default function JobView({ jobId }: { jobId: number }) {
 
   if (applyWarning) {
     const handleAtsCheck = () => {
-      atsMutation.mutate({
-        resume_url: resume,
-        job_description: data?.CONTENT.jobDescription,
-      });
+      if (!resume) {
+        errorToast("Please upload your resume first");
+        return;
+      }
+
+      setIsCheckingAts(true);
+      atsMutation.mutate(
+        {
+          resume_url: resume,
+          job_description: jobQuery.data?.CONTENT.jobDescription,
+        },
+        {
+          onSuccess: () => {
+            setIsCheckingAts(false);
+            setShowAtsCheck(true);
+          },
+          onError: () => {
+            setIsCheckingAts(false);
+            errorToast("Failed to check ATS score. Please try again.");
+          },
+        }
+      );
     };
 
     return (
@@ -154,7 +211,7 @@ export default function JobView({ jobId }: { jobId: number }) {
                 </h2>
                 <p className="text-gray-600 mt-2">
                   Are you sure you want to apply for this position at{" "}
-                  {data?.CONTENT.companyDTO.companyName}?
+                  {jobQuery.data?.CONTENT.companyDTO.companyName}?
                 </p>
               </div>
 
@@ -175,7 +232,7 @@ export default function JobView({ jobId }: { jobId: number }) {
                     />
                   </svg>
                   <span className="font-medium text-gray-700">
-                    {data?.CONTENT.jobTitle}
+                    {jobQuery.data?.CONTENT.jobTitle}
                   </span>
                 </div>
                 <div className="flex items-center text-sm text-gray-500">
@@ -199,7 +256,7 @@ export default function JobView({ jobId }: { jobId: number }) {
                       d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
                     />
                   </svg>
-                  <span>{data?.CONTENT.jobLocation}</span>
+                  <span>{jobQuery.data?.CONTENT.jobLocation}</span>
                 </div>
               </div>
 
@@ -228,20 +285,76 @@ export default function JobView({ jobId }: { jobId: number }) {
                 </div>
 
                 {hasResume ? (
-                  <button
-                    onClick={handleAtsCheck}
-                    disabled={isCheckingAts}
-                    className="mt-3 w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 rounded-lg font-medium text-white transition-colors duration-300 flex justify-center items-center"
-                  >
-                    {isCheckingAts ? (
-                      <>
-                        <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-white mr-3"></div>
-                        Checking...
-                      </>
-                    ) : (
-                      "Check ATS Score"
-                    )}
-                  </button>
+                  <div className="mt-3 space-y-3">
+                    <button
+                      onClick={handleAtsCheck}
+                      disabled={isCheckingAts}
+                      className="w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 rounded-lg font-medium text-white transition-colors duration-300 flex justify-center items-center"
+                    >
+                      {isCheckingAts ? (
+                        <>
+                          <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-white mr-3"></div>
+                          Checking ATS Score...
+                        </>
+                      ) : (
+                        <>
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-5 w-5 mr-2"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+                            />
+                          </svg>
+                          Check ATS Score
+                        </>
+                      )}
+                    </button>
+
+                    <label className="w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 rounded-lg font-medium text-white transition-colors duration-300 flex justify-center items-center cursor-pointer">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-5 w-5 mr-2"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                        />
+                      </svg>
+                      Update Resume
+                      <input
+                        type="file"
+                        className="hidden"
+                        accept=".pdf,.doc,.docx"
+                        onChange={async (e) => {
+                          if (e.target.files && e.target.files[0]) {
+                            const file = e.target.files[0];
+                            const url = await uploadResume(file);
+                            if (!url) {
+                              errorToast(
+                                "Failed to upload resume. Please try again."
+                              );
+                              return;
+                            }
+                            setResume(url);
+                            setHasResume(true);
+                            localStorage.setItem("userResume", url);
+                          }
+                        }}
+                      />
+                    </label>
+                  </div>
                 ) : (
                   <div className="mt-3">
                     <div className="mb-2 text-sm text-amber-600 bg-amber-50 p-2 rounded-lg flex items-start">
@@ -291,14 +404,35 @@ export default function JobView({ jobId }: { jobId: number }) {
                               );
                               return;
                             }
-                            localStorage.setItem("userResume", url);
+                            setResume(url);
                             setHasResume(true);
+                            localStorage.setItem("userResume", url);
                           }
                         }}
                       />
                     </label>
                   </div>
                 )}
+              </div>
+
+              <div className="flex flex-col sm:flex-row gap-4 mt-6">
+                <button
+                  onClick={() => setApplyWarning(false)}
+                  className="py-3 px-6 bg-gray-200 hover:bg-gray-300 rounded-xl font-medium text-gray-800 transition-colors duration-300 flex-1 flex justify-center items-center"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleConfirmApplyJob}
+                  disabled={!hasResume}
+                  className={`py-3 px-6 rounded-xl font-bold text-white transition-all duration-300 shadow-md hover:shadow-lg flex-1 flex justify-center items-center ${
+                    hasResume
+                      ? "bg-gradient-to-r from-[#FFBF2F] to-[#FFD700] hover:from-[#F0B020] hover:to-[#F0C000]"
+                      : "bg-gray-400 cursor-not-allowed"
+                  }`}
+                >
+                  Apply Now
+                </button>
               </div>
 
               <div className="mt-4 text-center text-xs text-gray-500">
@@ -372,16 +506,16 @@ export default function JobView({ jobId }: { jobId: number }) {
                     <svg className="w-full h-full" viewBox="0 0 36 36">
                       <path
                         d="M18 2.0845
-                          a 15.9155 15.9155 0 0 1 0 31.831
-                          a 15.9155 15.9155 0 0 1 0 -31.831"
+                a 15.9155 15.9155 0 0 1 0 31.831
+                a 15.9155 15.9155 0 0 1 0 -31.831"
                         fill="none"
                         stroke="#eee"
                         strokeWidth="3"
                       />
                       <path
                         d="M18 2.0845
-                          a 15.9155 15.9155 0 0 1 0 31.831
-                          a 15.9155 15.9155 0 0 1 0 -31.831"
+                a 15.9155 15.9155 0 0 1 0 31.831
+                a 15.9155 15.9155 0 0 1 0 -31.831"
                         fill="none"
                         stroke={
                           atsScore && atsScore >= 80
@@ -409,175 +543,28 @@ export default function JobView({ jobId }: { jobId: number }) {
 
               <div className="bg-gray-50 p-4 rounded-xl mb-6">
                 <h3 className="font-medium text-gray-800 mb-2">
-                  Resume Analysis
+                  Resume Analysis Result
                 </h3>
-                <ul className="space-y-2">
-                  {atsScore && atsScore >= 80 ? (
-                    <>
-                      <li className="flex items-start">
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          className="h-5 w-5 text-green-500 mr-2 mt-0.5"
-                          viewBox="0 0 20 20"
-                          fill="currentColor"
-                        >
-                          <path
-                            fillRule="evenodd"
-                            d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                            clipRule="evenodd"
-                          />
-                        </svg>
-                        <span className="text-gray-700 text-sm">
-                          Keywords match the job requirements well
-                        </span>
-                      </li>
-                      <li className="flex items-start">
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          className="h-5 w-5 text-green-500 mr-2 mt-0.5"
-                          viewBox="0 0 20 20"
-                          fill="currentColor"
-                        >
-                          <path
-                            fillRule="evenodd"
-                            d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                            clipRule="evenodd"
-                          />
-                        </svg>
-                        <span className="text-gray-700 text-sm">
-                          Resume formatting is ATS-friendly
-                        </span>
-                      </li>
-                      <li className="flex items-start">
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          className="h-5 w-5 text-green-500 mr-2 mt-0.5"
-                          viewBox="0 0 20 20"
-                          fill="currentColor"
-                        >
-                          <path
-                            fillRule="evenodd"
-                            d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                            clipRule="evenodd"
-                          />
-                        </svg>
-                        <span className="text-gray-700 text-sm">
-                          Skills section aligns with job requirements
-                        </span>
-                      </li>
-                    </>
-                  ) : atsScore && atsScore >= 70 ? (
-                    <>
-                      <li className="flex items-start">
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          className="h-5 w-5 text-green-500 mr-2 mt-0.5"
-                          viewBox="0 0 20 20"
-                          fill="currentColor"
-                        >
-                          <path
-                            fillRule="evenodd"
-                            d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                            clipRule="evenodd"
-                          />
-                        </svg>
-                        <span className="text-gray-700 text-sm">
-                          Basic skills match the job requirements
-                        </span>
-                      </li>
-                      <li className="flex items-start">
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          className="h-5 w-5 text-amber-500 mr-2 mt-0.5"
-                          viewBox="0 0 20 20"
-                          fill="currentColor"
-                        >
-                          <path
-                            fillRule="evenodd"
-                            d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
-                            clipRule="evenodd"
-                          />
-                        </svg>
-                        <span className="text-gray-700 text-sm">
-                          Consider adding more relevant keywords
-                        </span>
-                      </li>
-                      <li className="flex items-start">
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          className="h-5 w-5 text-amber-500 mr-2 mt-0.5"
-                          viewBox="0 0 20 20"
-                          fill="currentColor"
-                        >
-                          <path
-                            fillRule="evenodd"
-                            d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
-                            clipRule="evenodd"
-                          />
-                        </svg>
-                        <span className="text-gray-700 text-sm">
-                          Resume format could be improved for ATS
-                        </span>
-                      </li>
-                    </>
-                  ) : (
-                    <>
-                      <li className="flex items-start">
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          className="h-5 w-5 text-red-500 mr-2 mt-0.5"
-                          viewBox="0 0 20 20"
-                          fill="currentColor"
-                        >
-                          <path
-                            fillRule="evenodd"
-                            d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-                            clipRule="evenodd"
-                          />
-                        </svg>
-                        <span className="text-gray-700 text-sm">
-                          Missing key skills required for this position
-                        </span>
-                      </li>
-                      <li className="flex items-start">
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          className="h-5 w-5 text-red-500 mr-2 mt-0.5"
-                          viewBox="0 0 20 20"
-                          fill="currentColor"
-                        >
-                          <path
-                            fillRule="evenodd"
-                            d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-                            clipRule="evenodd"
-                          />
-                        </svg>
-                        <span className="text-gray-700 text-sm">
-                          Resume format not optimized for ATS
-                        </span>
-                      </li>
-                      <li className="flex items-start">
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          className="h-5 w-5 text-red-500 mr-2 mt-0.5"
-                          viewBox="0 0 20 20"
-                          fill="currentColor"
-                        >
-                          <path
-                            fillRule="evenodd"
-                            d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-                            clipRule="evenodd"
-                          />
-                        </svg>
-                        <span className="text-gray-700 text-sm">
-                          Low keyword relevance to job description
-                        </span>
-                      </li>
-                    </>
-                  )}
-                </ul>
+
+                {atsScore && atsScore >= 80 ? (
+                  <div className="p-3 bg-green-50 border border-green-100 rounded-lg text-green-700 text-sm">
+                    <strong>Great job!</strong> Your resume is well-optimized
+                    for this position.
+                  </div>
+                ) : atsScore && atsScore >= 70 ? (
+                  <div className="p-3 bg-amber-50 border border-amber-100 rounded-lg text-amber-700 text-sm">
+                    <strong>Room for improvement!</strong> Your resume has
+                    potential but might benefit from more job-specific keywords.
+                  </div>
+                ) : (
+                  <div className="p-3 bg-red-50 border border-red-100 rounded-lg text-red-700 text-sm">
+                    <strong>Important!</strong> Your resume may not pass ATS
+                    screening. Consider updating your resume.
+                  </div>
+                )}
               </div>
 
+              {/* Always show buttons regardless of score */}
               <div className="flex flex-col sm:flex-row gap-4 mt-6">
                 <button
                   onClick={() => setShowAtsCheck(false)}
@@ -586,18 +573,15 @@ export default function JobView({ jobId }: { jobId: number }) {
                   Back
                 </button>
                 <button
-                  // onClick={handleConfirmApplyJob}
+                  onClick={handleConfirmApplyJob}
                   className="py-3 px-6 bg-gradient-to-r from-[#FFBF2F] to-[#FFD700] hover:from-[#F0B020] hover:to-[#F0C000] rounded-xl font-bold text-white transition-all duration-300 shadow-md hover:shadow-lg flex-1 flex justify-center items-center"
                 >
-                  Apply
+                  Apply Now
                 </button>
               </div>
 
               <div className="mt-4 text-center text-xs text-gray-500">
-                <p>
-                  We recommend updating your resume for a better match before
-                  applying
-                </p>
+                <p>Your profile and resume will be shared with the employer</p>
               </div>
             </>
           )}
@@ -606,7 +590,7 @@ export default function JobView({ jobId }: { jobId: number }) {
     );
   }
 
-  const dataResponse: IJobByIDResponse = data;
+  const dataResponse: IJobByIDResponse = jobQuery.data;
   const job = dataResponse.CONTENT;
   const company = job.companyDTO;
   const category = job.categoryDTO;

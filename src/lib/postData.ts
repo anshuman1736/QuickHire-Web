@@ -115,7 +115,38 @@ interface IATSResponse {
 
 export async function getATSScore(form: IATSRequest): Promise<IATSResponse> {
   try {
-    const response = await axios.post(`${ML_BACKEND_URL}/api/match`, form);
+    const response = await axios.post(`${ML_BACKEND_URL}/api/match/`, form);
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      const serverMessage = error.response?.data?.message || error.message;
+      throw new Error(serverMessage);
+    }
+    throw error;
+  }
+}
+
+interface IApplyJobRequest {
+  jobId: number;
+  userId: number;
+  token: string;
+}
+
+export async function applyjob(form: IApplyJobRequest) {
+  try {
+    const response = await axios.post(
+      `${BACKEND_URL}/job/apply`,
+      {
+        jobId: form.jobId,
+        userId: form.userId,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${form.token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
     return response.data;
   } catch (error) {
     if (axios.isAxiosError(error)) {

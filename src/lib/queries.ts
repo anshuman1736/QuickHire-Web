@@ -2,6 +2,7 @@ import axios from "axios";
 import { BACKEND_URL, ML_BACKEND_URL } from "./config";
 import { ICategoryResponse } from "@/types/auth";
 import { JobPosting, MatchJobResponse } from "@/types/job";
+import { UserProfile } from "@/types/user";
 
 export async function getCatogory() {
   try {
@@ -203,6 +204,33 @@ export async function getJobByCategory(categoryId: number) {
     if (axios.isAxiosError(error)) {
       throw new Error(
         error.response?.data?.message || "Failed to fetch jobs by category"
+      );
+    }
+    throw new Error("An unexpected error occurred");
+  }
+}
+
+interface IUserByIdResponse {
+  STS: string;
+  MSG: string;
+  CONTENT: UserProfile;
+}
+
+export async function getUserById(
+  userId: number,
+  token: string
+): Promise<IUserByIdResponse> {
+  try {
+    const res = await axios.get(`${BACKEND_URL}/user/${userId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return res.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      throw new Error(
+        error.response?.data?.message || "Failed to fetch user by ID"
       );
     }
     throw new Error("An unexpected error occurred");
