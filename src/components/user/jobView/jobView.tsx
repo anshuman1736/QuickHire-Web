@@ -123,9 +123,6 @@ export default function JobView({ jobId }: { jobId: number }) {
         resume: url,
       };
       uploadResumeMutation.mutate(form);
-      setResume(url);
-      setHasResume(true);
-    }
   };
 
   const handleApplyJob = (e: MouseEvent<HTMLButtonElement>) => {
