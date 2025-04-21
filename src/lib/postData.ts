@@ -1,7 +1,8 @@
-import { BACKEND_URL, ML_BACKEND_URL } from "@/lib/config";
+import { BACKEND_URL, PYTHON_BACKEND_URL } from "@/lib/config";
 import { ILogin, IUserRegister } from "@/types/auth";
 import { ICompanyRegister } from "@/types/auth";
 import { IJobPost } from "@/types/job";
+import { IUpdateUserRequest } from "@/types/user";
 import axios from "axios";
 
 interface IJobPostfn extends IJobPost {
@@ -67,6 +68,25 @@ export const verifyEmail = async (email: string) => {
   }
 };
 
+
+export const updateUser = async (form: IUpdateUserRequest, userId: number, token: string) => {
+  try {
+    const response = await axios.put(`${BACKEND_URL}/user/updateUser/${userId}`, form, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      const serverMessage = error.response?.data?.message || error.message;
+      throw new Error(serverMessage);
+    }
+    throw error;
+  }
+}
+
 export const postJob = async (form: IJobPostfn) => {
   console.log("form", form);
   try {
@@ -115,7 +135,7 @@ interface IATSResponse {
 
 export async function getATSScore(form: IATSRequest): Promise<IATSResponse> {
   try {
-    const response = await axios.post(`${ML_BACKEND_URL}/api/match/`, form);
+    const response = await axios.post(`${PYTHON_BACKEND_URL}/api/match/`, form);
     return response.data;
   } catch (error) {
     if (axios.isAxiosError(error)) {
@@ -135,7 +155,7 @@ interface IApplyJobRequest {
 export async function applyjob(form: IApplyJobRequest) {
   try {
     const response = await axios.post(
-      `${BACKEND_URL}/job/apply`,
+      `${BACKEND_URL}/application/`,
       {
         jobId: form.jobId,
         userId: form.userId,

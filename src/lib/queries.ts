@@ -1,5 +1,5 @@
 import axios from "axios";
-import { BACKEND_URL, ML_BACKEND_URL } from "./config";
+import { BACKEND_URL, PYTHON_BACKEND_URL } from "./config";
 import { ICategoryResponse } from "@/types/auth";
 import { JobPosting, MatchJobResponse } from "@/types/job";
 import { UserProfile } from "@/types/user";
@@ -90,7 +90,7 @@ export async function getRecomdedJob(
 ): Promise<MatchJobResponse[]> {
   try {
     const res = await axios.get(
-      `${ML_BACKEND_URL}/api/match-jobs-ai/${userId}`
+      `${PYTHON_BACKEND_URL}/api/match-jobs-ai/${userId}`
     );
     return res.data;
   } catch (error) {
