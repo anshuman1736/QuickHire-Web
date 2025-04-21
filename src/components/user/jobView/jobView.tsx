@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, MouseEvent } from "react";
+import { useState, useEffect, MouseEvent, ChangeEvent } from "react";
 import Link from "next/link";
 import { X } from "lucide-react";
 import { useMutation, useQueries } from "@tanstack/react-query";
@@ -8,7 +8,8 @@ import { getJobById, getUserById } from "@/lib/queries";
 import { JobPosting } from "@/types/job";
 import { uploadResume } from "@/lib/uploadTofirebase";
 import { errorToast, successToast } from "@/lib/toast";
-import { applyjob, getATSScore } from "@/lib/postData";
+import { applyjob, getATSScore, updateUser } from "@/lib/postData";
+import { IUpdateUserRequest } from "@/types/user";
 
 interface IJobByIDResponse {
   STS: string;
@@ -62,6 +63,17 @@ export default function JobView({ jobId }: { jobId: number }) {
     },
   });
 
+  const uploadResumeMutation = useMutation({
+    mutationFn: (form: IUpdateUserRequest) => updateUser(form, userId, token),
+    onSuccess: (url) => {
+      setResume(url);
+      setHasResume(true);
+    },
+    onError: () => {
+      errorToast("Failed to upload resume. Please try again.");
+    },
+  });
+
   useEffect(() => {
     const sessionToken = localStorage.getItem("sessionId");
     if (sessionToken) {
@@ -87,6 +99,33 @@ export default function JobView({ jobId }: { jobId: number }) {
       month: "long",
       day: "numeric",
     });
+  };
+
+  const handleResumeUpload = async (e: ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      const url = await uploadResume(file);
+      if (!url) {
+        errorToast("Failed to upload resume. Please try again.");
+        return;
+      }
+      const form: IUpdateUserRequest = {
+        address: userQuery.data?.CONTENT.address,
+        categoryId: userQuery.data?.CONTENT.categoryId,
+        categoryName: userQuery.data?.CONTENT.categoryName,
+        completeProfile: userQuery.data?.CONTENT.completeProfile,
+        email: userQuery.data?.CONTENT.email,
+        fullName: userQuery.data?.CONTENT.fullName,
+        id: userQuery.data?.CONTENT.id,
+        majorIntrest: userQuery.data?.CONTENT.majorIntrest,
+        phoneNo: userQuery.data?.CONTENT.phoneNo,
+        profile_pic: userQuery.data?.CONTENT.profile_pic,
+        resume: url,
+      };
+      uploadResumeMutation.mutate(form);
+      setResume(url);
+      setHasResume(true);
+    }
   };
 
   const handleApplyJob = (e: MouseEvent<HTMLButtonElement>) => {
@@ -335,21 +374,7 @@ export default function JobView({ jobId }: { jobId: number }) {
                         type="file"
                         className="hidden"
                         accept=".pdf,.doc,.docx"
-                        onChange={async (e) => {
-                          if (e.target.files && e.target.files[0]) {
-                            const file = e.target.files[0];
-                            const url = await uploadResume(file);
-                            if (!url) {
-                              errorToast(
-                                "Failed to upload resume. Please try again."
-                              );
-                              return;
-                            }
-                            setResume(url);
-                            setHasResume(true);
-                            localStorage.setItem("userResume", url);
-                          }
-                        }}
+                        onChange={handleResumeUpload}
                       />
                     </label>
                   </div>
@@ -392,21 +417,7 @@ export default function JobView({ jobId }: { jobId: number }) {
                         type="file"
                         className="hidden"
                         accept=".pdf,.doc,.docx"
-                        onChange={async (e) => {
-                          if (e.target.files && e.target.files[0]) {
-                            const file = e.target.files[0];
-                            const url = await uploadResume(file);
-                            if (!url) {
-                              errorToast(
-                                "Failed to upload resume. Please try again."
-                              );
-                              return;
-                            }
-                            setResume(url);
-                            setHasResume(true);
-                            localStorage.setItem("userResume", url);
-                          }
-                        }}
+                        onChange={handleResumeUpload}
                       />
                     </label>
                   </div>
