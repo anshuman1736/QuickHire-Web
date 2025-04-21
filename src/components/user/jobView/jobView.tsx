@@ -95,7 +95,6 @@ export default function JobView({ jobId }: { jobId: number }) {
   };
 
   const handleConfirmApplyJob = () => {
-    // Add job application logic here
     const data = {
       userId: Number(userQuery.data?.CONTENT.id),
       jobId: Number(jobQuery.data?.CONTENT.id),
@@ -105,7 +104,6 @@ export default function JobView({ jobId }: { jobId: number }) {
     jobApplyMutation.mutate(data);
     setApplyWarning(false);
 
-    // Show success message to user
     successToast("Your job application has been successfully submitted.");
   };
 
@@ -505,17 +503,13 @@ export default function JobView({ jobId }: { jobId: number }) {
                   <div className="relative w-40 h-40">
                     <svg className="w-full h-full" viewBox="0 0 36 36">
                       <path
-                        d="M18 2.0845
-                a 15.9155 15.9155 0 0 1 0 31.831
-                a 15.9155 15.9155 0 0 1 0 -31.831"
+                        d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
                         fill="none"
                         stroke="#eee"
                         strokeWidth="3"
                       />
                       <path
-                        d="M18 2.0845
-                a 15.9155 15.9155 0 0 1 0 31.831
-                a 15.9155 15.9155 0 0 1 0 -31.831"
+                        d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
                         fill="none"
                         stroke={
                           atsScore && atsScore >= 80
@@ -527,12 +521,15 @@ export default function JobView({ jobId }: { jobId: number }) {
                         strokeWidth="3"
                         strokeDasharray={`${atsScore || 0}, 100`}
                       />
+                      {/* Fixed text element to ensure visibility */}
                       <text
                         x="18"
-                        y="20.35"
-                        className="text-5xl font-bold"
+                        y="18"
                         textAnchor="middle"
                         fill="#333"
+                        fontWeight="bold"
+                        fontSize="7px"
+                        dominantBaseline="middle"
                       >
                         {atsScore}%
                       </text>
