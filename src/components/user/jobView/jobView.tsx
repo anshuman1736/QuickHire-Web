@@ -123,6 +123,7 @@ export default function JobView({ jobId }: { jobId: number }) {
         resume: url,
       };
       uploadResumeMutation.mutate(form);
+    }
   };
 
   const handleApplyJob = (e: MouseEvent<HTMLButtonElement>) => {
@@ -375,7 +376,7 @@ export default function JobView({ jobId }: { jobId: number }) {
                           handleResumeUpload(event);
                           const file = event.target.files?.[0];
                           if (file) {
-                            localStorage.setItem('userResume', file.name);
+                            localStorage.setItem("userResume", file.name);
                           }
                         }}
                       />
