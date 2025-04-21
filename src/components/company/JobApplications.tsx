@@ -4,10 +4,17 @@ import { getJobByCompanyId } from "@/lib/queries";
 import { useQuery } from "@tanstack/react-query";
 import { formatDistanceToNow } from "date-fns";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 
 export default function JobApplicaiton() {
-  const token = localStorage.getItem("sessionId") || "";
-  const companyId = Number(localStorage.getItem("companyId"));
+  const [token, setToken] = useState("");
+  const [companyId, setCompanyId] = useState<number>(0);
+
+  useEffect(() => {
+    setToken(localStorage.getItem("sessionId") || "");
+    setCompanyId(Number(localStorage.getItem("companyId")));
+  }, []);
+
   const { isPending, isError, data, error } = useQuery({
     queryKey: ["jobByCompanyId"],
     queryFn: () => getJobByCompanyId(companyId, token),
@@ -193,11 +200,11 @@ export default function JobApplicaiton() {
                     </div>
 
                     <div className="flex flex-col items-end gap-4">
-                      <div className="bg-green-100 px-4 py-2 rounded-lg">
+                      {/* <div className="bg-green-100 px-4 py-2 rounded-lg">
                         <span className="text-green-800 font-semibold">
                           {0} Applications
                         </span>
-                      </div>
+                      </div> */}
                       <div className="flex items-center gap-3">
                         <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-lg text-sm font-medium">
                           {job.jobType}

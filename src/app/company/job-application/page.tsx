@@ -1,7 +1,5 @@
 import JobApplicaiton from "@/components/company/JobApplications";
 
-const page = () => {
+export default function page() {
   return <JobApplicaiton />;
-};
-
-export default page;
+}

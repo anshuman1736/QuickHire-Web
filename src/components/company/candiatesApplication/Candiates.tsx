@@ -1,12 +1,12 @@
-"use client"
+"use client";
 import React, { useState } from "react";
 import { Briefcase, ArrowLeft, Search, Clock, Filter } from "lucide-react";
 import Link from "next/link";
 
-const Candidates = () => {
+export default function CandiatesCompo() {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterRole, setFilterRole] = useState("");
-  
+
   const candidates = [
     {
       name: "Daniel Joe",
@@ -66,11 +66,12 @@ const Candidates = () => {
     },
   ];
 
-  const roles = [...new Set(candidates.map(candidate => candidate.role))];
-  
-  const filteredCandidates = candidates.filter(candidate => {
-    const matchesSearch = candidate.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                        candidate.role.toLowerCase().includes(searchTerm.toLowerCase());
+  const roles = [...new Set(candidates.map((candidate) => candidate.role))];
+
+  const filteredCandidates = candidates.filter((candidate) => {
+    const matchesSearch =
+      candidate.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      candidate.role.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesRole = filterRole === "" || candidate.role === filterRole;
     return matchesSearch && matchesRole;
   });
@@ -80,15 +81,18 @@ const Candidates = () => {
       <div className="max-w-7xl mx-auto space-y-6">
         <div className="flex items-center gap-2 text-gray-600 mb-4 transition-all hover:text-blue-600">
           <ArrowLeft className="w-4 h-4" />
-          <Link href="/company/job-application" className="text-blue-500 hover:text-blue-700">
+          <Link
+            href="/company/job-application"
+            className="text-blue-500 hover:text-blue-700"
+          >
             Back to Applications
           </Link>
         </div>
-        
+
         <h1 className="text-2xl md:text-3xl font-semibold text-gray-800">
           Applications for Web Development
         </h1>
-        
+
         <div className="flex flex-col md:flex-row gap-4 mb-6">
           <div className="relative flex-grow">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -102,7 +106,7 @@ const Candidates = () => {
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
-          
+
           <div className="relative">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <Filter className="h-5 w-5 text-gray-400" />
@@ -114,21 +118,26 @@ const Candidates = () => {
             >
               <option value="">All Roles</option>
               {roles.map((role, idx) => (
-                <option key={idx} value={role}>{role}</option>
+                <option key={idx} value={role}>
+                  {role}
+                </option>
               ))}
             </select>
           </div>
         </div>
-        
+
         <div className="text-gray-600 mb-4 flex items-center gap-2">
-          <Clock className="w-4 h-4" /> 
-          <span>Showing {filteredCandidates.length} of {candidates.length} candidates</span>
+          <Clock className="w-4 h-4" />
+          <span>
+            Showing {filteredCandidates.length} of {candidates.length}{" "}
+            candidates
+          </span>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredCandidates.map((candidate, idx) => (
-            <div 
-              key={idx} 
+            <div
+              key={idx}
               className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-all duration-300"
             >
               <div className="flex gap-4 items-start mb-6">
@@ -143,12 +152,12 @@ const Candidates = () => {
                   </h2>
                   <p className="text-blue-600 font-medium">{candidate.role}</p>
                   <p className="text-sm text-gray-600 flex items-center gap-1">
-                    <Briefcase className="w-4 h-4" /> 
+                    <Briefcase className="w-4 h-4" />
                     <span>{candidate.experience} experience</span>
                   </p>
                 </div>
               </div>
-              
+
               <div className="flex items-center justify-between border-t pt-4">
                 <p className="text-gray-500 text-sm">
                   {candidate.timeAgo} · by {candidate.postedBy}
@@ -160,12 +169,14 @@ const Candidates = () => {
             </div>
           ))}
         </div>
-        
+
         {/* Empty State */}
         {filteredCandidates.length === 0 && (
           <div className="text-center py-12">
-            <p className="text-gray-500">No candidates found matching your search criteria.</p>
-            <button 
+            <p className="text-gray-500">
+              No candidates found matching your search criteria.
+            </p>
+            <button
               className="mt-4 text-blue-500 hover:text-blue-700"
               onClick={() => {
                 setSearchTerm("");
@@ -179,6 +190,4 @@ const Candidates = () => {
       </div>
     </div>
   );
-};
-
-export default Candidates;
+}
