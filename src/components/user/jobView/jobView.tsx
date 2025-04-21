@@ -371,7 +371,13 @@ export default function JobView({ jobId }: { jobId: number }) {
                         type="file"
                         className="hidden"
                         accept=".pdf,.doc,.docx"
-                        onChange={handleResumeUpload}
+                        onChange={(event) => {
+                          handleResumeUpload(event);
+                          const file = event.target.files?.[0];
+                          if (file) {
+                            localStorage.setItem('userResume', file.name);
+                          }
+                        }}
                       />
                     </label>
                   </div>
