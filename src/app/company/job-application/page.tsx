@@ -1,11 +1,7 @@
-
-import JobHstry from '@/components/company/JobApplications'
-import React from 'react'
+import JobApplicaiton from "@/components/company/JobApplications";
 
 const page = () => {
-  return (
-    <JobHstry/>
-  )
-}
+  return <JobApplicaiton />;
+};
 
-export default page
+export default page;

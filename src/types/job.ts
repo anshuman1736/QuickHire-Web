@@ -6,9 +6,9 @@ export interface IJobPost {
   salary: string;
   jobType: string;
   categoryId: number;
-  skills: string;           
-  experience: string;       
-  jobEligibility: string;   
+  skills: string;
+  experience: string;
+  jobEligibility: string;
 }
 
 export interface JobPosting {
@@ -20,12 +20,13 @@ export interface JobPosting {
   salary: string;
   jobType: string;
   skills: string;
+  experience: string;
+  jobEligibility: string;
   enabled: boolean;
   categoryId: number;
   creationDate: number;
   companyDTO: CompanyDTO;
   categoryDTO: CategoryDTO;
-  
 }
 
 interface CompanyDTO {

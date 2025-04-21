@@ -236,3 +236,33 @@ export async function getUserById(
     throw new Error("An unexpected error occurred");
   }
 }
+
+interface IJobByCompanyIdResponse {
+  STS: string;
+  MSG: string;
+  CONTENT: JobPosting[];
+}
+
+export async function getJobByCompanyId(
+  companyId: number,
+  token: string
+): Promise<IJobByCompanyIdResponse> {
+  try {
+    const res = await axios.get(
+      `${BACKEND_URL}/job/getJobsByCompany/${companyId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return res.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      throw new Error(
+        error.response?.data?.message || "Failed to fetch jobs by company ID"
+      );
+    }
+    throw new Error("An unexpected error occurred");
+  }
+}
