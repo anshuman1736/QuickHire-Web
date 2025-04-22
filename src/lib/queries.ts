@@ -1,7 +1,7 @@
 import axios from "axios";
 import { BACKEND_URL, PYTHON_BACKEND_URL } from "./config";
 import { ICategoryResponse } from "@/types/auth";
-import { JobPosting, MatchJobResponse } from "@/types/job";
+import { JobApplication, JobPosting, MatchJobResponse } from "@/types/job";
 import { UserProfile } from "@/types/user";
 
 export async function getCatogory() {
@@ -145,20 +145,6 @@ export async function getApplicationById(applicationId: number) {
   }
 }
 
-export async function getApplicationByJobId(jobId: number) {
-  try {
-    const res = await axios.get(`${BACKEND_URL}/application/job/${jobId}`);
-    return res.data;
-  } catch (error) {
-    if (axios.isAxiosError(error)) {
-      throw new Error(
-        error.response?.data?.message || "Failed to fetch applications for job"
-      );
-    }
-    throw new Error("An unexpected error occurred");
-  }
-}
-
 export async function getEnabledApplicationAndJob(jobId: number) {
   try {
     const res = await axios.get(
@@ -261,6 +247,33 @@ export async function getJobByCompanyId(
     if (axios.isAxiosError(error)) {
       throw new Error(
         error.response?.data?.message || "Failed to fetch jobs by company ID"
+      );
+    }
+    throw new Error("An unexpected error occurred");
+  }
+}
+
+interface IApplicationByJobIdResponse {
+  STS: string;
+  MSG: string;
+  CONTENT: JobApplication[]
+}
+
+export async function getApplicationByJobId(jobId: number, token: string): Promise<IApplicationByJobIdResponse> {
+  try {
+    const res = await axios.get(
+      `${BACKEND_URL}/application/enabled/job/${jobId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return res.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      throw new Error(
+        error.response?.data?.message || "Failed to fetch applications for job"
       );
     }
     throw new Error("An unexpected error occurred");

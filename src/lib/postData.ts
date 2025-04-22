@@ -68,15 +68,22 @@ export const verifyEmail = async (email: string) => {
   }
 };
 
-
-export const updateUser = async (form: IUpdateUserRequest, userId: number, token: string) => {
+export const updateUser = async (
+  form: IUpdateUserRequest,
+  userId: number,
+  token: string
+) => {
   try {
-    const response = await axios.put(`${BACKEND_URL}/user/updateUser/${userId}`, form, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-    });
+    const response = await axios.put(
+      `${BACKEND_URL}/user/updateUser/${userId}`,
+      form,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
     return response.data;
   } catch (error) {
     if (axios.isAxiosError(error)) {
@@ -85,7 +92,7 @@ export const updateUser = async (form: IUpdateUserRequest, userId: number, token
     }
     throw error;
   }
-}
+};
 
 export const postJob = async (form: IJobPostfn) => {
   console.log("form", form);
@@ -160,6 +167,34 @@ export async function applyjob(form: IApplyJobRequest) {
         jobId: form.jobId,
         userId: form.userId,
       },
+      {
+        headers: {
+          Authorization: `Bearer ${form.token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      const serverMessage = error.response?.data?.message || error.message;
+      throw new Error(serverMessage);
+    }
+    throw error;
+  }
+}
+
+interface IRespondApplicationRequest {
+  applicationId: number;
+  token: string;
+  status: boolean;
+}
+
+export async function respondApplication(form: IRespondApplicationRequest) {
+  try {
+    const response = await axios.post(
+      `${BACKEND_URL}/application/status/${form.applicationId}/${form.status}`,
+      {},
       {
         headers: {
           Authorization: `Bearer ${form.token}`,

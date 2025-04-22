@@ -1,80 +1,148 @@
 "use client";
-import React, { useState } from "react";
-import { Briefcase, ArrowLeft, Search, Clock, Filter } from "lucide-react";
+
+import { useEffect, useState } from "react";
+import {
+  Briefcase,
+  ArrowLeft,
+  Search,
+  Clock,
+  Check,
+  CircleX,
+} from "lucide-react";
 import Link from "next/link";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { getApplicationByJobId } from "@/lib/queries";
+import { JobApplication } from "@/types/job";
+import { formatDistanceToNow } from "date-fns";
+import { respondApplication } from "@/lib/postData";
+import { successToast } from "@/lib/toast";
 
-export default function CandiatesCompo() {
+export default function CandiatesCompo({ jobId }: { jobId: number }) {
   const [searchTerm, setSearchTerm] = useState("");
-  const [filterRole, setFilterRole] = useState("");
+  const [filterStatus, setFilterStatus] = useState("all");
+  const [activeTab, setActiveTab] = useState("all");
+  const [token, setToken] = useState<string>("");
 
-  const candidates = [
-    {
-      name: "Daniel Joe",
-      role: "Web Developer",
-      experience: "3 yrs",
-      timeAgo: "2h ago",
-      postedBy: "Daniel Joe",
-    },
-    {
-      name: "Sophia Lane",
-      role: "UI/UX Designer",
-      experience: "2 yrs",
-      timeAgo: "5h ago",
-      postedBy: "Sophia Lane",
-    },
-    {
-      name: "Ethan Wright",
-      role: "Frontend Engineer",
-      experience: "4 yrs",
-      timeAgo: "1d ago",
-      postedBy: "Ethan Wright",
-    },
-    {
-      name: "Ava Patel",
-      role: "Backend Developer",
-      experience: "5 yrs",
-      timeAgo: "3d ago",
-      postedBy: "Ava Patel",
-    },
-    {
-      name: "Liam Chen",
-      role: "Full Stack Developer",
-      experience: "6 yrs",
-      timeAgo: "1h ago",
-      postedBy: "Liam Chen",
-    },
-    {
-      name: "Mia Gomez",
-      role: "Project Manager",
-      experience: "7 yrs",
-      timeAgo: "4h ago",
-      postedBy: "Mia Gomez",
-    },
-    {
-      name: "Noah Smith",
-      role: "DevOps Engineer",
-      experience: "4 yrs",
-      timeAgo: "2d ago",
-      postedBy: "Noah Smith",
-    },
-    {
-      name: "Emma Johnson",
-      role: "QA Tester",
-      experience: "3 yrs",
-      timeAgo: "6h ago",
-      postedBy: "Emma Johnson",
-    },
-  ];
+  useEffect(() => {
+    const storedToken = localStorage.getItem("sessionId");
+    if (storedToken) {
+      setToken(storedToken);
+    } else {
+      console.error("Token not found in local storage.");
+    }
+  }, []);
 
-  const roles = [...new Set(candidates.map((candidate) => candidate.role))];
-
-  const filteredCandidates = candidates.filter((candidate) => {
-    const matchesSearch =
-      candidate.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      candidate.role.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesRole = filterRole === "" || candidate.role === filterRole;
-    return matchesSearch && matchesRole;
+  const { isPending, isError, data } = useQuery({
+    queryKey: ["jobApplications", jobId, token],
+    queryFn: () => getApplicationByJobId(jobId, token),
+    enabled: !!token,
   });
+
+  const applicationMutation = useMutation({
+    mutationFn: respondApplication,
+    onSuccess: (data) => {
+      console.log("Application response:", data);
+      successToast("Application response sent successfully!");
+    },
+    onError: (error) => {
+      console.error("Error responding to application:", error);
+    },
+  });
+
+  const applications: JobApplication[] = data?.CONTENT || [];
+
+  const formatApplicationDate = (timestamp: number) => {
+    try {
+      return formatDistanceToNow(new Date(timestamp), { addSuffix: true });
+    } catch (error) {
+      console.error("Error formatting date:", error);
+      return "Unknown date";
+    }
+  };
+
+  const filteredApplications = applications.filter((application) => {
+    const matchesSearch =
+      application.userDTO.fullName
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase()) ||
+      application.userDTO.majorIntrest
+        ?.toLowerCase()
+        .includes(searchTerm.toLowerCase());
+
+    // Handle both dropdown filter and tabs
+    const matchesStatus =
+      filterStatus === "all" ||
+      (filterStatus === "approved" && application.status) ||
+      (filterStatus === "pending" && !application.status);
+
+    const matchesTab =
+      activeTab === "all" ||
+      (activeTab === "approved" && application.status === true) ||
+      (activeTab === "rejected" && application.status === null) ||
+      (activeTab === "pending" && application.status === false);
+
+    return matchesSearch && matchesStatus && matchesTab;
+  });
+
+  async function handleAcceptApplication(applicationId: number) {
+    if (!applicationId) return;
+    if (!token) return;
+    const form = {
+      applicationId: applicationId,
+      token: token,
+      status: true,
+    };
+    applicationMutation.mutate(form);
+  }
+
+  async function handleRejectApplication(applicationId: number) {
+    if (!applicationId) return;
+    const form = {
+      applicationId: applicationId,
+      token: token,
+      status: false,
+    };
+    applicationMutation.mutate(form);
+  }
+
+  if (isPending) {
+    return (
+      <div className="p-6 md:p-12 bg-gray-50 min-h-screen mt-11 flex justify-center items-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading applications...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="p-6 md:p-12 bg-gray-50 min-h-screen mt-11 flex justify-center items-center">
+        <div className="text-center">
+          <p className="text-red-500">
+            Error loading applications. Please try again later.
+          </p>
+          <Link
+            href="/company/job-application"
+            className="mt-4 text-blue-500 hover:text-blue-700 block"
+          >
+            Back to Applications
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  const jobTitle = applications[0]?.jobDTO.jobTitle || "This Position";
+
+  // Count applications by status
+  const counts = {
+    all: applications.length,
+    approved: applications.filter((app) => app.status === true).length,
+    rejected: applications.filter((app) => app.status === null).length,
+    pending: applications.filter((app) => app.status === false).length,
+  };
 
   return (
     <div className="p-6 md:p-12 bg-gray-50 min-h-screen mt-11">
@@ -90,8 +158,52 @@ export default function CandiatesCompo() {
         </div>
 
         <h1 className="text-2xl md:text-3xl font-semibold text-gray-800">
-          Applications for Web Development
+          Applications for {jobTitle}
         </h1>
+
+        {/* Status Tabs */}
+        <div className="flex overflow-x-auto border-b">
+          <button
+            onClick={() => setActiveTab("all")}
+            className={`px-4 py-2 whitespace-nowrap font-medium text-sm transition-colors duration-200 border-b-2 -mb-px ${
+              activeTab === "all"
+                ? "border-blue-500 text-blue-600"
+                : "border-transparent text-gray-500 hover:text-gray-700"
+            }`}
+          >
+            All ({counts.all})
+          </button>
+          <button
+            onClick={() => setActiveTab("pending")}
+            className={`px-4 py-2 whitespace-nowrap font-medium text-sm transition-colors duration-200 border-b-2 -mb-px ${
+              activeTab === "pending"
+                ? "border-blue-500 text-blue-600"
+                : "border-transparent text-gray-500 hover:text-gray-700"
+            }`}
+          >
+            Pending ({counts.pending})
+          </button>
+          <button
+            onClick={() => setActiveTab("approved")}
+            className={`px-4 py-2 whitespace-nowrap font-medium text-sm transition-colors duration-200 border-b-2 -mb-px ${
+              activeTab === "approved"
+                ? "border-blue-500 text-blue-600"
+                : "border-transparent text-gray-500 hover:text-gray-700"
+            }`}
+          >
+            Approved ({counts.approved})
+          </button>
+          <button
+            onClick={() => setActiveTab("rejected")}
+            className={`px-4 py-2 whitespace-nowrap font-medium text-sm transition-colors duration-200 border-b-2 -mb-px ${
+              activeTab === "rejected"
+                ? "border-blue-500 text-blue-600"
+                : "border-transparent text-gray-500 hover:text-gray-700"
+            }`}
+          >
+            Rejected ({counts.rejected})
+          </button>
+        </div>
 
         <div className="flex flex-col md:flex-row gap-4 mb-6">
           <div className="relative flex-grow">
@@ -106,81 +218,114 @@ export default function CandiatesCompo() {
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
-
-          <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <Filter className="h-5 w-5 text-gray-400" />
-            </div>
-            <select
-              className="pl-10 pr-8 py-2 border border-gray-300 rounded-lg appearance-none bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-              value={filterRole}
-              onChange={(e) => setFilterRole(e.target.value)}
-            >
-              <option value="">All Roles</option>
-              {roles.map((role, idx) => (
-                <option key={idx} value={role}>
-                  {role}
-                </option>
-              ))}
-            </select>
-          </div>
         </div>
 
         <div className="text-gray-600 mb-4 flex items-center gap-2">
           <Clock className="w-4 h-4" />
           <span>
-            Showing {filteredCandidates.length} of {candidates.length}{" "}
-            candidates
+            Showing {filteredApplications.length} of {applications.length}{" "}
+            applications
           </span>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredCandidates.map((candidate, idx) => (
+          {filteredApplications.map((application) => (
             <div
-              key={idx}
+              key={application.id}
               className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-all duration-300"
             >
               <div className="flex gap-4 items-start mb-6">
                 <div className="flex-shrink-0">
-                  <div className="h-16 w-16 rounded-full bg-gray-200 flex items-center justify-center text-gray-500">
-                    {candidate.name.charAt(0)}
-                  </div>
+                  {application.userDTO.profile_pic ? (
+                    <div className="h-16 w-16 rounded-full overflow-hidden">
+                      <img
+                        src={application.userDTO.profile_pic}
+                        alt={application.userDTO.fullName}
+                        width={64}
+                        height={64}
+                        className="h-full w-full object-cover"
+                      />
+                    </div>
+                  ) : (
+                    <div className="h-16 w-16 rounded-full bg-gray-200 flex items-center justify-center text-gray-500">
+                      {application.userDTO.fullName.charAt(0)}
+                    </div>
+                  )}
                 </div>
                 <div className="space-y-1 flex-grow">
                   <h2 className="text-xl font-semibold text-gray-800">
-                    {candidate.name}
+                    {application.userDTO.fullName}
                   </h2>
-                  <p className="text-blue-600 font-medium">{candidate.role}</p>
+                  <p className="text-blue-600 font-medium">
+                    {application.userDTO.majorIntrest || "Not specified"}
+                  </p>
                   <p className="text-sm text-gray-600 flex items-center gap-1">
                     <Briefcase className="w-4 h-4" />
-                    <span>{candidate.experience} experience</span>
+                    <span>Applicant ID: {application.userId}</span>
                   </p>
                 </div>
               </div>
 
-              <div className="flex items-center justify-between border-t pt-4">
-                <p className="text-gray-500 text-sm">
-                  {candidate.timeAgo} · by {candidate.postedBy}
-                </p>
-                <button className="px-4 py-2 rounded-lg bg-blue-500 hover:bg-blue-600 text-white font-medium text-sm transition-colors duration-200">
-                  View Application
-                </button>
+              <div className="flex items-center justify-between border-t pt-4 pb-2">
+                <div>
+                  <p className="text-gray-500 text-sm">
+                    {formatApplicationDate(application.applicationDate)}
+                  </p>
+                  <span
+                    className={`inline-block px-2 py-1 text-xs rounded-full mt-1 ${
+                      application.status === true
+                        ? "bg-green-100 text-green-800"
+                        : application.status === false
+                        ? "bg-gray-200 text-black"
+                        : "bg-yellow-100 text-yellow-800"
+                    }`}
+                  >
+                    {application.status === true
+                      ? "Approved"
+                      : application.status === false
+                      ? "Pending"
+                      : "Rejected"}
+                  </span>
+                </div>
+                <Link
+                  href={`/company/job-application/${jobId}/${application.id}`}
+                >
+                  <button className="px-4 py-2 rounded-lg bg-blue-500 hover:bg-blue-600 text-white font-medium text-sm transition-colors duration-200">
+                    View Application
+                  </button>
+                </Link>
+                <div className="justify-between border-t pt-4 flex gap-2">
+                  <button
+                    className="px-4 py-2 rounded-lg bg-red-100 hover:bg-red-200 text-red-600 font-medium text-sm transition-colors duration-200 cursor-pointer flex items-center gap-2"
+                    onClick={() => handleRejectApplication(application.id)}
+                  >
+                    <CircleX className="w-4 h-4" />
+                    Reject
+                  </button>
+                  <button
+                    className="px-4 py-2 rounded-lg bg-green-100 hover:bg-green-200 text-green-600 font-medium text-sm transition-colors duration-200 cursor-pointer flex items-center gap-2"
+                    onClick={() => handleAcceptApplication(application.id)}
+                  >
+                    <Check className="w-4 h-4" />
+                    Accept
+                  </button>
+                </div>
               </div>
             </div>
           ))}
         </div>
 
-        {/* Empty State */}
-        {filteredCandidates.length === 0 && (
+        {filteredApplications.length === 0 && (
           <div className="text-center py-12">
             <p className="text-gray-500">
-              No candidates found matching your search criteria.
+              No applications found matching your search criteria.
             </p>
             <button
               className="mt-4 text-blue-500 hover:text-blue-700"
               onClick={() => {
                 setSearchTerm("");
-                setFilterRole("");
+                setFilterStatus("all");
+                setActiveTab("all");
               }}
             >
               Clear filters
