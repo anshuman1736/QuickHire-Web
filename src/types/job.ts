@@ -67,6 +67,31 @@ export interface MatchedJob {
   job_skills: string;
 }
 
+export interface userDTO {
+  id: number;
+  fullName: string;
+  email: string;
+  phoneNo: string;
+  resume: string;
+  address: string;
+  profile_pic: string;
+  majorIntrest: string;
+  completeProfile: boolean;
+  categoryId: number;
+  categoryName: string;
+}
+
+export interface JobApplication {
+  id: number;
+  jobId: number;
+  userId: number;
+  applicationDate: number;
+  enabled: boolean;
+  status: boolean;
+  jobDTO: JobPosting;
+  userDTO: userDTO;
+}
+
 export interface MatchJobResponse {
   user_id: number;
   matched_jobs: MatchedJob[];
