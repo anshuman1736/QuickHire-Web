@@ -62,7 +62,6 @@ export default function JobApplicaiton() {
   };
 
   const jobPosts = data?.CONTENT || [];
-
   return (
     <div className="min-h-screen bg-gradient-to-r from-blue-100 to-white py-20 mt-6">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -200,11 +199,6 @@ export default function JobApplicaiton() {
                     </div>
 
                     <div className="flex flex-col items-end gap-4">
-                      {/* <div className="bg-green-100 px-4 py-2 rounded-lg">
-                        <span className="text-green-800 font-semibold">
-                          {0} Applications
-                        </span>
-                      </div> */}
                       <div className="flex items-center gap-3">
                         <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-lg text-sm font-medium">
                           {job.jobType}
@@ -217,9 +211,12 @@ export default function JobApplicaiton() {
                   </div>
 
                   <div className="mt-6 flex justify-end gap-4">
-                    <button className="px-6 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 transition duration-200 shadow-md">
+                    <Link
+                      href="/company/update-job"
+                      className="px-6 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 transition duration-200 shadow-md"
+                    >
                       Update Post
-                    </button>
+                    </Link>
                     <Link
                       href={`/company/job-application/${job.id}/candidates`}
                       className="px-6 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 transition duration-200 shadow-md"

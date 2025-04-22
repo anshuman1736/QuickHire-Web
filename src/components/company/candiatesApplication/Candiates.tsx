@@ -1,6 +1,5 @@
 "use client";
-
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Briefcase,
   ArrowLeft,
@@ -17,7 +16,7 @@ import { formatDistanceToNow } from "date-fns";
 import { respondApplication } from "@/lib/postData";
 import { successToast } from "@/lib/toast";
 
-export default function CandiatesCompo({ jobId }: { jobId: number }) {
+export default function CandidatesCompo({ jobId }: { jobId: number }) {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
   const [activeTab, setActiveTab] = useState("all");
@@ -78,7 +77,7 @@ export default function CandiatesCompo({ jobId }: { jobId: number }) {
     const matchesTab =
       activeTab === "all" ||
       (activeTab === "approved" && application.status === true) ||
-      (activeTab === "rejected" && application.status === null) ||
+      (activeTab === "rejected" && application.status === false) ||
       (activeTab === "pending" && application.status === false);
 
     return matchesSearch && matchesStatus && matchesTab;
@@ -140,7 +139,7 @@ export default function CandiatesCompo({ jobId }: { jobId: number }) {
   const counts = {
     all: applications.length,
     approved: applications.filter((app) => app.status === true).length,
-    rejected: applications.filter((app) => app.status === null).length,
+    rejected: applications.filter((app) => app.status === false).length,
     pending: applications.filter((app) => app.status === false).length,
   };
 
@@ -294,22 +293,22 @@ export default function CandiatesCompo({ jobId }: { jobId: number }) {
                     View Application
                   </button>
                 </Link>
-                <div className="justify-between border-t pt-4 flex gap-2">
-                  <button
-                    className="px-4 py-2 rounded-lg bg-red-100 hover:bg-red-200 text-red-600 font-medium text-sm transition-colors duration-200 cursor-pointer flex items-center gap-2"
-                    onClick={() => handleRejectApplication(application.id)}
-                  >
-                    <CircleX className="w-4 h-4" />
-                    Reject
-                  </button>
-                  <button
-                    className="px-4 py-2 rounded-lg bg-green-100 hover:bg-green-200 text-green-600 font-medium text-sm transition-colors duration-200 cursor-pointer flex items-center gap-2"
-                    onClick={() => handleAcceptApplication(application.id)}
-                  >
-                    <Check className="w-4 h-4" />
-                    Accept
-                  </button>
-                </div>
+              </div>
+              <div className="justify-between border-t pt-4 flex gap-2">
+                <button 
+                  className="px-4 py-2 rounded-lg bg-red-100 hover:bg-red-200 text-red-600 font-medium text-sm transition-colors duration-200 cursor-pointer flex items-center gap-2"
+                  onClick={() => handleRejectApplication(application.id)}
+                >
+                  <CircleX className="w-4 h-4" />
+                  Reject
+                </button>
+                <button 
+                  className="px-4 py-2 rounded-lg bg-green-100 hover:bg-green-200 text-green-600 font-medium text-sm transition-colors duration-200 cursor-pointer flex items-center gap-2"
+                  onClick={() => handleAcceptApplication(application.id)}
+                >
+                  <Check className="w-4 h-4" />
+                  Accept
+                </button>
               </div>
             </div>
           ))}
