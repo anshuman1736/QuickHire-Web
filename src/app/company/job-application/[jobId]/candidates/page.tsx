@@ -6,6 +6,5 @@ export default async function Candiate({
   params: Promise<{ jobId: string }>;
 }) {
   const { jobId } = await params;
-  console.log(jobId);
-  return <CandiatesCompo />;
+  return <CandiatesCompo jobId={Number(jobId)} />;
 }
