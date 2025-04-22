@@ -1,6 +1,14 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { Briefcase, ArrowLeft, Search, Clock, Filter } from "lucide-react";
+import {
+  Briefcase,
+  ArrowLeft,
+  Search,
+  Clock,
+  Filter,
+  Check,
+  CircleX,
+} from "lucide-react";
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { getApplicationByJobId } from "@/lib/queries";
@@ -10,6 +18,7 @@ import { formatDistanceToNow } from "date-fns";
 export default function CandiatesCompo({ jobId }: { jobId: number }) {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
+  const [activeTab, setActiveTab] = useState("all");
   const [token, setToken] = useState<string>("");
 
   useEffect(() => {
@@ -39,7 +48,6 @@ export default function CandiatesCompo({ jobId }: { jobId: number }) {
   };
 
   const filteredApplications = applications.filter((application) => {
-    console.log("application", application);
     const matchesSearch =
       application.userDTO.fullName
         .toLowerCase()
@@ -48,12 +56,19 @@ export default function CandiatesCompo({ jobId }: { jobId: number }) {
         ?.toLowerCase()
         .includes(searchTerm.toLowerCase());
 
+    // Handle both dropdown filter and tabs
     const matchesStatus =
       filterStatus === "all" ||
       (filterStatus === "approved" && application.status) ||
       (filterStatus === "pending" && !application.status);
 
-    return matchesSearch && matchesStatus;
+    const matchesTab =
+      activeTab === "all" ||
+      (activeTab === "approved" && application.status === true) ||
+      (activeTab === "rejected" && application.status === null) ||
+      (activeTab === "pending" && application.status === false);
+
+    return matchesSearch && matchesStatus && matchesTab;
   });
 
   if (isPending) {
@@ -87,6 +102,14 @@ export default function CandiatesCompo({ jobId }: { jobId: number }) {
 
   const jobTitle = applications[0]?.jobDTO.jobTitle || "This Position";
 
+  // Count applications by status
+  const counts = {
+    all: applications.length,
+    approved: applications.filter(app => app.status === true).length,
+    rejected: applications.filter(app => app.status === null).length,
+    pending: applications.filter(app => app.status === false).length
+  };
+
   return (
     <div className="p-6 md:p-12 bg-gray-50 min-h-screen mt-11">
       <div className="max-w-7xl mx-auto space-y-6">
@@ -104,6 +127,50 @@ export default function CandiatesCompo({ jobId }: { jobId: number }) {
           Applications for {jobTitle}
         </h1>
 
+        {/* Status Tabs */}
+        <div className="flex overflow-x-auto border-b">
+          <button
+            onClick={() => setActiveTab("all")}
+            className={`px-4 py-2 whitespace-nowrap font-medium text-sm transition-colors duration-200 border-b-2 -mb-px ${
+              activeTab === "all"
+                ? "border-blue-500 text-blue-600"
+                : "border-transparent text-gray-500 hover:text-gray-700"
+            }`}
+          >
+            All ({counts.all})
+          </button>
+          <button
+            onClick={() => setActiveTab("pending")}
+            className={`px-4 py-2 whitespace-nowrap font-medium text-sm transition-colors duration-200 border-b-2 -mb-px ${
+              activeTab === "pending"
+                ? "border-blue-500 text-blue-600"
+                : "border-transparent text-gray-500 hover:text-gray-700"
+            }`}
+          >
+            Pending ({counts.pending})
+          </button>
+          <button
+            onClick={() => setActiveTab("approved")}
+            className={`px-4 py-2 whitespace-nowrap font-medium text-sm transition-colors duration-200 border-b-2 -mb-px ${
+              activeTab === "approved"
+                ? "border-blue-500 text-blue-600"
+                : "border-transparent text-gray-500 hover:text-gray-700"
+            }`}
+          >
+            Approved ({counts.approved})
+          </button>
+          <button
+            onClick={() => setActiveTab("rejected")}
+            className={`px-4 py-2 whitespace-nowrap font-medium text-sm transition-colors duration-200 border-b-2 -mb-px ${
+              activeTab === "rejected"
+                ? "border-blue-500 text-blue-600"
+                : "border-transparent text-gray-500 hover:text-gray-700"
+            }`}
+          >
+            Rejected ({counts.rejected})
+          </button>
+        </div>
+
         <div className="flex flex-col md:flex-row gap-4 mb-6">
           <div className="relative flex-grow">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -118,20 +185,7 @@ export default function CandiatesCompo({ jobId }: { jobId: number }) {
             />
           </div>
 
-          <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <Filter className="h-5 w-5 text-gray-400" />
-            </div>
-            <select
-              className="pl-10 pr-8 py-2 border border-gray-300 rounded-lg appearance-none bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-              value={filterStatus}
-              onChange={(e) => setFilterStatus(e.target.value)}
-            >
-              <option value="all">All Applications</option>
-              <option value="pending">Pending</option>
-              <option value="approved">Approved</option>
-            </select>
-          </div>
+         
         </div>
 
         <div className="text-gray-600 mb-4 flex items-center gap-2">
@@ -180,19 +234,26 @@ export default function CandiatesCompo({ jobId }: { jobId: number }) {
                 </div>
               </div>
 
-              <div className="flex items-center justify-between border-t pt-4">
+              <div className="flex items-center justify-between border-t pt-4 pb-2">
                 <div>
                   <p className="text-gray-500 text-sm">
                     {formatApplicationDate(application.applicationDate)}
                   </p>
                   <span
                     className={`inline-block px-2 py-1 text-xs rounded-full mt-1 ${
-                      application.status
+                      application.status === true
                         ? "bg-green-100 text-green-800"
+                        : application.status === false
+                        ? "bg-gray-200 text-black"
                         : "bg-yellow-100 text-yellow-800"
                     }`}
                   >
-                    {application.status ? "Approved" : "Pending"}
+                    {application.status === true 
+                      ? "Approved" 
+                      : application.status === false 
+                      ? "Pending"
+                      : "Rejected"
+                      }
                   </span>
                 </div>
                 <Link
@@ -202,6 +263,16 @@ export default function CandiatesCompo({ jobId }: { jobId: number }) {
                     View Application
                   </button>
                 </Link>
+              </div>
+              <div className="justify-between border-t pt-4 flex gap-2">
+                <button className="px-4 py-2 rounded-lg bg-red-100 hover:bg-red-200 text-red-600 font-medium text-sm transition-colors duration-200 cursor-pointer flex items-center gap-2">
+                  <CircleX className="w-4 h-4" />
+                  Reject
+                </button>
+                <button className="px-4 py-2 rounded-lg bg-green-100 hover:bg-green-200 text-green-600 font-medium text-sm transition-colors duration-200 cursor-pointer flex items-center gap-2">
+                  <Check className="w-4 h-4" />
+                  Accept
+                </button>
               </div>
             </div>
           ))}
@@ -217,6 +288,7 @@ export default function CandiatesCompo({ jobId }: { jobId: number }) {
               onClick={() => {
                 setSearchTerm("");
                 setFilterStatus("all");
+                setActiveTab("all");
               }}
             >
               Clear filters
