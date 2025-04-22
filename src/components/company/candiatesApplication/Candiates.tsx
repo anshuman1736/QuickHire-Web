@@ -1,19 +1,21 @@
 "use client";
-import React, { useEffect, useState } from "react";
+
+import { useEffect, useState } from "react";
 import {
   Briefcase,
   ArrowLeft,
   Search,
   Clock,
-  Filter,
   Check,
   CircleX,
 } from "lucide-react";
 import Link from "next/link";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { getApplicationByJobId } from "@/lib/queries";
 import { JobApplication } from "@/types/job";
 import { formatDistanceToNow } from "date-fns";
+import { respondApplication } from "@/lib/postData";
+import { successToast } from "@/lib/toast";
 
 export default function CandiatesCompo({ jobId }: { jobId: number }) {
   const [searchTerm, setSearchTerm] = useState("");
@@ -34,6 +36,17 @@ export default function CandiatesCompo({ jobId }: { jobId: number }) {
     queryKey: ["jobApplications", jobId, token],
     queryFn: () => getApplicationByJobId(jobId, token),
     enabled: !!token,
+  });
+
+  const applicationMutation = useMutation({
+    mutationFn: respondApplication,
+    onSuccess: (data) => {
+      console.log("Application response:", data);
+      successToast("Application response sent successfully!");
+    },
+    onError: (error) => {
+      console.error("Error responding to application:", error);
+    },
   });
 
   const applications: JobApplication[] = data?.CONTENT || [];
@@ -71,6 +84,27 @@ export default function CandiatesCompo({ jobId }: { jobId: number }) {
     return matchesSearch && matchesStatus && matchesTab;
   });
 
+  async function handleAcceptApplication(applicationId: number) {
+    if (!applicationId) return;
+    if (!token) return;
+    const form = {
+      applicationId: applicationId,
+      token: token,
+      status: true,
+    };
+    applicationMutation.mutate(form);
+  }
+
+  async function handleRejectApplication(applicationId: number) {
+    if (!applicationId) return;
+    const form = {
+      applicationId: applicationId,
+      token: token,
+      status: false,
+    };
+    applicationMutation.mutate(form);
+  }
+
   if (isPending) {
     return (
       <div className="p-6 md:p-12 bg-gray-50 min-h-screen mt-11 flex justify-center items-center">
@@ -105,9 +139,9 @@ export default function CandiatesCompo({ jobId }: { jobId: number }) {
   // Count applications by status
   const counts = {
     all: applications.length,
-    approved: applications.filter(app => app.status === true).length,
-    rejected: applications.filter(app => app.status === null).length,
-    pending: applications.filter(app => app.status === false).length
+    approved: applications.filter((app) => app.status === true).length,
+    rejected: applications.filter((app) => app.status === null).length,
+    pending: applications.filter((app) => app.status === false).length,
   };
 
   return (
@@ -184,8 +218,6 @@ export default function CandiatesCompo({ jobId }: { jobId: number }) {
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
-
-         
         </div>
 
         <div className="text-gray-600 mb-4 flex items-center gap-2">
@@ -248,12 +280,11 @@ export default function CandiatesCompo({ jobId }: { jobId: number }) {
                         : "bg-yellow-100 text-yellow-800"
                     }`}
                   >
-                    {application.status === true 
-                      ? "Approved" 
-                      : application.status === false 
+                    {application.status === true
+                      ? "Approved"
+                      : application.status === false
                       ? "Pending"
-                      : "Rejected"
-                      }
+                      : "Rejected"}
                   </span>
                 </div>
                 <Link
@@ -263,16 +294,22 @@ export default function CandiatesCompo({ jobId }: { jobId: number }) {
                     View Application
                   </button>
                 </Link>
-              </div>
-              <div className="justify-between border-t pt-4 flex gap-2">
-                <button className="px-4 py-2 rounded-lg bg-red-100 hover:bg-red-200 text-red-600 font-medium text-sm transition-colors duration-200 cursor-pointer flex items-center gap-2">
-                  <CircleX className="w-4 h-4" />
-                  Reject
-                </button>
-                <button className="px-4 py-2 rounded-lg bg-green-100 hover:bg-green-200 text-green-600 font-medium text-sm transition-colors duration-200 cursor-pointer flex items-center gap-2">
-                  <Check className="w-4 h-4" />
-                  Accept
-                </button>
+                <div className="justify-between border-t pt-4 flex gap-2">
+                  <button
+                    className="px-4 py-2 rounded-lg bg-red-100 hover:bg-red-200 text-red-600 font-medium text-sm transition-colors duration-200 cursor-pointer flex items-center gap-2"
+                    onClick={() => handleRejectApplication(application.id)}
+                  >
+                    <CircleX className="w-4 h-4" />
+                    Reject
+                  </button>
+                  <button
+                    className="px-4 py-2 rounded-lg bg-green-100 hover:bg-green-200 text-green-600 font-medium text-sm transition-colors duration-200 cursor-pointer flex items-center gap-2"
+                    onClick={() => handleAcceptApplication(application.id)}
+                  >
+                    <Check className="w-4 h-4" />
+                    Accept
+                  </button>
+                </div>
               </div>
             </div>
           ))}
