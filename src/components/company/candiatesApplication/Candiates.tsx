@@ -50,6 +50,8 @@ export default function CandidatesCompo({ jobId }: { jobId: number }) {
 
   const applications: JobApplication[] = data?.CONTENT || [];
 
+  applications.sort((a, b) => b.applicationScore - a.applicationScore);
+
   const formatApplicationDate = (timestamp: number) => {
     try {
       return formatDistanceToNow(new Date(timestamp), { addSuffix: true });

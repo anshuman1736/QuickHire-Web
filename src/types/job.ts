@@ -86,6 +86,7 @@ export interface JobApplication {
   jobId: number;
   userId: number;
   applicationDate: number;
+  applicationScore: number;
   enabled: boolean;
   status: boolean;
   jobDTO: JobPosting;
