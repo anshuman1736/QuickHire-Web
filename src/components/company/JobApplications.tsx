@@ -62,6 +62,8 @@ export default function JobApplicaiton() {
   };
 
   const jobPosts = data?.CONTENT || [];
+  // console.log(jobPosts);
+
   return (
     <div className="min-h-screen bg-gradient-to-r from-blue-100 to-white py-20 mt-6">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -212,7 +214,24 @@ export default function JobApplicaiton() {
 
                   <div className="mt-6 flex justify-end gap-4">
                     <Link
-                      href="/company/update-job"
+                      onClick={() => console.log(job)}
+                      href={{
+                        pathname: "/company/update-job",
+                        query: {
+                          id: job.id,
+                          jobTitle: job.jobTitle,
+                          categoryId: job.categoryId,
+                          jobCategory: job.categoryDTO.categoryName,
+                          jobType: job.jobType,
+                          skills: job.skills,
+                          joblocation: job.jobLocation,
+                          experience: job.experience,
+                          salary: job.salary,
+                          description: job.jobDescription,
+                          education: job.jobEligibility,
+                          jobAddress: job.jobAddress,
+                        },
+                      }}
                       className="px-6 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 transition duration-200 shadow-md"
                     >
                       Update Post

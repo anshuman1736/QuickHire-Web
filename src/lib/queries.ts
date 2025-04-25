@@ -279,3 +279,4 @@ export async function getApplicationByJobId(jobId: number, token: string): Promi
     throw new Error("An unexpected error occurred");
   }
 }
+

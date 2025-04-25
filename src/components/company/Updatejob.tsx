@@ -7,74 +7,84 @@ import {
   FileText,
   Tag,
   DollarSign,
+  Building,
 } from "lucide-react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { updatejob } from "@/lib/postData";
+import { successToast } from "@/lib/toast";
+import { useRouter } from "next/navigation";
 
 const Updatejob = () => {
-  // const { isPending, isError, data, error } = useQuery({
-  //   queryKey: ["todos"],
-  //   queryFn: getJobByid
-  // });
+  const router = useRouter();
+  const searchParams = useSearchParams();
 
-  // if (isPending) {
-  //   return <span>Loading...</span>
-  // }
+  useEffect(() => {
+    const jobTitle = searchParams.get("jobTitle") || "";
+    const jobCategory = searchParams.get("jobCategory") || "";
+    const categoryId = parseInt(searchParams.get("categoryId") || "");
+    const id = parseInt(searchParams.get("id") || "");
+    const jobType = searchParams.get("jobType") || "";
+    const skills = searchParams.get("skills") || "";
+    const jobLocation = searchParams.get("joblocation") || "";
+    const jobAddress = searchParams.get("jobAddress") || "";
+    const experience = searchParams.get("experience") || "";
+    const jobDescription = searchParams.get("description") || "";
+    const jobEligibility = searchParams.get("education") || "";
+    const salary = searchParams.get("salary") || " 0";
+    const token = localStorage.getItem("sessionId") || "";
+    setFormData({
+      jobTitle,
+      jobCategory,
+      categoryId,
+      id,
+      jobType,
+      skills,
+      jobLocation,
+      jobAddress,
+      experience,
+      jobDescription,
+      jobEligibility,
+      salary,
+      token: token, // You can fetch this from auth if needed
+    });
+  }, [searchParams]);
 
-  // if (isError) {
-  //   return <span>Error: {error.message}</span>
-  // }
-  // const jobData = {
-  //   jobTitle: "Senior Frontend Developer",
-  //   jobCategory: "Frontend Development",
-  //   jobType: "Full-time",
-  //   requiredSkills: "React, Tailwind, TypeScript",
-  //   location: "Berlin, Germany",
-  //   experienceLevel: "Mid-level",
-  //   description:
-  //     "We're looking for a skilled frontend developer to join our team and work on exciting web projects using React and modern tech stack.",
-  //   education: "Bachelor’s Degree in Computer Science",
-  //   annualSalary: "$80,000 - $100,000",
-  // };
   const [popup, setpopup] = useState(false);
+  const [isSubmitting, setisSubmitting] = useState(false);
   type JobFormData = {
     jobTitle: string;
     jobCategory: string;
+    categoryId: number;
+    id: number;
+    token: string;
     jobType: string;
-    requiredSkills: string;
-    location: string;
-    experienceLevel: string;
-    description: string;
-    education: string;
-    annualSalary: string;
+    skills: string;
+    jobLocation: string;
+    jobAddress: string;
+    experience: string;
+    jobDescription: string;
+    jobEligibility: string;
+    salary: string;
   };
+
   const [formData, setFormData] = useState<JobFormData>({
     jobTitle: "",
     jobCategory: "",
+    categoryId: 0,
+    id: 0,
+    token: "",
     jobType: "",
-    requiredSkills: "",
-    location: "",
-    experienceLevel: "",
-    description: "",
-    education: "",
-    annualSalary: "",
+    skills: "",
+    jobLocation: "",
+    jobAddress: "",
+    experience: "",
+    jobDescription: "",
+    jobEligibility: "",
+    salary: "",
   });
-
-  useEffect(() => {
-    const existingJobData: JobFormData = {
-      jobTitle: "Senior Frontend Developer",
-      jobCategory: "Frontend Development",
-      jobType: "Full-time",
-      requiredSkills: "React, Tailwind, TypeScript",
-      location: "Berlin, Germany",
-      experienceLevel: "Mid-level",
-      description:
-        "We're looking for a skilled frontend developer to join our team and work on exciting web projects using React and modern tech stack.",
-      education: "Bachelor’s Degree in Computer Science",
-      annualSalary: "$80,000 - $100,000",
-    };
-
-    setFormData(existingJobData);
-  }, []);
+  console.log(formData);
 
   const handlechange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -86,6 +96,35 @@ const Updatejob = () => {
     e.preventDefault();
     setpopup(true);
   };
+
+  const jobMutation = useMutation({
+    mutationFn: updatejob,
+    onSuccess: (data) => {
+      setisSubmitting(false);
+      successToast("Job Updated successfully!");
+      router.push("/company/job-application");
+    },
+    onError: (error) => {
+      console.error("Error updating job:", error);
+    },
+  });
+  const handlejobUpdate = () => {
+    jobMutation.mutate(formData);
+    setisSubmitting(true);
+  };
+
+  if (isSubmitting) {
+    return (
+      <div className="min-h-screen bg-gradient-to-r from-blue-100 to-white py-20 mt-6 flex items-center justify-center">
+        <div className="flex flex-col items-center space-y-4">
+          <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+          <span className="text-xl text-gray-700">
+            Post updating & <br /> redirecting to Home Page...
+          </span>
+        </div>
+      </div>
+    );
+  }
   return (
     <div className="min-h-screen bg-gray-100 py-20 mt-6">
       {/* popup for final submit */}
@@ -109,7 +148,14 @@ const Updatejob = () => {
             >
               Cancel Changes
             </button>
-            <button className="text-base cursor-pointer  px-4 py-2 rounded-lg text-white bg-blue-600">
+            <button
+              type="button"
+              onClick={() => {
+                handlejobUpdate();
+                setpopup(false);
+              }}
+              className="text-base cursor-pointer  px-4 py-2 rounded-lg text-white bg-blue-600"
+            >
               {" "}
               Confirm Update
             </button>
@@ -137,7 +183,6 @@ const Updatejob = () => {
               </p>
             </div>
           </div>
-          {/*  from start */}
           <form onSubmit={onsubmithandle} className="divide-y divide-gray-100">
             {/* Basic info  */}
             <div className="p-4 sm:p-6 md:p-8 ">
@@ -218,9 +263,9 @@ const Updatejob = () => {
                       <Tag size={18} className="hidden sm:block" />
                     </span>
                     <input
-                      type="tel"
-                      name="requiredSkills"
-                      value={formData.requiredSkills}
+                      type="text"
+                      name="skills"
+                      value={formData.skills}
                       onChange={handlechange}
                       className="flex-1 p-2 sm:p-3 text-sm sm:text-base border border-gray-300 rounded-r-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     />
@@ -238,8 +283,8 @@ const Updatejob = () => {
                     </span>
                     <input
                       type="text"
-                      name="location"
-                      value={formData.location}
+                      name="jobLocation"
+                      value={formData.jobLocation}
                       onChange={handlechange}
                       required
                       className="flex-1 p-2 sm:p-3 text-sm sm:text-base border border-gray-300 rounded-r-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -258,8 +303,8 @@ const Updatejob = () => {
                     </span>
                     <input
                       type="text"
-                      name="experienceLevel"
-                      value={formData.experienceLevel}
+                      name="experience"
+                      value={formData.experience}
                       onChange={handlechange}
                       required
                       className="flex-1 p-2 sm:p-3 text-sm sm:text-base border border-gray-300 rounded-r-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -272,8 +317,8 @@ const Updatejob = () => {
                     Description*
                   </label>
                   <textarea
-                    name="description"
-                    value={formData.description}
+                    name="jobDescription"
+                    value={formData.jobDescription}
                     onChange={handlechange}
                     required
                     rows={4}
@@ -287,6 +332,26 @@ const Updatejob = () => {
             <div className="grid p-4 sm:p-6 md:p-8 grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5 md:gap-6 mt-4 sm:mt-5 md:mt-6">
               <div>
                 <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
+                  Company Address*
+                </label>
+                <div className="flex">
+                  <span className="inline-flex items-center px-2 sm:px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-200 text-gray-500">
+                    <Building size={16} className="sm:hidden" />
+                    <Building size={18} className="hidden sm:block" />
+                  </span>
+                  <input
+                    type="text"
+                    name="jobAddress"
+                    value={formData.jobAddress}
+                    onChange={handlechange}
+                    required
+                    placeholder="City, Country"
+                    className="flex-1 p-2 sm:p-3 text-sm sm:text-base border border-gray-300 rounded-r-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
                   Education*
                 </label>
                 <div className="flex">
@@ -296,8 +361,8 @@ const Updatejob = () => {
                   </span>
                   <input
                     type="text"
-                    name="education"
-                    value={formData.education}
+                    name="jobEligibility"
+                    value={formData.jobEligibility}
                     onChange={handlechange}
                     required
                     className="flex-1 p-2 sm:p-3 text-sm sm:text-base border border-gray-300 rounded-r-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -316,8 +381,8 @@ const Updatejob = () => {
                   </span>
                   <input
                     type="text"
-                    name="annualSalary"
-                    value={formData.annualSalary}
+                    name="salary"
+                    value={formData.salary}
                     onChange={handlechange}
                     required
                     placeholder="City, Country"

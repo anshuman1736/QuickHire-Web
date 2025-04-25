@@ -10,6 +10,19 @@ export interface IJobPost {
   experience: string;
   jobEligibility: string;
 }
+export interface IUpdateJob {
+  jobTitle: string;
+  jobAddress:string;
+  jobDescription: string;
+  jobLocation: string;
+  salary: string;
+  jobType: string;
+  categoryId: number;
+  skills: string;
+  experience: string;
+  jobEligibility: string;
+}
+
 
 export interface JobPosting {
   id: number;
