@@ -1,10 +1,18 @@
-import Updatejob from '@/components/company/Updatejob'
-import React from 'react'
+import Updatejob from "@/components/company/Updatejob";
+import React, { Suspense } from "react";
 
 const page = () => {
   return (
-    <Updatejob/>
-  )
-}
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="text-gray-600">Loading...</div>
+        </div>
+      }
+    >
+      <Updatejob />
+    </Suspense>
+  );
+};
 
-export default page
+export default page;

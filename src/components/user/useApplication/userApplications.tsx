@@ -1,151 +1,152 @@
 "use client"
 
+import { getAppliedJobs } from "@/lib/queries";
+import { JobApplication } from "@/types/job";
+import { useQuery } from "@tanstack/react-query";
 import {
   Briefcase,
   Clock,
   CheckCircle,
   XCircle,
   Search,
-  ArrowRight,
   MapPin,
   DollarSign,
   Calendar,
 } from "lucide-react";
-import { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 export default function UserApplications() {
-  // Application status filters
+  const [token, setToken] = useState("");
+  const [userId, setUserId] = useState<number>(0);
+
+  useEffect(() => {
+    setToken(localStorage.getItem("sessionId") || "");
+    setUserId(Number(localStorage.getItem("userId")));
+  }, []);
+
   const [statusFilter, setStatusFilter] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState("newest");
 
-  // Mock data for applied jobs
-  const applications = [
-    {
-      id: 1,
-      jobTitle: "Senior Frontend Developer",
-      company: "TechCorp Solutions",
-      location: "San Francisco, CA",
-      salary: "$90K - $120K",
-      appliedDate: "2023-05-15",
-      status: "interview" as "pending" | "interview" | "rejected" | "offered", // pending, rejected, offered
-      interviewDate: "2023-06-10",
-      jobType: "Full-time",
-      companyLogo: "TC",
-    },
-    {
-      id: 2,
-      jobTitle: "Product Designer",
-      company: "Creative Studio",
-      location: "Remote",
-      salary: "$85K - $110K",
-      appliedDate: "2023-05-20",
-      status: "pending" as "pending" | "interview" | "rejected" | "offered",
-      jobType: "Full-time",
-      companyLogo: "CS",
-    },
-    {
-      id: 3,
-      jobTitle: "DevOps Engineer",
-      company: "Cloud Systems Inc.",
-      location: "Austin, TX",
-      salary: "$100K - $130K",
-      appliedDate: "2023-04-28",
-      status: "rejected" as "pending" | "interview" | "rejected" | "offered",
-      jobType: "Full-time",
-      companyLogo: "CS",
-    },
-    {
-      id: 4,
-      jobTitle: "Data Scientist",
-      company: "Analytics Pro",
-      location: "New York, NY",
-      salary: "$95K - $125K",
-      appliedDate: "2023-06-01",
-      status: "offered" as "pending" | "interview" | "rejected" | "offered",
-      jobType: "Contract",
-      companyLogo: "AP",
-    },
-    {
-      id: 5,
-      jobTitle: "Marketing Specialist",
-      company: "Growth Tactics",
-      location: "Chicago, IL",
-      salary: "$65K - $85K",
-      appliedDate: "2023-05-10",
-      status: "interview" as "pending" | "interview" | "rejected" | "offered",
-      interviewDate: "2023-05-25",
-      jobType: "Full-time",
-      companyLogo: "GT",
-    },
-  ];
+  const { isPending, isError, data } = useQuery({
+    queryKey: ["appliedJobs", userId],
+    queryFn: () => getAppliedJobs(userId, token),
+    enabled: !!token && userId > 0,
+  });
 
-  // Filter applications based on status and search query
-  const filteredApplications = applications
-    .filter((app) => {
+  const applications: JobApplication[] = data?.CONTENT || [];
+
+  const filteredApplications = React.useMemo(() => {
+    if (!applications) return [];
+  
+    const statusFiltered = applications.filter((app) => {
       if (statusFilter === "all") return true;
-      return app.status === statusFilter;
-    })
-    .filter((app) => {
+      
+      if (statusFilter === "pending") return app.status === null;
+      if (statusFilter === "accepted") return app.status === true;
+      if (statusFilter === "rejected") return app.status === false;
+      
+      return true;
+    });
+  
+    const searchFiltered = statusFiltered.filter((app) => {
       if (!searchQuery) return true;
+      const query = searchQuery.toLowerCase();
       return (
-        app.jobTitle.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        app.company.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        app.location.toLowerCase().includes(searchQuery.toLowerCase())
+        app.jobDTO?.jobTitle?.toLowerCase().includes(query) ||
+        app.jobDTO?.companyDTO?.companyName?.toLowerCase().includes(query) ||
+        app.jobDTO?.jobLocation?.toLowerCase().includes(query) ||
+        (app.jobDTO?.skills && app.jobDTO.skills.toLowerCase().includes(query))
       );
-    })
-    .sort((a, b) => {
+    });
+  
+    return searchFiltered.sort((a, b) => {
       if (sortBy === "newest") {
-        return new Date(b.appliedDate).getTime() - new Date(a.appliedDate).getTime();
+        return b.applicationDate - a.applicationDate;
       } else {
-        return new Date(a.appliedDate).getTime() - new Date(b.appliedDate).getTime();
+        return a.applicationDate - b.applicationDate;
       }
     });
+  }, [applications, statusFilter, searchQuery, sortBy]);
 
-  // Status badge component
-  const StatusBadge = ({ status }: { status: "pending" | "interview" | "rejected" | "offered" }) => {
+  const counts = React.useMemo(() => {
+    return {
+      all: applications.length,
+      pending: applications.filter((app) => app.status === null ).length,
+      accepted: applications.filter((app) => app.status === true ).length,
+      rejected: applications.filter((app) => app.status === false ).length,
+    };
+  }, [applications]);
+
+  const StatusBadge = ({ status }: { status: boolean | string | null }) => {
+    let statusValue = "";
+    if (status === null) statusValue = "pending";
+    else if (status === true) statusValue = "accepted";
+    else if (status === false) statusValue = "rejected";
+    else statusValue = status;
+
     const statusConfig = {
       pending: {
         color: "bg-yellow-100 text-yellow-800",
         icon: <Clock className="w-4 h-4" />,
         text: "Pending",
       },
-      interview: {
-        color: "bg-blue-100 text-blue-800",
+      accepted: {
+        color: "bg-green-100 text-green-800",
         icon: <CheckCircle className="w-4 h-4" />,
-        text: "Interview",
+        text: "Accepted",
       },
       rejected: {
         color: "bg-red-100 text-red-800",
         icon: <XCircle className="w-4 h-4" />,
         text: "Rejected",
       },
-      offered: {
-        color: "bg-green-100 text-green-800",
-        icon: <CheckCircle className="w-4 h-4" />,
-        text: "Offered",
-      },
     };
+
+    const config = statusConfig[statusValue as keyof typeof statusConfig] || statusConfig.pending;
 
     return (
       <span
-        className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${statusConfig[status].color}`}
+        className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${config.color}`}
       >
-        {statusConfig[status].icon}
-        <span className="ml-1">{statusConfig[status].text}</span>
+        {config.icon}
+        <span className="ml-1">{config.text}</span>
       </span>
     );
   };
 
-  // Format date
-  const formatDate = (dateString: number) => {
-      const options: Intl.DateTimeFormatOptions = { year: "numeric", month: "short", day: "numeric" };
-      return new Date(dateString).toLocaleDateString(undefined, options);
+  const formatDate = (timestamp: number) => {
+    const options: Intl.DateTimeFormatOptions = { year: "numeric", month: "short", day: "numeric" };
+    return new Date(timestamp).toLocaleDateString(undefined, options);
   };
 
+  if (isPending) {
+    return (
+      <div className="min-h-screen bg-gradient-to-r from-blue-50 via-white to-blue-50 py-20 flex items-center justify-center ">
+        <div className="flex flex-col items-center space-y-4">
+          <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+          <span className="text-xl font-medium text-gray-700">Loading your job Applications...</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <main className="pt-20 w-full bg-gray-50 min-h-screen">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
+          <div className="flex flex-col items-center justify-center h-64">
+            <p className="text-lg text-red-600">Failed to load applications</p>
+            <p className="text-sm text-gray-600 mt-2">Please try again later</p>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
   return (
-    <main className="pt-20 w-full bg-gray-50 min-h-screen">
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
+    <main className="pt-20 w-full bg-gray-50 min-h-screen mt-6">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
         <div className="mb-6 md:mb-8">
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Your Job Applications</h1>
           <p className="mt-2 text-sm sm:text-base text-gray-600">
@@ -153,10 +154,8 @@ export default function UserApplications() {
           </p>
         </div>
 
-        {/* Filters and Search */}
         <div className="bg-white rounded-lg shadow p-3 sm:p-4 mb-4 sm:mb-6">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
-            {/* Search Bar */}
             <div className="relative flex-grow max-w-full sm:max-w-2xl">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <Search className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400" />
@@ -170,7 +169,6 @@ export default function UserApplications() {
               />
             </div>
 
-            {/* Status Filter */}
             <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
               <div className="w-full sm:w-auto">
                 <label htmlFor="status-filter" className="sr-only">
@@ -184,13 +182,11 @@ export default function UserApplications() {
                 >
                   <option value="all">All Statuses</option>
                   <option value="pending">Pending</option>
-                  <option value="interview">Interview</option>
-                  <option value="offered">Offered</option>
+                  <option value="accepted">Accepted</option>
                   <option value="rejected">Rejected</option>
                 </select>
               </div>
 
-              {/* Sort By */}
               <div className="w-full sm:w-auto">
                 <label htmlFor="sort-by" className="sr-only">
                   Sort by
@@ -209,7 +205,6 @@ export default function UserApplications() {
           </div>
         </div>
 
-        {/* Application Stats */}
         <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4 mb-4 sm:mb-6">
           <div className="bg-white rounded-lg shadow p-3 sm:p-4">
             <div className="flex items-center">
@@ -218,7 +213,7 @@ export default function UserApplications() {
               </div>
               <div className="ml-3 sm:ml-4">
                 <p className="text-xs sm:text-sm font-medium text-gray-500">Total Applications</p>
-                <p className="text-xl sm:text-2xl font-semibold text-gray-900">{applications.length}</p>
+                <p className="text-xl sm:text-2xl font-semibold text-gray-900">{counts.all}</p>
               </div>
             </div>
           </div>
@@ -229,22 +224,7 @@ export default function UserApplications() {
               </div>
               <div className="ml-3 sm:ml-4">
                 <p className="text-xs sm:text-sm font-medium text-gray-500">Pending</p>
-                <p className="text-xl sm:text-2xl font-semibold text-gray-900">
-                  {applications.filter(a => a.status === "pending").length}
-                </p>
-              </div>
-            </div>
-          </div>
-          <div className="bg-white rounded-lg shadow p-3 sm:p-4">
-            <div className="flex items-center">
-              <div className="p-2 sm:p-3 rounded-full bg-blue-100 text-blue-600">
-                <CheckCircle className="h-4 w-4 sm:h-6 sm:w-6" />
-              </div>
-              <div className="ml-3 sm:ml-4">
-                <p className="text-xs sm:text-sm font-medium text-gray-500">Interviews</p>
-                <p className="text-xl sm:text-2xl font-semibold text-gray-900">
-                  {applications.filter(a => a.status === "interview").length}
-                </p>
+                <p className="text-xl sm:text-2xl font-semibold text-gray-900">{counts.pending}</p>
               </div>
             </div>
           </div>
@@ -254,10 +234,19 @@ export default function UserApplications() {
                 <CheckCircle className="h-4 w-4 sm:h-6 sm:w-6" />
               </div>
               <div className="ml-3 sm:ml-4">
-                <p className="text-xs sm:text-sm font-medium text-gray-500">Offers</p>
-                <p className="text-xl sm:text-2xl font-semibold text-gray-900">
-                  {applications.filter(a => a.status === "offered").length}
-                </p>
+                <p className="text-xs sm:text-sm font-medium text-gray-500">Accepted</p>
+                <p className="text-xl sm:text-2xl font-semibold text-gray-900">{counts.accepted}</p>
+              </div>
+            </div>
+          </div>
+          <div className="bg-white rounded-lg shadow p-3 sm:p-4">
+            <div className="flex items-center">
+              <div className="p-2 sm:p-3 rounded-full bg-red-100 text-red-600">
+                <XCircle className="h-4 w-4 sm:h-6 sm:w-6" />
+              </div>
+              <div className="ml-3 sm:ml-4">
+                <p className="text-xs sm:text-sm font-medium text-gray-500">Rejected</p>
+                <p className="text-xl sm:text-2xl font-semibold text-gray-900">{counts.rejected}</p>
               </div>
             </div>
           </div>
@@ -281,33 +270,44 @@ export default function UserApplications() {
             <ul className="divide-y divide-gray-200">
               {filteredApplications.map((application) => (
                 <li key={application.id}>
-                  <div className="px-3 py-3 sm:px-6 sm:py-4">
+                  <div className="px-3 py-3 sm:px-6 sm:py-4 space-y-10">
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
                       <div className="flex items-center">
-                        <div className="flex-shrink-0 h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 text-sm sm:font-medium">
-                          {application.companyLogo}
-                        </div>
+                        {/* Company logo/avatar */}
+                        {application.jobDTO.companyDTO.profile_Pic ? (
+                          <div className="flex-shrink-0 h-8 w-8 sm:h-10 sm:w-10 rounded-full overflow-hidden">
+                            <img
+                              src={application.jobDTO.companyDTO.profile_Pic}
+                              alt={application.jobDTO.companyDTO.companyName}
+                              className="h-full w-full object-cover"
+                            />
+                          </div>
+                        ) : (
+                          <div className="flex-shrink-0 h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 text-sm sm:font-medium">
+                            {application.jobDTO.companyDTO.companyName.charAt(0)}
+                          </div>
+                        )}
                         <div className="ml-3 sm:ml-4">
                           <div className="flex flex-wrap items-center gap-1 sm:gap-0">
                             <h3 className="text-base sm:text-lg font-medium text-blue-600 hover:text-blue-800 mr-2">
-                              {application.jobTitle}
+                              {application.jobDTO.jobTitle}
                             </h3>
                             <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                              {application.jobType}
+                              {application.jobDTO.jobType}
                             </span>
                           </div>
                           <div className="mt-1 flex flex-wrap gap-2 sm:gap-0 sm:flex-row sm:mt-0 sm:space-x-4">
                             <div className="flex items-center text-xs sm:text-sm text-gray-500">
                               <Briefcase className="flex-shrink-0 mr-1 h-3 w-3 sm:h-4 sm:w-4 text-gray-400" />
-                              {application.company}
+                              {application.jobDTO.companyDTO.companyName}
                             </div>
                             <div className="flex items-center text-xs sm:text-sm text-gray-500">
                               <MapPin className="flex-shrink-0 mr-1 h-3 w-3 sm:h-4 sm:w-4 text-gray-400" />
-                              {application.location}
+                              {application.jobDTO.jobLocation}
                             </div>
                             <div className="flex items-center text-xs sm:text-sm text-gray-500">
                               <DollarSign className="flex-shrink-0 mr-1 h-3 w-3 sm:h-4 sm:w-4 text-gray-400" />
-                              {application.salary}
+                              {application.jobDTO.salary}
                             </div>
                           </div>
                         </div>
@@ -316,30 +316,17 @@ export default function UserApplications() {
                         <StatusBadge status={application.status} />
                       </div>
                     </div>
-                    <div className="mt-3 sm:mt-4 sm:flex sm:justify-between">
+                    <div className=" sm:mt-1  sm:justify-between">
                       <div className="flex items-center text-xs sm:text-sm text-gray-500">
                         <Calendar className="flex-shrink-0 mr-1 h-3 w-3 sm:h-4 sm:w-4 text-gray-400" />
                         <p>
-                          Applied on <time dateTime={application.appliedDate}>{formatDate(Date.parse(application.appliedDate))}</time>
-                          {application.interviewDate && (
-                            <>
-                              {' • '}
-                              <span className="font-medium">
-                                Interview: {formatDate(Date.parse(application.interviewDate))}
-                              </span>
-                            </>
-                          )}
+                          Applied on{" "}
+                          <time dateTime={new Date(application.applicationDate).toISOString()}>
+                            {formatDate(application.applicationDate)}
+                          </time>
                         </p>
                       </div>
-                      <div className="mt-2 sm:mt-0 flex items-center text-sm text-gray-500">
-                        <button
-                          type="button"
-                          className="inline-flex items-center px-2 py-1 sm:px-3 sm:py-1.5 border border-transparent text-xs font-medium rounded shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                        >
-                          View Details
-                          <ArrowRight className="ml-1 h-3 w-3" />
-                        </button>
-                      </div>
+                      
                     </div>
                   </div>
                 </li>

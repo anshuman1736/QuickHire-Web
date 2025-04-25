@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Building2, Info, Check, File, X, ChevronDown } from "lucide-react";
+import { Building2, Info, Check, File, X, ChevronDown, Eye, EyeOff } from "lucide-react";
 import { RegisterCompany } from "@/hooks/recruiter/Registration";
 import { useMutation } from "@tanstack/react-query";
 import Link from "next/link";
@@ -21,6 +21,7 @@ interface ErrorResponse {
 
 export default function CompanyRegistration() {
   const [currentStep, setCurrentStep] = useState(1);
+  const [showpwd, setshowpwd] = useState({ password: false, confirm: false });
   const [formData, setFormData] = useState({
     companyName: "",
     email: "",
@@ -342,9 +343,17 @@ export default function CompanyRegistration() {
               )}
             </div>
 
-            <div>
+            <div className="relative">
+            <span
+                onClick={() =>
+                  setshowpwd((prev) => ({ ...prev,confirm:false,  password: !prev.password }) )
+                }
+                className="text-xs text-orange-400  cursor-pointer absolute right-5 top-3.5"
+              >
+                {showpwd.password ? <Eye /> : <EyeOff />}
+              </span>
               <input
-                type="password"
+                type={showpwd.password ? "text" : "password"}
                 name="password"
                 value={formData.password}
                 onChange={handleInputChange}
@@ -359,9 +368,17 @@ export default function CompanyRegistration() {
               )}
             </div>
 
-            <div>
+            <div className="relative">
+            <span
+                onClick={() =>
+                  setshowpwd((prev) => ({ ...prev,password:false, confirm: !prev.confirm }))
+                }
+                className="text-xs text-orange-400  cursor-pointer absolute right-5 top-3.5"
+              >
+                {showpwd.confirm ? <Eye /> : <EyeOff />}
+              </span>
               <input
-                type="password"
+                type={showpwd.confirm ? "text" : "password"}
                 name="confirmPassword"
                 value={formData.confirmPassword}
                 onChange={handleInputChange}

@@ -241,7 +241,7 @@ const Postjob = () => {
   const progressPercentage = (activeStep - 1) * 33.3;
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4 md:px-8 mt-11">
+    <div className="min-h-screen bg-gray-50 py-12 px-4 md:px-8 ">
       <div className="max-w-3xl mx-auto">
         <div className="mb-8 text-center">
           <div className="inline-flex items-center justify-center w-16 h-16 mb-4 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full shadow-lg text-white">

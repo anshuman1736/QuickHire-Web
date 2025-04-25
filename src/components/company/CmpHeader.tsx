@@ -1,38 +1,91 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
-  Briefcase,
-  Bell,
-  MessageSquare,
   User,
   Menu,
   X,
-  ChevronDown,
-  Bookmark,
   LogOut,
+  Home,
+  PlusCircle, 
+  FileText,
+  Settings,
+  Briefcase,
+  ChevronLeft,
+  ChevronRight
 } from "lucide-react";
 import Link from "next/link";
-import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useRouter } from "next/navigation";
 
 function CmpHeader() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
-  const [notificationsOpen, setNotificationsOpen] = useState(false);
-  const [messagesOpen, setMessagesOpen] = useState(false);
-  const pathname = usePathname(); 
-
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const pathname = usePathname();
   const router = useRouter();
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   const user = {
-    name: "Quick-Hire pvt Ltd",
+    name: "Quick-Hire Pvt Ltd",
     avatar: null,
     role: "Software Developer",
-    unreadNotifications: 3,
-    unreadMessages: 2,
   };
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setProfileDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  // Check and set sidebar state from local storage on component mount
+  useEffect(() => {
+    const savedState = localStorage.getItem("sidebarCollapsed");
+    if (savedState !== null) {
+      setSidebarCollapsed(savedState === "true");
+    }
+  }, []);
+
+  // Save sidebar state to local storage when it changes
+  useEffect(() => {
+    localStorage.setItem("sidebarCollapsed", sidebarCollapsed.toString());
+    
+    // Update main content margin
+    const mainElement = document.querySelector("main");
+    if (mainElement) {
+      if (sidebarCollapsed) {
+        mainElement.classList.remove("lg:ml-64");
+        mainElement.classList.add("lg:ml-20");
+      } else {
+        mainElement.classList.remove("lg:ml-20");
+        mainElement.classList.add("lg:ml-64");
+      }
+    }
+  }, [sidebarCollapsed]);
+
+  // Set initial main content margin on component mount
+  useEffect(() => {
+    const mainElement = document.querySelector("main");
+    if (mainElement) {
+      mainElement.classList.add(sidebarCollapsed ? "lg:ml-20" : "lg:ml-64");
+      mainElement.classList.add("transition-all", "duration-300");
+    }
+    
+    return () => {
+      // Clean up classes when component unmounts
+      if (mainElement) {
+        mainElement.classList.remove("lg:ml-64", "lg:ml-20", "transition-all", "duration-300");
+      }
+    };
+  }, []);
 
   const getInitials = (name: string): string => {
     return name
@@ -42,398 +95,347 @@ function CmpHeader() {
       .toUpperCase();
   };
 
-  interface TabStylesProps {
-    path: string;
-  }
-
-  const getTabStyles = (path: TabStylesProps["path"]): string => {
-    const baseStyles =
-      "font-medium px-3 py-2 rounded-md transition-colors duration-200";
-    if (path === pathname) {
-      return `${baseStyles} bg-blue-50 text-black`;
-    }
-    return `${baseStyles} text-gray-700 hover:text-black hover:bg-gray-50`;
-  };
-
-  interface MobileTabStylesProps {
-    path: string;
-  }
-
-  const getMobileTabStyles = (path: MobileTabStylesProps["path"]): string => {
-    const baseStyles = "font-medium py-2 px-4 hover:bg-blue-50 rounded-lg";
-    if (path === pathname) {
-      return `${baseStyles} bg-blue-50 text-black`;
-    }
-    return `${baseStyles} text-gray-700 hover:text-black`;
-  };
   const handleLogout = () => {
     localStorage.clear();
     router.push("/");
   };
 
+  const toggleSidebar = () => {
+    setSidebarCollapsed(!sidebarCollapsed);
+  };
+
   return (
-    <header className="bg-white w-screen shadow-sm fixed top-0 left-0 right-0 z-10">
-      <div className="container mx-auto px-4 md:px-6">
-        <div className="flex items-center justify-between h-16">
-          {/* Logo */}
-          <Link
-            href="/user"
-            className="font-bold text-xl md:text-2xl flex items-center"
-          >
-            <div className="flex items-center">
-              <span className="text-[#FFBF2F]">Q</span>
-              <span className="text-black">H</span>
-              <span className="ml-1 inline-flex items-center justify-center h-5 w-12 md:h-6 md:w-14 rounded-full text-black text-xs bg-gray-100">
-                jobs
-              </span>
+    <>
+      {/* Desktop sidebar */}
+      <aside 
+        className={`hidden lg:flex flex-col fixed left-0 top-0 bottom-0 bg-slate-900 text-white z-50 transition-all duration-300 ${
+          sidebarCollapsed ? "w-20" : "w-64"
+        }`}
+      >
+        {/* Logo */}
+        <div className={`p-6 flex ${sidebarCollapsed ? "justify-center" : ""}`}>
+          <Link href="/company" className="flex items-center">
+            <div className="h-10 w-10 bg-gradient-to-br from-teal-400 to-emerald-500 rounded-lg flex items-center justify-center shadow-lg">
+              <span className="font-bold text-xl">QH</span>
             </div>
+            {!sidebarCollapsed && <span className="ml-3 font-bold text-xl">QuickHire</span>}
           </Link>
-
-          <nav className="hidden md:flex items-center space-x-1">
-            <Link href="/company" className={getTabStyles("/company")}>
-              Dashboard
-            </Link>
-            <Link
-              href="/company/create-job"
-              className={getTabStyles("/company/create-job")}
+        </div>
+        
+        {/* Toggle sidebar button */}
+        <button 
+          onClick={toggleSidebar}
+          className="absolute top-5 -right-3 bg-slate-700 rounded-full p-1 text-gray-300 hover:text-white border border-slate-600 shadow-md"
+          aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+        >
+          {sidebarCollapsed ? 
+            <ChevronRight className="h-4 w-4" /> : 
+            <ChevronLeft className="h-4 w-4" />
+          }
+        </button>
+        
+        {/* Navigation */}
+        <nav className={`flex-1 ${sidebarCollapsed ? "px-2" : "px-4"} mt-6`}>
+          <div className="space-y-1">
+            <Link 
+              href="/company" 
+              className={`flex items-center ${sidebarCollapsed ? "justify-center" : ""} px-4 py-3 text-sm font-medium rounded-lg ${
+                pathname === "/company" 
+                  ? "bg-gradient-to-r from-teal-500 to-emerald-500 text-white" 
+                  : "text-gray-300 hover:bg-slate-800"
+              }`}
+              title={sidebarCollapsed ? "Dashboard" : ""}
             >
-              Create Job
+              <Home className={`w-5 h-5 ${sidebarCollapsed ? "" : "mr-3"}`} />
+              {!sidebarCollapsed && "Dashboard"}
             </Link>
-            <Link
-              href="/company/job-application"
-              className={getTabStyles("/company/job-application")}
+            
+            <Link 
+              href="/company/create-job" 
+              className={`flex items-center ${sidebarCollapsed ? "justify-center" : ""} px-4 py-3 text-sm font-medium rounded-lg ${
+                pathname === "/company/create-job" 
+                  ? "bg-gradient-to-r from-teal-500 to-emerald-500 text-white" 
+                  : "text-gray-300 hover:bg-slate-800"
+              }`}
+              title={sidebarCollapsed ? "Post New Job" : ""}
             >
-              Job Application
+              <PlusCircle className={`w-5 h-5 ${sidebarCollapsed ? "" : "mr-3"}`} />
+              {!sidebarCollapsed && "Post New Job"}
             </Link>
-          </nav>
-
-          <div className="hidden md:flex items-center space-x-5">
-            <div className="relative">
-              <button
-                className="relative text-gray-500 hover:text-black"
-                onClick={() => {
-                  setNotificationsOpen(!notificationsOpen);
-                  setMessagesOpen(false);
-                  setProfileDropdownOpen(false);
-                }}
+            
+            <Link 
+              href="/company/job-application" 
+              className={`flex items-center ${sidebarCollapsed ? "justify-center" : ""} px-4 py-3 text-sm font-medium rounded-lg ${
+                pathname === "/company/job-application" 
+                  ? "bg-gradient-to-r from-teal-500 to-emerald-500 text-white" 
+                  : "text-gray-300 hover:bg-slate-800"
+              }`}
+              title={sidebarCollapsed ? "Applications" : ""}
+            >
+              <FileText className={`w-5 h-5 ${sidebarCollapsed ? "" : "mr-3"}`} />
+              {!sidebarCollapsed && "Applications"}
+            </Link>
+          </div>
+          
+          <div className="mt-10">
+            {!sidebarCollapsed && (
+              <h3 className="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                Company
+              </h3>
+            )}
+            <div className="mt-3 space-y-1">
+              <Link 
+                href="/company/settings" 
+                className={`flex items-center ${sidebarCollapsed ? "justify-center" : ""} px-4 py-3 text-sm font-medium rounded-lg ${
+                  pathname === "/company/settings" 
+                    ? "bg-gradient-to-r from-teal-500 to-emerald-500 text-white" 
+                    : "text-gray-300 hover:bg-slate-800"
+                }`}
+                title={sidebarCollapsed ? "Company Profile" : ""}
               >
-                <Bell className="w-5 h-5" />
-                {user.unreadNotifications > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
-                    {user.unreadNotifications}
-                  </span>
-                )}
-              </button>
-
-              {notificationsOpen && (
-                <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg py-2 z-10 border border-gray-100">
-                  <div className="px-4 py-2 border-b border-gray-100 flex justify-between items-center">
-                    <h3 className="font-medium">Notifications</h3>
-                    <button className="text-xs text-black hover:underline">
-                      Mark all read
-                    </button>
-                  </div>
-                  <div className="max-h-80 overflow-y-auto">
-                    <Link
-                      href="#"
-                      className="block px-4 py-3 hover:bg-blue-50 border-l-2 border-blue-500"
-                    >
-                      <div className="flex items-start">
-                        <div className="bg-blue-100 p-2 rounded-full">
-                          <User className="w-4 h-4 text-black" />
-                        </div>
-                        <div className="ml-3">
-                          <p className="text-sm font-medium">
-                            Your profile was viewed by a recruiter at TechCorp
-                          </p>
-                          <p className="text-xs text-gray-500 mt-1">
-                            2 hours ago
-                          </p>
-                        </div>
-                      </div>
-                    </Link>
-                    <Link
-                      href="#"
-                      className="block px-4 py-3 hover:bg-blue-50 border-l-2 border-blue-500"
-                    >
-                      <div className="flex items-start">
-                        <div className="bg-green-100 p-2 rounded-full">
-                          <Briefcase className="w-4 h-4 text-green-600" />
-                        </div>
-                        <div className="ml-3">
-                          <p className="text-sm font-medium">
-                            Application status updated for Senior Frontend
-                            Developer
-                          </p>
-                          <p className="text-xs text-gray-500 mt-1">
-                            Yesterday
-                          </p>
-                        </div>
-                      </div>
-                    </Link>
-                    <Link href="#" className="block px-4 py-3 hover:bg-blue-50">
-                      <div className="flex items-start">
-                        <div className="bg-purple-100 p-2 rounded-full">
-                          <Bookmark className="w-4 h-4 text-purple-600" />
-                        </div>
-                        <div className="ml-3">
-                          <p className="text-sm font-medium">
-                            New job matching your preferences: UX Designer at
-                            Creative Studio
-                          </p>
-                          <p className="text-xs text-gray-500 mt-1">
-                            2 days ago
-                          </p>
-                        </div>
-                      </div>
-                    </Link>
-                  </div>
-                  <div className="border-t border-gray-100 px-4 py-2">
-                    <Link
-                      href="/notifications"
-                      className="text-sm text-black hover:underline"
-                    >
-                      View all notifications
-                    </Link>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            <div className="relative">
-              <button
-                className="relative text-gray-500 hover:text-black"
-                onClick={() => {
-                  setMessagesOpen(!messagesOpen);
-                  setNotificationsOpen(false);
-                  setProfileDropdownOpen(false);
-                }}
+                <Settings className={`w-5 h-5 ${sidebarCollapsed ? "" : "mr-3"}`} />
+                {!sidebarCollapsed && "Company Profile"}
+              </Link>
+              
+              <Link 
+                href="/company/account" 
+                className={`flex items-center ${sidebarCollapsed ? "justify-center" : ""} px-4 py-3 text-sm font-medium rounded-lg ${
+                  pathname === "/company/account" 
+                    ? "bg-gradient-to-r from-teal-500 to-emerald-500 text-white" 
+                    : "text-gray-300 hover:bg-slate-800"
+                }`}
+                title={sidebarCollapsed ? "Account Settings" : ""}
               >
-                <MessageSquare className="w-5 h-5" />
-                {user.unreadMessages > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
-                    {user.unreadMessages}
-                  </span>
-                )}
-              </button>
-
-              {messagesOpen && (
-                <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg py-2 z-10 border border-gray-100">
-                  <div className="px-4 py-2 border-b border-gray-100">
-                    <h3 className="font-medium">Messages</h3>
-                  </div>
-                  <div className="max-h-80 overflow-y-auto">
-                    <Link
-                      href="#"
-                      className="block px-4 py-3 hover:bg-blue-50 border-l-2 border-blue-500"
-                    >
-                      <div className="flex items-center">
-                        <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 font-medium">
-                          RS
-                        </div>
-                        <div className="ml-3">
-                          <p className="text-sm font-medium">Rachel Smith</p>
-                          <p className="text-xs text-gray-500 truncate">
-                            Hi Alex, I&apos;d like to discuss the position...
-                          </p>
-                          <p className="text-xs text-gray-500 mt-1">
-                            30 minutes ago
-                          </p>
-                        </div>
-                      </div>
-                    </Link>
-                    <Link
-                      href="#"
-                      className="block px-4 py-3 hover:bg-blue-50 border-l-2 border-blue-500"
-                    >
-                      <div className="flex items-center">
-                        <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 font-medium">
-                          TT
-                        </div>
-                        <div className="ml-3">
-                          <p className="text-sm font-medium">TechCorp Team</p>
-                          <p className="text-xs text-gray-500 truncate">
-                            Thanks for your application! We&apos;d like to
-                            schedule...
-                          </p>
-                          <p className="text-xs text-gray-500 mt-1">
-                            Yesterday
-                          </p>
-                        </div>
-                      </div>
-                    </Link>
-                  </div>
-                  <div className="border-t border-gray-100 px-4 py-2">
-                    <Link
-                      href="/messages"
-                      className="text-sm text-black hover:underline"
-                    >
-                      View all messages
-                    </Link>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            <div className="relative">
-              <button
-                className="flex items-center space-x-2"
-                onClick={() => {
-                  setProfileDropdownOpen(!profileDropdownOpen);
-                  setNotificationsOpen(false);
-                  setMessagesOpen(false);
-                }}
-              >
-                <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-black font-medium">
-                  {user.avatar ? (
-                    <div className="relative w-8 h-8">
-                      <Image
-                        src={user.avatar}
-                        alt={user.name}
-                        fill
-                        sizes="32px"
-                        className="rounded-full object-cover"
-                      />
-                    </div>
-                  ) : (
-                    getInitials(user.name)
-                  )}
-                </div>
-                <div className="hidden lg:block text-left">
-                  <p className="text-sm font-medium text-gray-700">
-                    {user.name}
-                  </p>
-                  <p className="text-xs text-gray-500">{user.role}</p>
-                </div>
-                <ChevronDown className="w-4 h-4 text-gray-500" />
-              </button>
-
-              {profileDropdownOpen && (
-                <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 z-10 border border-gray-100">
-                  <Link
-                    href="/user/account"
-                    className="flex items-center px-4 py-2 text-gray-700 hover:bg-blue-50"
-                  >
-                    <User className="w-4 h-4 mr-2" />
-                    <span>Account </span>
-                  </Link>
-
-                  <div className="border-t border-gray-100 mt-1 pt-1">
-                    <button
-                      onClick={() => handleLogout()}
-                      className="flex items-center px-4 py-2 text-red-600 hover:bg-red-50"
-                    >
-                      <LogOut className="w-4 h-4 mr-2" />
-                      <span>Log Out</span>
-                    </button>
-                  </div>
-                </div>
-              )}
+                <User className={`w-5 h-5 ${sidebarCollapsed ? "" : "mr-3"}`} />
+                {!sidebarCollapsed && "Account Settings"}
+              </Link>
             </div>
           </div>
+        </nav>
+        
+        {/* User profile */}
+        <div className={`${sidebarCollapsed ? "p-2 mx-2" : "p-4 mx-4"} mt-6 mb-6 rounded-lg bg-slate-800`}>
+          <div className="flex items-center justify-center">
+            <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center text-white font-medium shadow-md">
+              {getInitials(user.name)}
+            </div>
+            {!sidebarCollapsed && (
+              <div className="ml-3 overflow-hidden">
+                <p className="text-sm font-medium text-white truncate">{user.name}</p>
+                <p className="text-xs text-gray-400 truncate">{user.role}</p>
+              </div>
+            )}
+          </div>
+          <button
+            onClick={handleLogout}
+            className={`mt-4 w-full flex items-center ${sidebarCollapsed ? "justify-center" : ""} ${sidebarCollapsed ? "px-2 py-2" : "px-4 py-2"} bg-slate-700 hover:bg-slate-600 rounded-lg text-sm font-medium text-white`}
+            title={sidebarCollapsed ? "Sign out" : ""}
+          >
+            <LogOut className={`w-4 h-4 ${sidebarCollapsed ? "" : "mr-2"}`} />
+            {!sidebarCollapsed && "Sign out"}
+          </button>
+        </div>
+      </aside>
 
-          {/* Mobile Menu Button */}
-          <div className="md:hidden flex items-center space-x-2">
-            <button
-              className="relative text-gray-500 hover:text-black"
-              onClick={() => setNotificationsOpen(!notificationsOpen)}
-            >
-              <Bell className="w-5 h-5" />
-              {user.unreadNotifications > 0 && (
-                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
-                  {user.unreadNotifications}
-                </span>
-              )}
-            </button>
-
-            <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="text-gray-500 hover:text-black"
-            >
-              {mobileMenuOpen ? (
-                <X className="w-6 h-6" />
-              ) : (
-                <Menu className="w-6 h-6" />
-              )}
-            </button>
+      {/* Mobile header */}
+      <header className="lg:hidden bg-white border-b border-gray-200 fixed top-0 left-0 right-0 z-50">
+        <div className="px-4 sm:px-6">
+          <div className="flex justify-between items-center h-16">
+            {/* Logo */}
+            <Link href="/company" className="flex items-center">
+              <div className="h-9 w-9 bg-gradient-to-br from-teal-400 to-emerald-500 rounded-lg flex items-center justify-center shadow-md">
+                <span className="font-bold text-lg text-white">QH</span>
+              </div>
+              <span className="ml-2 font-bold text-lg text-gray-900">QuickHire</span>
+            </Link>
+            
+            {/* User profile and menu button */}
+            <div className="flex items-center space-x-2" ref={dropdownRef}>
+              {/* Profile dropdown */}
+              <div className="relative">
+                <button
+                  onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
+                  className="flex items-center justify-center h-10 w-10 rounded-lg bg-gradient-to-br from-teal-400 to-emerald-500 text-white shadow-md"
+                >
+                  {getInitials(user.name)}
+                </button>
+                
+                {profileDropdownOpen && (
+                  <div className="absolute right-0 mt-2 w-60 rounded-xl bg-white shadow-xl border border-gray-100 py-2 z-20">
+                    <div className="px-4 py-3 border-b border-gray-100">
+                      <p className="text-sm font-semibold text-gray-900">{user.name}</p>
+                      <p className="text-xs text-gray-500">{user.role}</p>
+                    </div>
+                    <div className="pt-2">
+                      <Link
+                        href="/company/account"
+                        className="flex items-center px-4 py-3 text-gray-700 hover:bg-gray-50"
+                        onClick={() => setProfileDropdownOpen(false)}
+                      >
+                        <User className="w-5 h-5 mr-3 text-teal-500" />
+                        Account Settings
+                      </Link>
+                      <Link
+                        href="/company/settings"
+                        className="flex items-center px-4 py-3 text-gray-700 hover:bg-gray-50"
+                        onClick={() => setProfileDropdownOpen(false)}
+                      >
+                        <Settings className="w-5 h-5 mr-3 text-teal-500" />
+                        Company Profile
+                      </Link>
+                      <div className="mt-2 pt-2 border-t border-gray-100">
+                        <button
+                          onClick={handleLogout}
+                          className="flex items-center w-full px-4 py-3 text-left text-red-600 hover:bg-red-50"
+                        >
+                          <LogOut className="w-5 h-5 mr-3" />
+                          Sign out
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+              
+              {/* Mobile menu button */}
+              <button
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className="inline-flex items-center justify-center p-2 rounded-lg text-gray-700 hover:text-teal-600 hover:bg-gray-100"
+              >
+                <span className="sr-only">Open menu</span>
+                {mobileMenuOpen ? (
+                  <X className="h-6 w-6" />
+                ) : (
+                  <Menu className="h-6 w-6" />
+                )}
+              </button>
+            </div>
           </div>
         </div>
-      </div>
-
-      {mobileMenuOpen && (
-        <div className="md:hidden bg-white border-t border-gray-100 py-2">
-          <div className="container mx-auto px-4">
-            <div className="py-3 px-4 border-b border-gray-100">
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-black font-medium">
-                  {user.avatar ? (
-                    <div className="relative w-10 h-10">
-                      <Image
-                        src={user.avatar}
-                        alt={user.name}
-                        fill
-                        sizes="40px"
-                        className="rounded-full object-cover"
-                      />
-                    </div>
-                  ) : (
-                    getInitials(user.name)
-                  )}
+        
+        {/* Mobile menu */}
+        {mobileMenuOpen && (
+          <div className="fixed inset-0 z-40 bg-black bg-opacity-25" onClick={() => setMobileMenuOpen(false)}>
+            <div className="fixed inset-y-0 right-0 max-w-xs w-full bg-white shadow-xl z-50" onClick={e => e.stopPropagation()}>
+              <div className="flex items-center justify-between px-6 h-16 border-b border-gray-200">
+                <h2 className="text-lg font-semibold text-gray-900">Menu</h2>
+                <button
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="rounded-md text-gray-400 hover:text-gray-500 focus:outline-none"
+                >
+                  <X className="h-6 w-6" />
+                </button>
+              </div>
+              
+              <div className="divide-y divide-gray-200">
+                {/* Navigation */}
+                <nav className="py-4">
+                  <div className="px-4 space-y-1">
+                    <Link
+                      href="/company"
+                      className={`flex items-center px-4 py-3 text-base font-medium rounded-lg ${
+                        pathname === "/company" 
+                          ? "bg-gradient-to-r from-teal-500 to-emerald-500 text-white" 
+                          : "text-gray-700 hover:bg-gray-50"
+                      }`}
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      <Home className="w-5 h-5 mr-3" />
+                      Dashboard
+                    </Link>
+                    
+                    <Link
+                      href="/company/create-job"
+                      className={`flex items-center px-4 py-3 text-base font-medium rounded-lg ${
+                        pathname === "/company/create-job" 
+                          ? "bg-gradient-to-r from-teal-500 to-emerald-500 text-white" 
+                          : "text-gray-700 hover:bg-gray-50"
+                      }`}
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      <PlusCircle className="w-5 h-5 mr-3" />
+                      Post New Job
+                    </Link>
+                    
+                    <Link
+                      href="/company/job-application"
+                      className={`flex items-center px-4 py-3 text-base font-medium rounded-lg ${
+                        pathname === "/company/job-application" 
+                          ? "bg-gradient-to-r from-teal-500 to-emerald-500 text-white" 
+                          : "text-gray-700 hover:bg-gray-50"
+                      }`}
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      <Briefcase className="w-5 h-5 mr-3" />
+                      Applications
+                    </Link>
+                  </div>
+                </nav>
+                
+                {/* Company section */}
+                <div className="py-4">
+                  <p className="px-8 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                    Company
+                  </p>
+                  
+                  <div className="mt-3 px-4 space-y-1">
+                    <Link
+                      href="/company/settings"
+                      className={`flex items-center px-4 py-3 text-base font-medium rounded-lg ${
+                        pathname === "/company/settings" 
+                          ? "bg-gradient-to-r from-teal-500 to-emerald-500 text-white" 
+                          : "text-gray-700 hover:bg-gray-50"
+                      }`}
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      <Settings className="w-5 h-5 mr-3" />
+                      Company Profile
+                    </Link>
+                    
+                    <Link
+                      href="/company/account"
+                      className={`flex items-center px-4 py-3 text-base font-medium rounded-lg ${
+                        pathname === "/company/account" 
+                          ? "bg-gradient-to-r from-teal-500 to-emerald-500 text-white" 
+                          : "text-gray-700 hover:bg-gray-50"
+                      }`}
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      <User className="w-5 h-5 mr-3" />
+                      Account Settings
+                    </Link>
+                  </div>
                 </div>
-                <div>
-                  <p className="font-medium">{user.name}</p>
-                  <p className="text-sm text-gray-500">{user.role}</p>
+                
+                {/* User profile */}
+                <div className="py-6 px-6">
+                  <div className="flex items-center">
+                    <div className="h-12 w-12 rounded-lg bg-gradient-to-br from-teal-400 to-emerald-500 flex items-center justify-center text-white text-lg font-medium shadow-md">
+                      {getInitials(user.name)}
+                    </div>
+                    <div className="ml-3">
+                      <p className="text-base font-medium text-gray-800">{user.name}</p>
+                      <p className="text-sm text-gray-500">{user.role}</p>
+                    </div>
+                  </div>
+                  
+                  <button
+                    onClick={handleLogout}
+                    className="mt-5 w-full flex items-center justify-center px-4 py-3 bg-red-50 hover:bg-red-100 rounded-lg text-base font-medium text-red-600"
+                  >
+                    <LogOut className="w-5 h-5 mr-2" />
+                    Sign out
+                  </button>
                 </div>
               </div>
             </div>
-
-            <nav className="flex flex-col space-y-1 py-2">
-              <Link href="/user" className={getMobileTabStyles("/user")}>
-                Dashboard
-              </Link>
-              <Link
-                href="/user/applications"
-                className={getMobileTabStyles("/user/applications")}
-              >
-                My Applications
-              </Link>
-              <Link href="/saved" className={getMobileTabStyles("/saved")}>
-                Saved Jobs
-              </Link>
-              <Link
-                href="/messages"
-                className={`${getMobileTabStyles(
-                  "/messages"
-                )} flex items-center justify-between`}
-              >
-                Messages
-                {user.unreadMessages > 0 && (
-                  <span className="bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                    {user.unreadMessages}
-                  </span>
-                )}
-              </Link>
-              <Link
-                href="/user/account"
-                className={getMobileTabStyles("/user/account")}
-              >
-                Account
-              </Link>
-            </nav>
-
-            <div className="pt-2 border-t border-gray-100 mt-2">
-              <button
-                onClick={() => handleLogout()}
-                className="flex items-center px-4 py-2 text-red-600 font-medium hover:bg-red-50 rounded-lg"
-              >
-                <LogOut className="w-4 h-4 mr-2" />
-                <span>Log Out</span>
-              </button>
-            </div>
           </div>
-        </div>
-      )}
-    </header>
+        )}
+      </header>
+      
+      {/* Mobile header padding */}
+      <div className="lg:hidden h-16"></div>
+    </>
   );
 }
 

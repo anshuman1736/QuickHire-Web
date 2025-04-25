@@ -10,6 +10,38 @@ export interface IJobPost {
   experience: string;
   jobEligibility: string;
 }
+export interface IUpdateJob {
+  jobTitle: string;
+  jobAddress: string;
+  jobDescription: string;
+  jobLocation: string;
+  salary: string;
+  jobType: string;
+  categoryId: number;
+  skills: string;
+  experience: string;
+  jobEligibility: string;
+}
+export interface Iupdateprofile {
+  fullName: string;
+  email: string;
+  phoneNo: string;
+  jobTitle: string;
+  location: string;
+  bio: string;
+  majorIntrest: string[];
+  experienceLevel: string;
+  workType: string[];
+  website: string;
+  linkedin: string;
+  github: string;
+  twitter: string;
+  resume: string;
+  portfolio: File | null;
+  token: string;
+  id: number;
+  profile_pic: string;
+}
 
 export interface JobPosting {
   id: number;
@@ -86,6 +118,7 @@ export interface JobApplication {
   jobId: number;
   userId: number;
   applicationDate: number;
+  applicationScore: number;
   enabled: boolean;
   status: boolean;
   jobDTO: JobPosting;

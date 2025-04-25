@@ -279,3 +279,38 @@ export async function getApplicationByJobId(jobId: number, token: string): Promi
     throw new Error("An unexpected error occurred");
   }
 }
+
+
+
+
+interface IJobByUserIdResponse {
+  STS: string;
+  MSG: string;
+  CONTENT: JobApplication[];
+}
+
+
+
+export async function getAppliedJobs(
+  userId: number,
+  token: string
+): Promise<IJobByUserIdResponse> {
+  try {
+    const res = await axios.get(
+      `${BACKEND_URL}/application/user/${userId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return res.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      throw new Error(
+        error.response?.data?.message || "Failed to fetch Applied jobs by user ID"
+      );
+    }
+    throw new Error("An unexpected error occurred");
+  }
+}
