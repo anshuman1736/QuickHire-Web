@@ -32,7 +32,7 @@ async function uploadFile(
   }
 }
 
-export async function uploadResume(resume: File) {
+export async function uploadResume(resume: File): Promise<string | null> {
   return uploadFile(resume, getResumeStorageRef, "resume");
 }
 
