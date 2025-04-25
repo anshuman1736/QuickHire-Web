@@ -388,17 +388,17 @@ function CmpHeader() {
             </div>
 
             <nav className="flex flex-col space-y-1 py-2">
-              <Link href="/user" className={getMobileTabStyles("/user")}>
+              <Link href="/company" className={getMobileTabStyles("/company")}>
                 Dashboard
               </Link>
               <Link
-                href="/user/applications"
-                className={getMobileTabStyles("/user/applications")}
+                href="/company/create-job"
+                className={getMobileTabStyles("/company/create-job")}
               >
-                My Applications
+                Create Job
               </Link>
-              <Link href="/saved" className={getMobileTabStyles("/saved")}>
-                Saved Jobs
+              <Link href="/company/job-application" className={getMobileTabStyles("/saved")}>
+                Job Application
               </Link>
               <Link
                 href="/messages"
