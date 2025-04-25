@@ -1,10 +1,11 @@
-import Updatejob from '@/components/company/Updatejob'
-import React from 'react'
-
-const page = () => {
+import { Suspense } from "react";
+import Updatejob from "@/components/company/Updatejob";
+const Page = () => {
   return (
-    <Updatejob/>
-  )
-}
+    <Suspense>
+      <Updatejob />
+    </Suspense>
+  );
+};
 
-export default page
+export default Page;

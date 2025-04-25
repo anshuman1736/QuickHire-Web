@@ -1,7 +1,7 @@
 import { BACKEND_URL, PYTHON_BACKEND_URL } from "@/lib/config";
 import { ILogin, IUserRegister } from "@/types/auth";
 import { ICompanyRegister } from "@/types/auth";
-import { IJobPost, IUpdateJob, Iupdateprofile } from "@/types/job";
+import { IJobPost, IUpdateJob } from "@/types/job";
 import { IUpdateUserRequest } from "@/types/user";
 import axios from "axios";
 
@@ -9,9 +9,9 @@ interface IJobPostfn extends IJobPost {
   token: string;
   companyId: number;
 }
-interface IUpdatejobfn extends IUpdateJob{
-  token:String,
-  id:Number
+interface IUpdatejobfn extends IUpdateJob {
+  token: string;
+  id: number;
 }
 // interface IUpdateprofilefn extends Iupdateprofile{
 //   token:String,
@@ -147,7 +147,7 @@ export const updatejob = async (form: IUpdatejobfn) => {
       jobDescription: form.jobDescription,
       jobLocation: form.jobLocation,
       salary: form.salary,
-      jobAddress:form.jobAddress,
+      jobAddress: form.jobAddress,
       jobType: form.jobType,
       categoryId: form.categoryId,
       skills: form.skills,
@@ -257,38 +257,25 @@ export async function respondApplication(form: IRespondApplicationRequest) {
   }
 }
 
+interface IDeleteJobRequest {
+  id: number;
+  token: string;
+}
 
-
-// export const UpdateProfile = async (form: Iupdateprofile) => {
-//   try {
-//     const finalForm: IU = {
-//       jobTitle: form.jobTitle,
-//       jobDescription: form.jobDescription,
-//       jobLocation: form.jobLocation,
-//       salary: form.salary,
-//       jobAddress:form.jobAddress,
-//       jobType: form.jobType,
-//       categoryId: form.categoryId,
-//       skills: form.skills,
-//       experience: form.experience,
-//       jobEligibility: form.jobEligibility,
-//     };
-//     const response = await axios.put(
-//       `${BACKEND_URL}/job/${form.id}`,
-//       finalForm,
-//       {
-//         headers: {
-//           Authorization: `Bearer ${form.token}`,
-//           "Content-Type": "application/json",
-//         },
-//       }
-//     );
-//     return response.data;
-//   } catch (error) {
-//     if (axios.isAxiosError(error)) {
-//       const serverMessage = error.response?.data?.message || error.message;
-//       throw new Error(serverMessage);
-//     }
-//     throw error;
-//   }
-// };
+export async function deleteJob(form: IDeleteJobRequest) {
+  try {
+    const response = await axios.delete(`${BACKEND_URL}/job/${form.id}`, {
+      headers: {
+        Authorization: `Bearer ${form.token}`,
+        "Content-Type": "application/json",
+      },
+    });
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      const serverMessage = error.response?.data?.message || error.message;
+      throw new Error(serverMessage);
+    }
+    throw error;
+  }
+}

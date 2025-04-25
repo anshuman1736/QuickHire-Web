@@ -8,51 +8,24 @@ import {
   Tag,
   DollarSign,
   Building,
+  Trash2,
 } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { updatejob } from "@/lib/postData";
-import { successToast } from "@/lib/toast";
+import { useMutation } from "@tanstack/react-query";
+import { deleteJob, updatejob } from "@/lib/postData";
+import { successToast, errorToast } from "@/lib/toast";
 import { useRouter } from "next/navigation";
 
 const Updatejob = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  useEffect(() => {
-    const jobTitle = searchParams.get("jobTitle") || "";
-    const jobCategory = searchParams.get("jobCategory") || "";
-    const categoryId = parseInt(searchParams.get("categoryId") || "");
-    const id = parseInt(searchParams.get("id") || "");
-    const jobType = searchParams.get("jobType") || "";
-    const skills = searchParams.get("skills") || "";
-    const jobLocation = searchParams.get("joblocation") || "";
-    const jobAddress = searchParams.get("jobAddress") || "";
-    const experience = searchParams.get("experience") || "";
-    const jobDescription = searchParams.get("description") || "";
-    const jobEligibility = searchParams.get("education") || "";
-    const salary = searchParams.get("salary") || " 0";
-    const token = localStorage.getItem("sessionId") || "";
-    setFormData({
-      jobTitle,
-      jobCategory,
-      categoryId,
-      id,
-      jobType,
-      skills,
-      jobLocation,
-      jobAddress,
-      experience,
-      jobDescription,
-      jobEligibility,
-      salary,
-      token: token, // You can fetch this from auth if needed
-    });
-  }, [searchParams]);
-
+  // Add state for delete confirmation
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [popup, setpopup] = useState(false);
   const [isSubmitting, setisSubmitting] = useState(false);
+
   type JobFormData = {
     jobTitle: string;
     jobCategory: string;
@@ -67,6 +40,7 @@ const Updatejob = () => {
     jobDescription: string;
     jobEligibility: string;
     salary: string;
+    isActive: boolean; // New field for job status
   };
 
   const [formData, setFormData] = useState<JobFormData>({
@@ -83,7 +57,46 @@ const Updatejob = () => {
     jobDescription: "",
     jobEligibility: "",
     salary: "",
+    isActive: true, // Default to active
   });
+
+  useEffect(() => {
+    const jobTitle = searchParams.get("jobTitle") || "";
+    const jobCategory = searchParams.get("jobCategory") || "";
+    const categoryId = parseInt(searchParams.get("categoryId") || "0");
+    const id = parseInt(searchParams.get("id") || "0");
+    const jobType = searchParams.get("jobType") || "";
+    const skills = searchParams.get("skills") || "";
+    const jobLocation = searchParams.get("joblocation") || "";
+    const jobAddress = searchParams.get("jobAddress") || "";
+    const experience = searchParams.get("experience") || "";
+    const jobDescription = searchParams.get("description") || "";
+    const jobEligibility = searchParams.get("education") || "";
+    const salary = searchParams.get("salary") || "0";
+    const isActive = searchParams.get("isActive") !== "false";
+    const token = localStorage.getItem("sessionId") || "";
+
+    setFormData({
+      jobTitle,
+      jobCategory,
+      categoryId,
+      id,
+      jobType,
+      skills,
+      jobLocation,
+      jobAddress,
+      experience,
+      jobDescription,
+      jobEligibility,
+      salary,
+      isActive,
+      token,
+    });
+  }, [searchParams]);
+
+  // const statusMutation = useMutation({
+  //   mutationFn;
+  // })
 
   const handlechange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -91,6 +104,12 @@ const Updatejob = () => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
+
+  // Toggle handler for active/inactive status
+  const handleStatusToggle = () => {
+    setFormData((prev) => ({ ...prev, isActive: !prev.isActive }));
+  };
+
   const onsubmithandle = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setpopup(true);
@@ -98,18 +117,45 @@ const Updatejob = () => {
 
   const jobMutation = useMutation({
     mutationFn: updatejob,
-    onSuccess: (data) => {
+    onSuccess: () => {
       setisSubmitting(false);
       successToast("Job Updated successfully!");
       router.push("/company/job-application");
     },
     onError: (error) => {
       console.error("Error updating job:", error);
+      errorToast("Failed to update job");
+      setisSubmitting(false);
     },
   });
+
   const handlejobUpdate = () => {
     jobMutation.mutate(formData);
     setisSubmitting(true);
+  };
+
+  const deleteJobMutation = useMutation({
+    mutationFn: deleteJob,
+    onSuccess: () => {
+      successToast("Job deleted successfully!");
+      router.push("/company/job-application");
+    },
+    onError: (error) => {
+      console.error("Error deleting job:", error);
+      errorToast("Failed to delete job");
+    },
+  });
+
+  const handleDeleteJob = () => {
+    if (formData.id) {
+      const form = {
+        id: formData.id,
+        token: formData.token,
+      };
+      deleteJobMutation.mutate(form);
+      setShowDeleteConfirm(false);
+      setisSubmitting(true);
+    }
   };
 
   if (isSubmitting) {
@@ -118,21 +164,58 @@ const Updatejob = () => {
         <div className="flex flex-col items-center space-y-4">
           <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
           <span className="text-xl text-gray-700">
-            Post updating & <br /> redirecting to Home Page...
+            {deleteJobMutation.isPending ? "Deleting job" : "Post updating"} &{" "}
+            <br /> redirecting to Home Page...
           </span>
         </div>
       </div>
     );
   }
+
   return (
     <div className="min-h-screen bg-gray-100 py-20 mt-6">
-      {/* popup for final submit */}
+      {/* Delete confirmation popup */}
       <div
-        className={`fixed inset-0 z-50 flex  items-center justify-center bg-black/30  transition-opacity ${
+        className={`fixed inset-0 z-50 flex items-center justify-center bg-black/30 transition-opacity ${
+          showDeleteConfirm ? "flex" : "hidden"
+        }`}
+      >
+        <div className="bg-white p-8 rounded-lg shadow-xl space-y-4 max-w-md">
+          <div className="text-center">
+            <div className="inline-flex items-center justify-center w-12 h-12 mb-4 bg-red-100 rounded-full">
+              <Trash2 className="w-6 h-6 text-red-600" />
+            </div>
+            <h3 className="text-xl font-bold text-gray-900">
+              Delete Job Listing
+            </h3>
+            <p className="mt-2 text-gray-600">
+              Are you sure you want to delete this job listing? This action
+              cannot be undone.
+            </p>
+          </div>
+          <div className="flex justify-center gap-4 mt-6">
+            <button
+              onClick={() => setShowDeleteConfirm(false)}
+              className="px-4 py-2 text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300 transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleDeleteJob}
+              className="px-4 py-2 text-white bg-red-600 rounded-md hover:bg-red-700 transition-colors"
+            >
+              Delete Job
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div
+        className={`fixed inset-0 z-50 flex items-center justify-center bg-black/30 transition-opacity ${
           popup ? "flex" : "hidden"
         }`}
       >
-        <div className="  space-y-3 bg-white p-10">
+        <div className="space-y-3 bg-white p-10 rounded-lg shadow-lg">
           <h6 className="text-center">🧐</h6>
           <p className="text-base text-center font-semibold text-gray-800">
             Are you sure you want <br /> to update this job?
@@ -143,7 +226,7 @@ const Updatejob = () => {
           <div className="flex gap-6">
             <button
               onClick={() => setpopup(false)}
-              className="text-base cursor-pointer px-4 py-2 rounded-lg border border-gray-400 "
+              className="text-base cursor-pointer px-4 py-2 rounded-lg border border-gray-400"
             >
               Cancel Changes
             </button>
@@ -153,18 +236,17 @@ const Updatejob = () => {
                 handlejobUpdate();
                 setpopup(false);
               }}
-              className="text-base cursor-pointer  px-4 py-2 rounded-lg text-white bg-blue-600"
+              className="text-base cursor-pointer px-4 py-2 rounded-lg text-white bg-blue-600"
             >
-              {" "}
               Confirm Update
             </button>
           </div>
         </div>
       </div>
+
       {!formData ? (
-        <div className=" font-semibold text-gray-600 text-2xl flex items-center justify-center">
-          {" "}
-          Something went Wrong 😒. <br />{" "}
+        <div className="font-semibold text-gray-600 text-2xl flex items-center justify-center">
+          Something went Wrong 😒. <br />
         </div>
       ) : (
         <>
@@ -182,13 +264,43 @@ const Updatejob = () => {
               </p>
             </div>
           </div>
-          <form onSubmit={onsubmithandle} className="divide-y divide-gray-100">
-            {/* Basic info  */}
-            <div className="p-4 sm:p-6 md:p-8 ">
-              <div className="flex justify-between items-center  cursor-pointer mb-4 sm:mb-6">
+          <form
+            onSubmit={onsubmithandle}
+            className="max-w-6xl mx-auto divide-y divide-gray-100 bg-white rounded-lg shadow-md"
+          >
+            <div className="p-4 sm:p-6 md:p-8">
+              <div className="flex justify-between items-center mb-4 sm:mb-6">
                 <h3 className="text-lg sm:text-xl font-semibold text-gray-800 flex items-center">
                   Basic Information
                 </h3>
+                <div
+                  onClick={handleStatusToggle}
+                  className="flex items-center gap-2 cursor-pointer"
+                >
+                  <div className="flex items-center">
+                    <span className="mr-2 text-sm text-gray-600">Status:</span>
+                    <div
+                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${
+                        formData.isActive ? "bg-green-500" : "bg-gray-400"
+                      }`}
+                    >
+                      <span
+                        className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                          formData.isActive ? "translate-x-6" : "translate-x-1"
+                        }`}
+                      />
+                    </div>
+                  </div>
+                  <span
+                    className={
+                      formData.isActive
+                        ? "text-green-600 text-sm font-medium"
+                        : "text-gray-500 text-sm font-medium"
+                    }
+                  >
+                    {formData.isActive ? "Active" : "Inactive"}
+                  </span>
+                </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5 md:gap-6 mt-4 sm:mt-5 md:mt-6">
@@ -371,7 +483,7 @@ const Updatejob = () => {
 
               <div>
                 <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
-                  Annual Salery*
+                  Annual Salary*
                 </label>
                 <div className="flex">
                   <span className="inline-flex items-center px-2 sm:px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-200 text-gray-500">
@@ -384,28 +496,35 @@ const Updatejob = () => {
                     value={formData.salary}
                     onChange={handlechange}
                     required
-                    placeholder="City, Country"
+                    placeholder="Annual salary"
                     className="flex-1 p-2 sm:p-3 text-sm sm:text-base border border-gray-300 rounded-r-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   />
                 </div>
               </div>
             </div>
 
-            {/* Save Section */}
             <div className="p-4 sm:p-6 md:p-8 bg-gray-50 border-t border-gray-200">
               <div className="flex flex-col md:flex-row justify-between items-center gap-3 sm:gap-4">
                 <div>
                   <h4 className="text-sm sm:text-base font-medium text-gray-800 text-center md:text-left">
-                    Really want to update job ?
+                    Really want to update job?
                   </h4>
                   <p className="text-xs sm:text-sm text-gray-600 text-center md:text-left">
                     Make sure all required fields are filled
                   </p>
                 </div>
-                <div className="flex gap-2 sm:gap-3 w-full md:w-auto">
+                <div className="flex flex-wrap gap-2 sm:gap-3 w-full md:w-auto">
+                  <button
+                    type="button"
+                    onClick={() => setShowDeleteConfirm(true)}
+                    className="flex items-center justify-center gap-1 px-4 sm:px-5 py-2 sm:py-2.5 text-xs sm:text-sm border border-red-300 text-red-600 rounded-md hover:bg-red-50 transition-colors"
+                  >
+                    <Trash2 size={16} />
+                    <span>Delete</span>
+                  </button>
                   <Link
                     href="/company"
-                    className="flex-1 md:flex-none px-4 sm:px-6 py-2 sm:py-3 text-xs sm:text-sm border border-gray-300 rounded-md text-gray-700 hover:bg-gray-100 transition-colors"
+                    className="flex-1 md:flex-none px-4 sm:px-6 py-2 sm:py-3 text-xs sm:text-sm border border-gray-300 rounded-md text-gray-700 hover:bg-gray-100 transition-colors text-center"
                   >
                     Cancel
                   </Link>

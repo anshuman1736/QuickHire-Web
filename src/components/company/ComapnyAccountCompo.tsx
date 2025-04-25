@@ -1,8 +1,7 @@
 "use client";
 
-import { useEffect, useState, MouseEvent } from "react";
+import { ChangeEvent, useState } from "react";
 import {
-  User,
   Mail,
   Phone,
   Tag,
@@ -10,252 +9,129 @@ import {
   Camera,
   Save,
   X,
-  Plus,
   Briefcase,
   Award,
   Eye,
   ChevronDown,
   ChevronUp,
-  MapPin,
   Globe,
   Linkedin,
   Github,
   Twitter,
+  Building,
+  Calendar,
 } from "lucide-react";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { getUserById } from "@/lib/queries";
-import { errorToast, successToast } from "@/lib/toast";
-import { updateUser } from "@/lib/postData";
-import { useRouter } from "next/navigation";
-import { uploadProfilePic } from "@/lib/uploadTofirebase";
-import { IUpdateUserRequest } from "@/types/user";
+import { uploadCinCertificate, uploadResume } from "@/lib/uploadTofirebase";
+import { errorToast } from "@/lib/toast";
 
-type FormData = {
-  fullName: string;
-  email: string;
-  phoneNo: string;
-  jobTitle: string;
-  location: string;
-  bio: string;
-  majorIntrest: string[];
-  experienceLevel: string;
-  workType: string[];
-  website: string;
-  linkedin: string;
-  github: string;
-  twitter: string;
-  resume: string;
-  portfolio: File | null;
-  token: string;
-  id: number;
-  profile_pic: string;
-};
-
-type InputChangeEvent = React.ChangeEvent<
-  HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
->;
-type CheckboxChangeEvent = React.ChangeEvent<HTMLInputElement>;
-type FileChangeEvent = React.ChangeEvent<HTMLInputElement>;
-
-export default function UserAccount() {
+export default function ComapnyAccountCompo() {
+  // State management
   const [isEditingPhoto, setIsEditingPhoto] = useState(false);
   const [activeSection, setActiveSection] = useState("all");
   const [isUploading, setIsUploading] = useState(false);
-  const [token, setToken] = useState("");
-  const [newSkill, setNewSkill] = useState("");
-  const [userId, setuserId] = useState<number>(0);
-  const router = useRouter();
 
+  // Form data with company specific fields
   const [formData, setFormData] = useState({
-    fullName: "Alex Johnson",
+    comapanyName: "Alex Johnson",
     email: "alex.johnson@example.com",
     phoneNo: "+1 (555) 987-6543",
-    jobTitle: "Senior Frontend Developer",
-    location: "San Francisco, CA",
+    cinNumber: "L17110MH1973PLC019786",
+    cinCertificate: "",
+    profile_pic: "",
+    establishedYear: "2020",
     bio: "Passionate developer with 5+ years of experience building modern web applications. Specialized in React ecosystem and responsive design.",
-    majorIntrest: [
-      "React",
-      "TypeScript",
-      "Node.js",
-      "GraphQL",
-      "AWS",
-      "Jest",
-      "UI/UX Design",
-    ],
-    experienceLevel: "senior",
-    workType: ["full-time", "remote"],
     website: "https://alexjohnson.dev",
     linkedin: "alexjohnson",
     github: "alexjohnson",
     twitter: "alexjohnson",
-    resume: " ",
-    portfolio: null,
-    profile_pic: " ",
-    address: " ",
   });
 
-  const { isPending, isError, data, error } = useQuery({
-    queryKey: ["getuserById"],
-    queryFn: () => getUserById(userId, token),
-    enabled: !!token,
-  });
+  // const [newSkill, setNewSkill] = useState("");
 
-  const updatepmution = useMutation({
-    mutationFn: (form: IUpdateUserRequest) => updateUser(form, userId, token),
-    onSuccess: () => {
-      successToast("Job Updated successfully!");
-      router.refresh();
-    },
-    onError: (error) => {
-      console.error("Error updating profile:", error);
-    },
-  });
+  // Use type instead of empty interfaces
+  type InputChangeEvent = ChangeEvent<
+    HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+  >;
+  // type CheckboxChangeEvent = React.ChangeEvent<HTMLInputElement>;
+  type FileChangeEvent = React.ChangeEvent<HTMLInputElement>;
+  type SubmitEvent = React.FormEvent<HTMLFormElement>;
 
-  useEffect(() => {
-    setToken(localStorage.getItem("sessionId") || "");
-    setuserId(Number(localStorage.getItem("userId")));
-  }, []);
-
-  useEffect(() => {
-    if (data?.CONTENT) {
-      const userdata = data.CONTENT;
-
-      setFormData((prev) => ({
-        ...prev,
-        fullName: userdata.fullName || "",
-        location: userdata.address || "",
-        phoneNo: userdata.phoneNo || "",
-        email: userdata.email || "",
-        majorIntrest: Array.isArray(userdata.majorIntrest)
-          ? userdata.majorIntrest
-          : [userdata.majorIntrest],
-        resume: userdata.resume || "",
-        profile_pic: userdata.profile_pic || "",
-        token: token,
-        id: userId,
-      }));
-    }
-  }, [data, token, userId]);
-
-  if (isError) {
-    errorToast(error.message);
-    return;
-  }
-
+  // Handlers
   const handleInputChange = (e: InputChangeEvent): void => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
 
-  const handleCheckboxChange = (e: CheckboxChangeEvent): void => {
-    const { name, checked, value } = e.target;
-    let updatedValues: string[] = [
-      ...(formData[name as keyof typeof formData] as string[]),
-    ];
+  // const handleCheckboxChange = (e: CheckboxChangeEvent): void => {
+  //   const { name, checked, value } = e.target;
+  //   let updatedValues: string[] = [
+  //     ...(formData[name as keyof typeof formData] as string[]),
+  //   ];
 
-    if (checked) {
-      updatedValues.push(value);
-    } else {
-      updatedValues = updatedValues.filter((item) => item !== value);
-    }
+  //   if (checked) {
+  //     updatedValues.push(value);
+  //   } else {
+  //     updatedValues = updatedValues.filter((item) => item !== value);
+  //   }
 
-    setFormData({ ...formData, [name]: updatedValues });
-  };
-
-  const handleAddSkill = () => {
-    if (newSkill.trim() && !formData.majorIntrest.includes(newSkill.trim())) {
-      setFormData({
-        ...formData,
-        majorIntrest: [...formData.majorIntrest, newSkill.trim()],
-      });
-      setNewSkill("");
-    }
-  };
-
-  type RemoveSkillHandler = (skillToRemove: string) => void;
-
-  const handleRemoveSkill: RemoveSkillHandler = (skillToRemove) => {
-    setFormData({
-      ...formData,
-      majorIntrest: formData.majorIntrest.filter(
-        (skill) => skill !== skillToRemove
-      ),
-    });
-  };
+  //   setFormData({ ...formData, [name]: updatedValues });
+  // };
 
   type HandleFileChange = (
     e: FileChangeEvent,
-    fileType: keyof Pick<FormData, "resume" | "portfolio" | "profile_pic">
+    fileType: "certificate" | "profile_pic"
   ) => Promise<void>;
 
+  const uploadProfilePic = async (file: File): Promise<string | null> => {
+    return await uploadResume(file);
+  };
+
   const handleFileChange: HandleFileChange = async (e, fileType) => {
-    if (e.target.files && e.target.files[0]) {
+    const file = e.target.files?.[0];
+    if (file) {
       setIsUploading(true);
-
-      const file = e.target.files[0];
-
+      if (fileType === "certificate") {
+        const certificateUrl = await uploadCinCertificate(file);
+        if (!certificateUrl) {
+          errorToast("Error uploading certificate. Please try again.");
+          return;
+        }
+        setFormData({ ...formData, cinCertificate: certificateUrl });
+      }
       if (fileType === "profile_pic") {
         const url = await uploadProfilePic(file);
         if (!url) {
-          setIsUploading(false);
+          errorToast("Error uploading profile. Please try again.");
           return;
         }
-        setFormData({
-          ...formData,
-          profile_pic: url,
-        });
-      } else {
-        const url = await uploadProfilePic(file);
-        if (!url) {
-          setIsUploading(false);
-          return;
-        }
-        setFormData({
-          ...formData,
-          [fileType]: url,
-        });
+        setFormData({ ...formData, profile_pic: url });
       }
-
       setIsUploading(false);
     }
   };
 
-  const handleSubmit = (e: MouseEvent<HTMLButtonElement>) => {
+  const handleSubmit = (e: SubmitEvent): void => {
     e.preventDefault();
-    const form: IUpdateUserRequest = {
-      address: formData.address,
-      categoryId: data?.CONTENT.categoryId,
-      categoryName: data?.CONTENT.categoryName,
-      completeProfile: data?.CONTENT.completeProfile,
-      email: data?.CONTENT.email,
-      fullName: formData.fullName,
-      id: data?.CONTENT.id,
-      majorIntrest: formData.majorIntrest.toString(),
-      phoneNo: data?.CONTENT.phoneNo,
-      profile_pic: formData.profile_pic,
-      resume: formData.resume,
-    };
-
-    updatepmution.mutate(form);
-    console.log("Profile updated:", formData);
+    console.log("Company Profile updated:", formData);
   };
 
-  const experienceLevels = [
-    { id: "intern", label: "Intern" },
-    { id: "junior", label: "Junior (0-2 yrs)" },
-    { id: "mid", label: "Mid (2-5 yrs)" },
-    { id: "senior", label: "Senior (5+ yrs)" },
-    { id: "lead", label: "Lead/Manager" },
+  // Company types
+  const companyTypes = [
+    { id: "startup", label: "Startup" },
+    { id: "sme", label: "SME" },
+    { id: "enterprise", label: "Enterprise" },
+    { id: "nonprofit", label: "Non-profit" },
+    { id: "government", label: "Government" },
   ];
 
-  const workTypes = [
-    { id: "full-time", label: "Full-time" },
-    { id: "part-time", label: "Part-time" },
-    { id: "contract", label: "Contract" },
-    { id: "freelance", label: "Freelance" },
-    { id: "remote", label: "Remote" },
-    { id: "hybrid", label: "Hybrid" },
-    { id: "onsite", label: "On-site" },
+  // Industries
+  const industries = [
+    { id: "tech", label: "Technology" },
+    { id: "finance", label: "Finance" },
+    { id: "healthcare", label: "Healthcare" },
+    { id: "education", label: "Education" },
+    { id: "retail", label: "Retail" },
+    { id: "manufacturing", label: "Manufacturing" },
   ];
 
   type ToggleSectionHandler = (section: string) => void;
@@ -264,57 +140,27 @@ export default function UserAccount() {
     setActiveSection((prevSection) => (prevSection === section ? "" : section));
   };
 
-  if (isPending) {
-    return (
-      <div className="min-h-screen bg-gradient-to-r from-blue-100 to-white py-20 mt-6 flex items-center justify-center">
-        <div className="flex flex-col items-center space-y-4">
-          <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-          <span className="text-xl text-gray-700">Loading profile...</span>
-        </div>
-      </div>
-    );
-  }
-
-  if (isError) {
-    return (
-      <div className="min-h-screen bg-gradient-to-r from-blue-100 to-white py-20 mt-6 flex items-center justify-center">
-        <div className="bg-white p-8 rounded-xl shadow-lg border-l-4 border-red-500 max-w-lg">
-          <h2 className="text-2xl text-red-600 font-bold mb-4">
-            Error Loading profile
-          </h2>
-          <p className="text-gray-700">{error}</p>
-          <button
-            onClick={() => window.location.reload()}
-            className="mt-6 px-6 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 transition duration-200 shadow-md"
-          >
-            Try Again
-          </button>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="w-full bg-gray-50 min-h-screen py-4 sm:py-6 md:py-8 px-2 sm:px-4 mt-12 sm:mt-20 md:mt-16">
       <div className="max-w-6xl mx-auto">
+        {/* Header */}
         <div className="bg-gradient-to-r from-blue-700 to-blue-500 rounded-lg sm:rounded-xl p-4 sm:p-6 md:p-8 mb-4 sm:mb-6 md:mb-8 shadow-lg">
           <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-white mb-1 sm:mb-2">
-            Job Seeker Profile
+            Company Profile
           </h1>
           <p className="text-blue-100 text-sm sm:text-base md:text-lg">
-            Manage your professional profile and visibility to employers
+            Manage your company profile and be visible to top talent
           </p>
         </div>
-
         <div className="bg-white rounded-lg sm:rounded-xl shadow-lg overflow-hidden">
           <div className="relative bg-gradient-to-r from-blue-50 to-indigo-50 p-4 sm:p-6 md:p-8 flex flex-col md:flex-row items-start gap-4 sm:gap-6 md:gap-8 border-b border-gray-200">
             <div className="relative mx-auto md:mx-0">
               <div className="w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 rounded-full bg-white p-1 shadow-xl overflow-hidden border-4 border-white">
                 <div className="relative w-full h-full">
                   <img
-                    src={formData.profile_pic}
-                    alt="Profile"
-                    className=" h-full w-full object-cover rounded-full"
+                    src="/api/placeholder/400/400"
+                    alt="Company Logo"
+                    className="object-cover rounded-full"
                   />
                 </div>
               </div>
@@ -351,14 +197,15 @@ export default function UserAccount() {
               )}
             </div>
 
+            {/* Profile Info */}
             <div className="flex-1 w-full md:w-auto text-center md:text-left">
               <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 sm:gap-4">
                 <div>
                   <h2 className="text-xl sm:text-2xl font-bold text-gray-800">
-                    {formData.fullName}
+                    {formData.comapanyName}
                   </h2>
                   <p className="text-base sm:text-lg text-blue-600 font-medium">
-                    {formData.jobTitle}
+                    Est. {formData.establishedYear}
                   </p>
                 </div>
                 <button
@@ -375,23 +222,12 @@ export default function UserAccount() {
 
               <div className="mt-3 sm:mt-4 flex flex-wrap items-center justify-center md:justify-start gap-x-4 sm:gap-x-6 gap-y-2 text-sm sm:text-base text-gray-600">
                 <div className="flex items-center">
-                  <MapPin size={16} className="sm:hidden mr-1 text-blue-500" />
-                  <MapPin
+                  <Tag size={16} className="sm:hidden mr-1 text-blue-500" />
+                  <Tag
                     size={18}
                     className="hidden sm:block mr-2 text-blue-500"
                   />
-                  <span>{formData.location}</span>
-                </div>
-                <div className="flex items-center">
-                  <Briefcase
-                    size={16}
-                    className="sm:hidden mr-1 text-blue-500"
-                  />
-                  <Briefcase
-                    size={18}
-                    className="hidden sm:block mr-2 text-blue-500"
-                  />
-                  <span className="capitalize">{formData.experienceLevel}</span>
+                  <span>CIN: {formData.cinNumber}</span>
                 </div>
                 <div className="flex items-center">
                   <Globe size={16} className="sm:hidden mr-1 text-blue-500" />
@@ -410,10 +246,11 @@ export default function UserAccount() {
                 </div>
               </div>
 
+              {/* Social Links */}
               <div className="mt-3 sm:mt-4 flex gap-2 sm:gap-3 justify-center md:justify-start">
                 {formData.linkedin && (
                   <a
-                    href={`https://linkedin.com/in/${formData.linkedin}`}
+                    href={`https://linkedin.com/company/${formData.linkedin}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="p-1.5 sm:p-2 bg-blue-50 text-blue-700 rounded-full hover:bg-blue-100 transition-colors"
@@ -448,19 +285,24 @@ export default function UserAccount() {
             </div>
           </div>
 
-          <form className="divide-y divide-gray-100">
+          {/* Main Form */}
+          <form onSubmit={handleSubmit} className="divide-y divide-gray-100">
+            {/* Basic Information Section */}
             <div className="p-4 sm:p-6 md:p-8">
               <div
                 className="flex justify-between items-center cursor-pointer mb-4 sm:mb-6"
                 onClick={() => toggleSection("basic")}
               >
                 <h3 className="text-lg sm:text-xl font-semibold text-gray-800 flex items-center">
-                  <User size={20} className="sm:hidden mr-2 text-blue-600" />
-                  <User
+                  <Building
+                    size={20}
+                    className="sm:hidden mr-2 text-blue-600"
+                  />
+                  <Building
                     size={22}
                     className="hidden sm:block mr-3 text-blue-600"
                   />
-                  Basic Information
+                  Company Information
                 </h3>
                 {activeSection === "basic" ? (
                   <ChevronUp size={20} className="sm:hidden text-gray-500" />
@@ -484,17 +326,17 @@ export default function UserAccount() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5 md:gap-6 mt-4 sm:mt-5 md:mt-6">
                   <div>
                     <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
-                      Full Name*
+                      Company Name*
                     </label>
                     <div className="flex">
                       <span className="inline-flex items-center px-2 sm:px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500">
-                        <User size={16} className="sm:hidden" />
-                        <User size={18} className="hidden sm:block" />
+                        <Building size={16} className="sm:hidden" />
+                        <Building size={18} className="hidden sm:block" />
                       </span>
                       <input
                         type="text"
-                        name="fullName"
-                        value={formData.fullName}
+                        name="comapanyName"
+                        value={formData.comapanyName}
                         onChange={handleInputChange}
                         required
                         className="flex-1 p-2 sm:p-3 text-sm sm:text-base border border-gray-300 rounded-r-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -504,22 +346,7 @@ export default function UserAccount() {
 
                   <div>
                     <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
-                      Professional Title*
-                    </label>
-                    <input
-                      type="text"
-                      name="jobTitle"
-                      value={formData.jobTitle}
-                      onChange={handleInputChange}
-                      required
-                      placeholder="E.g. Senior Frontend Developer"
-                      className="w-full p-2 sm:p-3 text-sm sm:text-base border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
-                      Email Address*
+                      Company Email*
                     </label>
                     <div className="flex">
                       <span className="inline-flex items-center px-2 sm:px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500">
@@ -530,8 +357,7 @@ export default function UserAccount() {
                         type="email"
                         name="email"
                         value={formData.email}
-                        onChange={handleInputChange}
-                        required
+                        disabled
                         className="flex-1 p-2 sm:p-3 text-sm sm:text-base border border-gray-300 rounded-r-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       />
                     </div>
@@ -558,20 +384,20 @@ export default function UserAccount() {
 
                   <div>
                     <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
-                      Location*
+                      CIN Number*
                     </label>
                     <div className="flex">
                       <span className="inline-flex items-center px-2 sm:px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500">
-                        <MapPin size={16} className="sm:hidden" />
-                        <MapPin size={18} className="hidden sm:block" />
+                        <Tag size={16} className="sm:hidden" />
+                        <Tag size={18} className="hidden sm:block" />
                       </span>
                       <input
                         type="text"
-                        name="location"
-                        value={formData.location}
+                        name="cinNumber"
+                        value={formData.cinNumber}
                         onChange={handleInputChange}
                         required
-                        placeholder="City, Country"
+                        placeholder="Company Identification Number"
                         className="flex-1 p-2 sm:p-3 text-sm sm:text-base border border-gray-300 rounded-r-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       />
                     </div>
@@ -579,26 +405,48 @@ export default function UserAccount() {
 
                   <div>
                     <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
-                      Experience Level*
+                      Established Year*
                     </label>
-                    <select
-                      name="experienceLevel"
-                      value={formData.experienceLevel}
-                      onChange={handleInputChange}
-                      required
-                      className="w-full p-2 sm:p-3 text-sm sm:text-base border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    >
-                      {experienceLevels.map((level) => (
-                        <option key={level.id} value={level.id}>
-                          {level.label}
-                        </option>
-                      ))}
-                    </select>
+                    <div className="flex">
+                      <span className="inline-flex items-center px-2 sm:px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500">
+                        <Calendar size={16} className="sm:hidden" />
+                        <Calendar size={18} className="hidden sm:block" />
+                      </span>
+                      <input
+                        type="text"
+                        name="establishedYear"
+                        value={formData.establishedYear}
+                        onChange={handleInputChange}
+                        required
+                        placeholder="Year company was founded"
+                        className="flex-1 p-2 sm:p-3 text-sm sm:text-base border border-gray-300 rounded-r-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
+                      Company Website
+                    </label>
+                    <div className="flex">
+                      <span className="inline-flex items-center px-2 sm:px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500">
+                        <Globe size={16} className="sm:hidden" />
+                        <Globe size={18} className="hidden sm:block" />
+                      </span>
+                      <input
+                        type="url"
+                        name="website"
+                        value={formData.website}
+                        onChange={handleInputChange}
+                        placeholder="https://company.com"
+                        className="flex-1 p-2 sm:p-3 text-sm sm:text-base border border-gray-300 rounded-r-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      />
+                    </div>
                   </div>
 
                   <div className="md:col-span-2">
                     <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
-                      Professional Bio*
+                      Company Bio*
                     </label>
                     <textarea
                       name="bio"
@@ -607,17 +455,18 @@ export default function UserAccount() {
                       required
                       rows={4}
                       className="w-full p-2 sm:p-3 text-sm sm:text-base border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      placeholder="Tell employers about your professional background, skills, and what you're looking for..."
+                      placeholder="Tell about your company, mission, vision, and what you're looking for..."
                     />
                   </div>
                 </div>
               )}
             </div>
 
+            {/* Company Type & Industry Section */}
             <div className="p-4 sm:p-6 md:p-8">
               <div
                 className="flex justify-between items-center cursor-pointer mb-4 sm:mb-6"
-                onClick={() => toggleSection("skills")}
+                onClick={() => toggleSection("company_details")}
               >
                 <h3 className="text-lg sm:text-xl font-semibold text-gray-800 flex items-center">
                   <Award size={20} className="sm:hidden mr-2 text-blue-600" />
@@ -625,14 +474,14 @@ export default function UserAccount() {
                     size={22}
                     className="hidden sm:block mr-3 text-blue-600"
                   />
-                  Skills & Job Preferences
+                  Company Details
                 </h3>
-                {activeSection === "skills" ? (
+                {activeSection === "company_details" ? (
                   <ChevronUp size={20} className="sm:hidden text-gray-500" />
                 ) : (
                   <ChevronDown size={20} className="sm:hidden text-gray-500" />
                 )}
-                {activeSection === "skills" ? (
+                {activeSection === "company_details" ? (
                   <ChevronUp
                     size={22}
                     className="hidden sm:block text-gray-500"
@@ -645,94 +494,61 @@ export default function UserAccount() {
                 )}
               </div>
 
-              {(activeSection === "skills" || activeSection === "all") && (
+              {(activeSection === "company_details" ||
+                activeSection === "all") && (
                 <div className="mt-4 sm:mt-6 space-y-6 sm:space-y-8">
+                  {/* Company Type */}
                   <div>
                     <h4 className="text-base sm:text-lg font-medium text-gray-800 mb-3 sm:mb-4">
-                      Your Skills*
+                      Company Type*
                     </h4>
-                    <div className="flex flex-wrap gap-2 sm:gap-3 mb-4 sm:mb-6">
-                      {formData.majorIntrest.map((skill, index) => (
-                        <div
-                          key={index}
-                          className="bg-blue-100 text-blue-800 px-3 sm:px-4 py-1 sm:py-2 text-xs sm:text-sm rounded-full flex items-center shadow-sm hover:shadow transition-all"
+                    <div className="flex flex-wrap gap-x-3 gap-y-2 text-xs sm:text-sm">
+                      {companyTypes.map((type) => (
+                        <label
+                          key={type.id}
+                          className="inline-flex items-center"
                         >
-                          <Tag size={14} className="sm:hidden mr-1" />
-                          <Tag size={16} className="hidden sm:block mr-2" />
-                          <span className="font-medium">{skill}</span>
-                          <button
-                            type="button"
-                            onClick={() => handleRemoveSkill(skill)}
-                            className="ml-1 sm:ml-2 text-blue-500 hover:text-blue-700 transition-colors"
-                          >
-                            <X size={14} className="sm:hidden" />
-                            <X size={16} className="hidden sm:block" />
-                          </button>
-                        </div>
+                          <input
+                            type="radio"
+                            name="companyType"
+                            value={type.id}
+                            // checked={formData.companyType === type.id}
+                            onChange={handleInputChange}
+                            className="h-3 w-3 sm:h-4 sm:w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                          />
+                          <span className="ml-1 sm:ml-2 text-gray-700">
+                            {type.label}
+                          </span>
+                        </label>
                       ))}
-                    </div>
-
-                    <div className="flex gap-2 sm:gap-3 max-w-lg">
-                      <input
-                        type="text"
-                        value={newSkill}
-                        onChange={(e) => setNewSkill(e.target.value)}
-                        placeholder="Add a skill (e.g. Python, Project Management)"
-                        className="flex-1 p-2 sm:p-3 text-sm sm:text-base border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        onKeyPress={(e) =>
-                          e.key === "Enter" &&
-                          (e.preventDefault(), handleAddSkill())
-                        }
-                      />
-                      <button
-                        type="button"
-                        onClick={handleAddSkill}
-                        disabled={!newSkill.trim()}
-                        className="px-3 sm:px-5 py-2 sm:py-3 text-xs sm:text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors flex items-center disabled:bg-gray-400 disabled:cursor-not-allowed"
-                      >
-                        <Plus size={16} className="sm:hidden mr-1" />
-                        <Plus size={18} className="hidden sm:block mr-1" />
-                        Add
-                      </button>
                     </div>
                   </div>
 
+                  {/* Industry */}
                   <div>
                     <h4 className="text-base sm:text-lg font-medium text-gray-800 mb-3 sm:mb-4">
-                      Job Preferences*
+                      Industry*
                     </h4>
-                    <div className="space-y-3 sm:space-y-4">
-                      <div>
-                        <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
-                          Work Type Preferences
-                        </label>
-                        <div className="flex flex-wrap gap-x-3 gap-y-2 text-xs sm:text-sm">
-                          {workTypes.map((type) => (
-                            <label
-                              key={type.id}
-                              className="inline-flex items-center"
-                            >
-                              <input
-                                type="checkbox"
-                                name="workType"
-                                value={type.id}
-                                checked={formData.workType.includes(type.id)}
-                                onChange={handleCheckboxChange}
-                                className="h-3 w-3 sm:h-4 sm:w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                              />
-                              <span className="ml-1 sm:ml-2 text-gray-700">
-                                {type.label}
-                              </span>
-                            </label>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
+                    <select
+                      name="industry"
+                      // value={formData.industry}
+                      onChange={handleInputChange}
+                      required
+                      className="w-full p-2 sm:p-3 text-sm sm:text-base border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    >
+                      <option value="">Select Industry</option>
+                      {industries.map((industry) => (
+                        <option key={industry.id} value={industry.id}>
+                          {industry.label}
+                        </option>
+                      ))}
+                    </select>
                   </div>
                 </div>
               )}
             </div>
 
+            {/* Documents Section */}
             <div className="p-4 sm:p-6 md:p-8">
               <div
                 className="flex justify-between items-center cursor-pointer mb-4 sm:mb-6"
@@ -769,6 +585,7 @@ export default function UserAccount() {
 
               {(activeSection === "documents" || activeSection === "all") && (
                 <div className="mt-4 sm:mt-6 grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 md:gap-8">
+                  {/* CIN Certificate Upload */}
                   <div className="border-2 border-dashed border-blue-200 rounded-lg sm:rounded-xl p-4 sm:p-6 bg-blue-50">
                     <div className="text-center">
                       <div className="mx-auto flex items-center justify-center h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-blue-100 mb-3 sm:mb-4">
@@ -779,65 +596,66 @@ export default function UserAccount() {
                         />
                       </div>
                       <h4 className="text-base sm:text-lg font-medium text-gray-800 mb-1 sm:mb-2">
-                        Upload Your Resume*
+                        Upload CIN Certificate*
                       </h4>
                       <p className="text-xs sm:text-sm text-gray-600 mb-3 sm:mb-4">
-                        Keep your resume updated to get better matches
+                        Required for company verification
                       </p>
                       <label className="px-4 sm:px-6 py-2 sm:py-3 text-xs sm:text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors inline-flex items-center cursor-pointer shadow-sm">
-                        {isUploading ? "Uploading..." : "Select Resume"}
+                        {isUploading ? "Uploading..." : "Select Certificate"}
                         <input
                           type="file"
-                          accept=".pdf,.doc,.docx"
+                          accept=".pdf,.jpg,.jpeg,.png"
                           className="hidden"
-                          onChange={(e) => handleFileChange(e, "resume")}
+                          onChange={(e) => handleFileChange(e, "certificate")}
                           disabled={isUploading}
                         />
                       </label>
                       <p className="text-xs text-gray-500 mt-2 sm:mt-3">
-                        PDF, DOCX (Max 5MB)
+                        PDF, JPG, PNG (Max 5MB)
                       </p>
                     </div>
                   </div>
 
+                  {/* Company Logo */}
                   <div className="border-2 border-dashed border-indigo-200 rounded-lg sm:rounded-xl p-4 sm:p-6 bg-indigo-50">
                     <div className="text-center">
                       <div className="mx-auto flex items-center justify-center h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-indigo-100 mb-3 sm:mb-4">
-                        <Globe
+                        <Camera
                           size={20}
                           className="sm:hidden text-indigo-600"
                         />
-                        <Globe
+                        <Camera
                           size={24}
                           className="hidden sm:block text-indigo-600"
                         />
                       </div>
                       <h4 className="text-base sm:text-lg font-medium text-gray-800 mb-1 sm:mb-2">
-                        Portfolio Link
+                        Company Logo
                       </h4>
                       <p className="text-xs sm:text-sm text-gray-600 mb-3 sm:mb-4">
-                        Showcase your work to stand out
+                        Upload your company logo (high resolution)
                       </p>
-                      <div className="flex">
-                        <span className="inline-flex items-center px-2 sm:px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500">
-                          <Globe size={16} className="sm:hidden" />
-                          <Globe size={18} className="hidden sm:block" />
-                        </span>
+                      <label className="px-4 sm:px-6 py-2 sm:py-3 text-xs sm:text-sm bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors inline-flex items-center cursor-pointer shadow-sm">
+                        {isUploading ? "Uploading..." : "Select Logo"}
                         <input
-                          type="url"
-                          name="website"
-                          value={formData.website}
-                          onChange={handleInputChange}
-                          placeholder="https://yourportfolio.com"
-                          className="flex-1 p-2 sm:p-3 text-xs sm:text-sm border border-gray-300 rounded-r-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={(e) => handleFileChange(e, "profile_pic")}
+                          disabled={isUploading}
                         />
-                      </div>
+                      </label>
+                      <p className="text-xs text-gray-500 mt-2 sm:mt-3">
+                        JPG, PNG (Min 400x400px)
+                      </p>
                     </div>
                   </div>
                 </div>
               )}
             </div>
 
+            {/* Social Links Section */}
             <div className="p-4 sm:p-6 md:p-8">
               <div
                 className="flex justify-between items-center cursor-pointer mb-4 sm:mb-6"
@@ -873,7 +691,7 @@ export default function UserAccount() {
                 <div className="mt-4 sm:mt-6 grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                   <div>
                     <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
-                      LinkedIn Username
+                      LinkedIn Company Page
                     </label>
                     <div className="flex">
                       <span className="inline-flex items-center px-2 sm:px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500">
@@ -885,7 +703,7 @@ export default function UserAccount() {
                         name="linkedin"
                         value={formData.linkedin}
                         onChange={handleInputChange}
-                        placeholder="yourusername"
+                        placeholder="companyname"
                         className="flex-1 p-2 sm:p-3 text-xs sm:text-sm border border-gray-300 rounded-r-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       />
                     </div>
@@ -893,7 +711,7 @@ export default function UserAccount() {
 
                   <div>
                     <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
-                      GitHub Username
+                      GitHub Organization
                     </label>
                     <div className="flex">
                       <span className="inline-flex items-center px-2 sm:px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500">
@@ -905,7 +723,7 @@ export default function UserAccount() {
                         name="github"
                         value={formData.github}
                         onChange={handleInputChange}
-                        placeholder="yourusername"
+                        placeholder="organization-name"
                         className="flex-1 p-2 sm:p-3 text-xs sm:text-sm border border-gray-300 rounded-r-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       />
                     </div>
@@ -913,7 +731,7 @@ export default function UserAccount() {
 
                   <div>
                     <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
-                      Twitter Username
+                      Twitter/X Handle
                     </label>
                     <div className="flex">
                       <span className="inline-flex items-center px-2 sm:px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500">
@@ -925,7 +743,7 @@ export default function UserAccount() {
                         name="twitter"
                         value={formData.twitter}
                         onChange={handleInputChange}
-                        placeholder="yourusername"
+                        placeholder="companyname"
                         className="flex-1 p-2 sm:p-3 text-xs sm:text-sm border border-gray-300 rounded-r-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       />
                     </div>
@@ -934,11 +752,12 @@ export default function UserAccount() {
               )}
             </div>
 
+            {/* Save Section */}
             <div className="p-4 sm:p-6 md:p-8 bg-gray-50 border-t border-gray-200">
               <div className="flex flex-col md:flex-row justify-between items-center gap-3 sm:gap-4">
                 <div>
                   <h4 className="text-sm sm:text-base font-medium text-gray-800 text-center md:text-left">
-                    Ready to update your profile?
+                    Ready to update your company profile?
                   </h4>
                   <p className="text-xs sm:text-sm text-gray-600 text-center md:text-left">
                     Make sure all required fields are filled
@@ -953,7 +772,6 @@ export default function UserAccount() {
                   </button>
                   <button
                     type="submit"
-                    onClick={handleSubmit}
                     className="flex-1 md:flex-none px-4 sm:px-8 py-2 sm:py-3 text-xs sm:text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors shadow-md flex items-center justify-center"
                   >
                     <Save size={16} className="sm:hidden mr-1" />

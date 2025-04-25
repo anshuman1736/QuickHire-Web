@@ -12,7 +12,7 @@ export interface IJobPost {
 }
 export interface IUpdateJob {
   jobTitle: string;
-  jobAddress:string;
+  jobAddress: string;
   jobDescription: string;
   jobLocation: string;
   salary: string;
@@ -24,25 +24,24 @@ export interface IUpdateJob {
 }
 export interface Iupdateprofile {
   fullName: string;
-    email: string;
-    phoneNo: string;
-    jobTitle: string;
-    location: string;
-    bio: string;
-    majorIntrest: string[];
-    experienceLevel: string;
-    workType: string[];
-    website: string;
-    linkedin: string;
-    github: string;
-    twitter: string;
-    resume: string ;
-    portfolio: File | null;
-    token:string ;
-    id:number;
-    profile_pic: string ;
+  email: string;
+  phoneNo: string;
+  jobTitle: string;
+  location: string;
+  bio: string;
+  majorIntrest: string[];
+  experienceLevel: string;
+  workType: string[];
+  website: string;
+  linkedin: string;
+  github: string;
+  twitter: string;
+  resume: string;
+  portfolio: File | null;
+  token: string;
+  id: number;
+  profile_pic: string;
 }
-
 
 export interface JobPosting {
   id: number;

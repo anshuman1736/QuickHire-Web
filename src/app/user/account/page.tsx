@@ -1,10 +1,7 @@
-import UserAccount from '@/components/user/userAccount/userAccount'
-import React from 'react'
+import UserAccount from "@/components/user/userAccount/userAccount";
 
-function Accout() {
-  return (
-    <UserAccount/>
-  )
+export default function Accout() {
+    return(
+      <UserAccount/>
+    )
 }
-
-export default Accout
