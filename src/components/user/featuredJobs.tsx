@@ -3,7 +3,6 @@
 import {
   Briefcase,
   MapPin,
-  Star,
   Search,
   Filter,
   ChevronDown,
@@ -154,16 +153,7 @@ export default function JobPortal() {
           return postedDate.includes("day") || postedDate === "Today";
         });
         filtered = recentJobs.length > 0 ? recentJobs : filtered;
-      } else if (activeTab === "urgent") {
-        // Find jobs with urgent or featured badges in metadata
-        filtered = filtered.filter((job) => {
-          // Check for urgent job types
-          return (
-            job.job_type?.toLowerCase().includes("urgent") ||
-            job.job_type?.toLowerCase().includes("featured")
-          );
-        });
-      }
+      } 
 
       if (searchQuery) {
         filtered = filtered.filter(
@@ -288,18 +278,18 @@ export default function JobPortal() {
   };
 
   return (
-    <section className="bg-white py-16 mt-16">
+    <section className="bg-gray-50 py-16 mt-16">
       <div className="container mx-auto px-4 md:px-6">
         <Header />
-        {/* Header */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 ">
-          {/* Search Bar with Filters */}
+        
+        {/* Search and Filter Section */}
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
           <div className="mt-6 md:mt-0 w-full flex flex-col justify-center items-center">
             <div className="relative w-full md:w-96 mb-4">
               <input
                 type="text"
                 placeholder="Search jobs, companies, or locations..."
-                className="pl-12 pr-4 py-3 w-full rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-lg shadow-lg transition duration-300 ease-in-out"
+                className="pl-12 pr-4 py-3 w-full rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-lg shadow-sm transition duration-300 ease-in-out"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
@@ -312,9 +302,8 @@ export default function JobPortal() {
               </button>
             </div>
 
-            {/* Advanced Filters */}
             {advancedFiltersOpen && (
-              <div className="w-full md:w-3/4 bg-white rounded-lg shadow-lg p-4 mb-6 border border-gray-200 grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="w-full md:w-3/4 bg-white rounded-lg shadow-md p-4 mb-6 border border-gray-200 grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Experience
@@ -368,12 +357,13 @@ export default function JobPortal() {
           </div>
         </div>
 
+        {/* Tabs and Category Filter */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
           <div className="hidden md:flex gap-2">
             <button
-              className={`px-4 py-2 rounded-lg font-medium ${
+              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
                 activeTab === "featured"
-                  ? "bg-blue-600 text-white"
+                  ? "bg-blue-600 text-white shadow-sm"
                   : "bg-gray-100 text-gray-700 hover:bg-gray-200"
               }`}
               onClick={() => setActiveTab("featured")}
@@ -381,9 +371,9 @@ export default function JobPortal() {
               Featured
             </button>
             <button
-              className={`px-4 py-2 rounded-lg font-medium ${
+              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
                 activeTab === "popular"
-                  ? "bg-blue-600 text-white"
+                  ? "bg-blue-600 text-white shadow-sm"
                   : "bg-gray-100 text-gray-700 hover:bg-gray-200"
               }`}
               onClick={() => setActiveTab("popular")}
@@ -391,43 +381,32 @@ export default function JobPortal() {
               Popular
             </button>
             <button
-              className={`px-4 py-2 rounded-lg font-medium ${
+              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
                 activeTab === "new"
-                  ? "bg-blue-600 text-white"
+                  ? "bg-blue-600 text-white shadow-sm"
                   : "bg-gray-100 text-gray-700 hover:bg-gray-200"
               }`}
               onClick={() => setActiveTab("new")}
             >
               Newest
             </button>
-            <button
-              className={`px-4 py-2 rounded-lg font-medium ${
-                activeTab === "urgent"
-                  ? "bg-blue-600 text-white"
-                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-              }`}
-              onClick={() => setActiveTab("urgent")}
-            >
-              Urgent
-            </button>
           </div>
 
           <div className="md:hidden w-full mb-4">
             <select
-              className="w-full p-2 rounded-lg border border-gray-200 bg-white"
+              className="w-full p-2 rounded-lg border border-gray-200 bg-white shadow-sm"
               value={activeTab}
               onChange={(e) => setActiveTab(e.target.value)}
             >
               <option value="featured">Featured</option>
               <option value="popular">Popular</option>
               <option value="new">Newest</option>
-              <option value="urgent">Urgent</option>
             </select>
           </div>
 
           <div className="w-full md:w-auto relative">
             <button
-              className="flex items-center justify-between w-full md:w-48 px-4 py-2 bg-white border border-gray-200 rounded-lg"
+              className="flex items-center justify-between w-full md:w-48 px-4 py-2 bg-white border border-gray-200 rounded-lg shadow-sm hover:bg-gray-50 transition-colors"
               onClick={() => setFilterOpen(!filterOpen)}
             >
               <span className="flex items-center">
@@ -441,11 +420,11 @@ export default function JobPortal() {
             </button>
 
             {filterOpen && (
-              <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg">
+              <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden">
                 {categories.map((category) => (
                   <button
                     key={category.value}
-                    className={`w-full text-left px-4 py-2 hover:bg-gray-50 ${
+                    className={`w-full text-left px-4 py-2 hover:bg-gray-50 transition-colors ${
                       selectedCategory === category.value
                         ? "bg-blue-50 text-blue-600"
                         : ""
@@ -460,12 +439,14 @@ export default function JobPortal() {
           </div>
         </div>
 
+        {/* Loading State */}
         {isPending && (
-          <div className="flex justify-center items-center h-64">
+          <div className="flex justify-center items-center h-80">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
           </div>
         )}
 
+        {/* Error State */}
         {isError && (
           <div className="flex flex-col items-center justify-center h-64 text-center">
             <div className="bg-red-100 p-4 rounded-full mb-4">
@@ -491,7 +472,7 @@ export default function JobPortal() {
                 : "Something went wrong. Please try again later."}
             </p>
             <button
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
               onClick={() => resetFilters()}
             >
               Reset Filters
@@ -499,102 +480,112 @@ export default function JobPortal() {
           </div>
         )}
 
+        {/* Success State */}
         {!isPending && !isError && (
           <>
-            {visibleJobs.length === 0 && (
+            {visibleJobs.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-64 text-center">
                 <div className="bg-gray-100 p-4 rounded-full mb-4">
                   <Search className="w-8 h-8 text-gray-400" />
                 </div>
                 <h3 className="text-xl font-bold mb-2">No jobs found</h3>
                 <p className="text-gray-500 mb-4">
-                  {"Try adjusting your search or filters to find what you're "}
-                  {"looking for"}
+                  {"Try adjusting your search or filters to find what you're looking for"}
                 </p>
                 <button
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                   onClick={resetFilters}
                 >
                   Reset Filters
                 </button>
               </div>
-            )}
-
-            {visibleJobs.length > 0 && (
+            ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {visibleJobs.map((job) => {
-                  const jobLevel = getJobLevelFromExperience(
-                    job.job_experience
-                  );
+                  const jobLevel = getJobLevelFromExperience(job.job_experience);
                   const postedDate = getPostedDateText(job.creation_date);
-                  const jobRating = Math.floor(Math.random() * 5) / 10 + 4.5; // Random rating between 4.5-5.0
 
                   return (
-                    <Link
+                    <div
                       key={job.id}
-                      href={`/user/${job.job_title}/${job.id}`}
+                      className="group bg-white rounded-xl shadow-md hover:shadow-lg transition-all overflow-hidden border border-gray-100 flex flex-col h-full"
                     >
-                      <div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow overflow-hidden border border-gray-100 flex flex-col">
-                        <div className="h-20 bg-gradient-to-r from-blue-500 to-blue-700 relative">
-                          <div className="absolute bottom-4 left-4 bg-white backdrop-blur-sm px-3 py-1 rounded-full text-black text-sm font-medium">
-                            {jobLevel}
-                          </div>
-                        </div>
-
-                        <div className="p-6 flex-grow flex flex-col">
-                          <div className="flex justify-between items-start mb-2">
-                            <h3 className="font-bold text-lg">
-                              {job.job_title}
-                            </h3>
-                            <div className="bg-blue-50 text-blue-700 text-xs font-medium px-2 py-1 rounded">
-                              {job.job_type}
+                      <div className="p-6 flex-grow flex flex-col">
+                        {/* Company/Job Header */}
+                        <div className="flex items-start justify-between mb-4">
+                          <div className="flex items-center">
+                            <div className="w-12 h-12 rounded-lg bg-gradient-to-r from-blue-500 to-blue-600 flex items-center justify-center text-white font-bold mr-4">
+                              { 'J'}
+                            </div>
+                            <div>
+                              <h3 className="font-bold text-lg text-gray-800 group-hover:text-blue-600 transition-colors">
+                                {job.job_title}
+                              </h3>
+                              
                             </div>
                           </div>
+                          <button className="text-gray-400 hover:text-blue-500 transition-colors">
+                            <BookmarkPlus className="w-5 h-5" />
+                          </button>
+                        </div>
 
-                          <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+                        {/* Job Details */}
+                        <div className="mb-4">
+                          <div className="flex flex-wrap gap-2 mb-3">
+                            <span className="px-3 py-1 bg-blue-50 text-blue-700 text-xs font-medium rounded-full">
+                              {job.job_type}
+                            </span>
+                            <span className="px-3 py-1 bg-green-50 text-green-700 text-xs font-medium rounded-full">
+                              {jobLevel}
+                            </span>
+                            {job.job_location.toLowerCase().includes('remote') && (
+                              <span className="px-3 py-1 bg-purple-50 text-purple-700 text-xs font-medium rounded-full">
+                                Remote
+                              </span>
+                            )}
+                          </div>
+
+                          <div className="h-1 w-full bg-gray-300 mb-4"></div>
+
+                          <p className="text-gray-600 text-sm mb-4 line-clamp-3">
                             {job.job_description}
                           </p>
+                        </div>
 
-                          <div className="text-sm text-gray-500 mb-4">
-                            <div className="flex items-center mb-1">
+                        {/* Meta Information */}
+                        <div className="mt-auto">
+                          <div className="flex flex-wrap gap-y-2 text-sm text-gray-500 mb-4">
+                            <div className="flex items-center w-1/2">
                               <MapPin className="w-4 h-4 mr-2 text-gray-400" />
                               <span>{job.job_location}</span>
                             </div>
-                            <div className="flex items-center mb-1">
+                            <div className="flex items-center w-1/2">
                               <DollarSign className="w-4 h-4 mr-2 text-gray-400" />
                               <span>{job.salary}</span>
                             </div>
-                            <div className="flex items-center mb-1">
+                            <div className="flex items-center w-1/2">
                               <Briefcase className="w-4 h-4 mr-2 text-gray-400" />
-                              <span>{job.job_experience || "Entry Level"}</span>
+                              <span>{job.job_experience || 'Entry Level'}</span>
                             </div>
-                            <div className="flex items-center">
+                            <div className="flex items-center w-1/2">
                               <Calendar className="w-4 h-4 mr-2 text-gray-400" />
                               <span>Posted {postedDate}</span>
                             </div>
                           </div>
 
-                          <div className="flex items-center gap-2 mt-auto mb-2">
-                            <Star className="w-4 h-4 text-blue-600 fill-blue-600" />
-                            <span className="font-medium">
-                              {jobRating.toFixed(1)}
-                            </span>
-                          </div>
-
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+                            
                             <Link
-                              href={`/user/${jobLevel}/${job.id}`}
-                              className="flex-1 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center"
+                              href={`/user/${job.job_title}/${job.id}`}
+                              className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors flex items-end"
                             >
                               Apply Now
+                              <ArrowRight className="w-4 h-4 ml-2" />
                             </Link>
-                            <button className="w-10 h-10 flex items-center justify-center rounded-lg border border-gray-200 hover:bg-gray-50">
-                              <BookmarkPlus className="w-5 h-5 text-gray-500" />
-                            </button>
                           </div>
                         </div>
                       </div>
-                    </Link>
+                    </div>
                   );
                 })}
               </div>
@@ -602,9 +593,10 @@ export default function JobPortal() {
           </>
         )}
 
+        {/* View More Button */}
         {!isPending && !isError && visibleJobs.length > 0 && (
           <div className="mt-12 text-center">
-            <button className="px-6 py-3 bg-white text-blue-600 rounded-xl font-medium border border-blue-200 hover:bg-blue-50 transition-colors flex items-center justify-center mx-auto">
+            <button className="px-6 py-3 bg-white text-blue-600 rounded-xl font-medium border border-blue-200 hover:bg-blue-50 transition-colors flex items-center justify-center mx-auto shadow-sm hover:shadow-md">
               Browse All Jobs
               <ArrowRight className="w-4 h-4 ml-2" />
             </button>
