@@ -1,14 +1,46 @@
 "use client";
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { User, Mail, Phone, Tag, Upload, Camera, Save, X, Plus, Briefcase, Award, Eye, ChevronDown, ChevronUp, MapPin, Globe, Linkedin, Github, Twitter } from 'lucide-react';
 import Image from 'next/image'; // Import Next.js Image component
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { getUserById } from '@/lib/queries';
+import { errorToast, successToast } from '@/lib/toast';
+
+
+  type FormData = {
+    fullName: string;
+    email: string;
+    phoneNo: string;
+    jobTitle: string;
+    location: string;
+    bio: string;
+    majorIntrest: string[];
+    experienceLevel: string;
+    workType: string[];
+    website: string;
+    linkedin: string;
+    github: string;
+    twitter: string;
+    resume: string ;
+    portfolio: File | null;
+    token:string ;
+    id:number;
+    profile_pic: string ;
+  }
+
+  type InputChangeEvent = React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>;
+  type CheckboxChangeEvent = React.ChangeEvent<HTMLInputElement>;
+  type FileChangeEvent = React.ChangeEvent<HTMLInputElement>;
+  type SubmitEvent = React.FormEvent<HTMLFormElement>;
 
 const UserAccount = () => {
   // State management
   const [isEditingPhoto, setIsEditingPhoto] = useState(false);
   const [activeSection, setActiveSection] = useState('all');
   const [isUploading, setIsUploading] = useState(false);
-  
+  const [token, setToken] = useState("");
+  const [userId, setuserId] = useState<number>(0);
+    
   // Form data with job seeker specific fields
   const [formData, setFormData] = useState({
     fullName: "Alex Johnson",
@@ -17,45 +49,67 @@ const UserAccount = () => {
     jobTitle: "Senior Frontend Developer",
     location: "San Francisco, CA",
     bio: "Passionate developer with 5+ years of experience building modern web applications. Specialized in React ecosystem and responsive design.",
-    skills: ["React", "TypeScript", "Node.js", "GraphQL", "AWS", "Jest", "UI/UX Design"],
+    majorIntrest: ["React", "TypeScript", "Node.js", "GraphQL", "AWS", "Jest", "UI/UX Design"],
     experienceLevel: "senior",
     workType: ["full-time", "remote"],
     website: "https://alexjohnson.dev",
     linkedin: "alexjohnson",
     github: "alexjohnson",
     twitter: "alexjohnson",
-    resume: null,
+    resume: " ",
     portfolio: null,
-    profile_pic: null
+    profile_pic: " "
   });
-  
-  const [newSkill, setNewSkill] = useState("");
+  useEffect(() => {
+    setToken(localStorage.getItem("sessionId") || "");
+    setuserId(Number(localStorage.getItem("userId")));
+  }, []);
 
-  // Type Definitions
-  type FormData = {
-    fullName: string;
-    email: string;
-    phoneNo: string;
-    jobTitle: string;
-    location: string;
-    bio: string;
-    skills: string[];
-    experienceLevel: string;
-    workType: string[];
-    website: string;
-    linkedin: string;
-    github: string;
-    twitter: string;
-    resume: File | null;
-    portfolio: File | null;
-    profile_pic: File | null;
+  const { isPending, isError, data, error } = useQuery({
+    queryKey: ["getuserById"],
+    queryFn: () => getUserById(userId, token),
+    enabled: !!token,
+  });
+ 
+  if(isError){
+     return errorToast(error.message)
   }
-
-  // Use type instead of empty interfaces
-  type InputChangeEvent = React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>;
-  type CheckboxChangeEvent = React.ChangeEvent<HTMLInputElement>;
-  type FileChangeEvent = React.ChangeEvent<HTMLInputElement>;
-  type SubmitEvent = React.FormEvent<HTMLFormElement>;
+  
+  //Update profile api
+  // const updatepmution = useMutation({
+  //   mutationFn: UpdateProfile,
+  //   onSuccess: (data) => {
+  //     successToast("Job Updated successfully!");
+  //   },
+  //   onError: (error) => {
+  //     console.error("Error updating profile:", error);
+  //   },
+  // });
+    
+  useEffect(() => {
+    if (data?.CONTENT) {
+      const userdata = data.CONTENT;
+  
+      setFormData((prev) => ({
+        ...prev,
+        fullName: userdata.fullName || "",
+        location: userdata.address || "",
+        phoneNo: userdata.phoneNo || "",
+        email: userdata.email || "",
+        majorIntrest: Array.isArray(userdata.majorIntrest)
+          ? userdata.majorIntrest
+          : [userdata.majorIntrest],
+        resume: userdata.resume || "",
+        profile_pic: userdata.profile_pic || "",
+        token:token,
+        id:userId
+      }));
+    }
+  }, [data]);
+    
+  
+  
+const [newSkill, setNewSkill] = useState("");
 
   // Handlers
   const handleInputChange = (e: InputChangeEvent): void => {
@@ -77,10 +131,10 @@ const UserAccount = () => {
   };
   
   const handleAddSkill = () => {
-    if (newSkill.trim() && !formData.skills.includes(newSkill.trim())) {
+    if (newSkill.trim() && !formData.majorIntrest.includes(newSkill.trim())) {
       setFormData({
         ...formData,
-        skills: [...formData.skills, newSkill.trim()]
+        majorIntrest: [...formData.majorIntrest, newSkill.trim()]
       });
       setNewSkill("");
     }
@@ -91,27 +145,42 @@ const UserAccount = () => {
   const handleRemoveSkill: RemoveSkillHandler = (skillToRemove) => {
     setFormData({
       ...formData,
-      skills: formData.skills.filter(skill => skill !== skillToRemove)
+      majorIntrest: formData.majorIntrest.filter(skill => skill !== skillToRemove)
     });
   };
   
   type HandleFileChange = (e: FileChangeEvent, fileType: keyof Pick<FormData, 'resume' | 'portfolio' | 'profile_pic'>) => Promise<void>;
 
-  const handleFileChange: HandleFileChange = async (e, fileType) => {
-    if (e.target.files && e.target.files[0]) {
-      setIsUploading(true);
-      // Simulate upload
-      await new Promise(resolve => setTimeout(resolve, 1000));
+ const handleFileChange: HandleFileChange = async (e, fileType) => {
+  if (e.target.files && e.target.files[0]) {
+    setIsUploading(true);
+
+    const file = e.target.files[0];
+
+    // Simulate upload
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
+    if (fileType === "profile_pic") {
+      const imageUrl = URL.createObjectURL(file); // Create temporary URL
       setFormData({
         ...formData,
-        [fileType]: e.target.files[0]
+        profile_pic: imageUrl,
       });
-      setIsUploading(false);
+    } else {
+      setFormData({
+        ...formData,
+        [fileType]: file,
+      });
     }
-  };
+
+    setIsUploading(false);
+  }
+};
+
 
   const handleSubmit = (e: SubmitEvent): void => {
     e.preventDefault();
+    // updatepmution.mutate(formData)
     console.log('Profile updated:', formData);
     // API call would go here
   };
@@ -142,6 +211,38 @@ const UserAccount = () => {
     setActiveSection((prevSection) => (prevSection === section ? '' : section));
   };
 
+  if (isPending) {
+    return (
+      <div className="min-h-screen bg-gradient-to-r from-blue-100 to-white py-20 mt-6 flex items-center justify-center">
+        <div className="flex flex-col items-center space-y-4">
+          <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+          <span className="text-xl text-gray-700">Loading profile...</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="min-h-screen bg-gradient-to-r from-blue-100 to-white py-20 mt-6 flex items-center justify-center">
+        <div className="bg-white p-8 rounded-xl shadow-lg border-l-4 border-red-500 max-w-lg">
+          <h2 className="text-2xl text-red-600 font-bold mb-4">
+            Error Loading profile
+          </h2>
+          <p className="text-gray-700">{error}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="mt-6 px-6 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 transition duration-200 shadow-md"
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+ 
+
   return (
     <div className="w-full bg-gray-50 min-h-screen py-4 sm:py-6 md:py-8 px-2 sm:px-4 mt-12 sm:mt-20 md:mt-16">
       <div className="max-w-6xl mx-auto">
@@ -160,11 +261,11 @@ const UserAccount = () => {
               <div className="w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 rounded-full bg-white p-1 shadow-xl overflow-hidden border-4 border-white">
                 {/* Replace img with Next.js Image component */}
                 <div className="relative w-full h-full">
-                  <Image 
-                    src="/api/placeholder/400/400" 
-                    alt="Profile" 
-                    fill
-                    className="object-cover rounded-full"
+                
+                  <img
+                    src={formData.profile_pic}
+                    alt="Profile"
+                    className=" h-full w-full object-cover rounded-full"
                   />
                 </div>
               </div>
@@ -445,7 +546,7 @@ const UserAccount = () => {
                   <div>
                     <h4 className="text-base sm:text-lg font-medium text-gray-800 mb-3 sm:mb-4">Your Skills*</h4>
                     <div className="flex flex-wrap gap-2 sm:gap-3 mb-4 sm:mb-6">
-                      {formData.skills.map((skill, index) => (
+                      {formData.majorIntrest.map((skill, index) => (
                         <div key={index} className="bg-blue-100 text-blue-800 px-3 sm:px-4 py-1 sm:py-2 text-xs sm:text-sm rounded-full flex items-center shadow-sm hover:shadow transition-all">
                           <Tag size={14} className="sm:hidden mr-1" />
                           <Tag size={16} className="hidden sm:block mr-2" />

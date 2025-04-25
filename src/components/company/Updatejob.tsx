@@ -84,7 +84,6 @@ const Updatejob = () => {
     jobEligibility: "",
     salary: "",
   });
-  console.log(formData);
 
   const handlechange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>

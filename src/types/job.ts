@@ -22,6 +22,26 @@ export interface IUpdateJob {
   experience: string;
   jobEligibility: string;
 }
+export interface Iupdateprofile {
+  fullName: string;
+    email: string;
+    phoneNo: string;
+    jobTitle: string;
+    location: string;
+    bio: string;
+    majorIntrest: string[];
+    experienceLevel: string;
+    workType: string[];
+    website: string;
+    linkedin: string;
+    github: string;
+    twitter: string;
+    resume: string ;
+    portfolio: File | null;
+    token:string ;
+    id:number;
+    profile_pic: string ;
+}
 
 
 export interface JobPosting {

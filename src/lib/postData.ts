@@ -1,7 +1,7 @@
 import { BACKEND_URL, PYTHON_BACKEND_URL } from "@/lib/config";
 import { ILogin, IUserRegister } from "@/types/auth";
 import { ICompanyRegister } from "@/types/auth";
-import { IJobPost, IUpdateJob } from "@/types/job";
+import { IJobPost, IUpdateJob, Iupdateprofile } from "@/types/job";
 import { IUpdateUserRequest } from "@/types/user";
 import axios from "axios";
 
@@ -13,6 +13,10 @@ interface IUpdatejobfn extends IUpdateJob{
   token:String,
   id:Number
 }
+// interface IUpdateprofilefn extends Iupdateprofile{
+//   token:String,
+//   id:Number
+// }
 
 export const RegisterUser = async (form: IUserRegister) => {
   try {
@@ -255,3 +259,36 @@ export async function respondApplication(form: IRespondApplicationRequest) {
 
 
 
+// export const UpdateProfile = async (form: Iupdateprofile) => {
+//   try {
+//     const finalForm: IU = {
+//       jobTitle: form.jobTitle,
+//       jobDescription: form.jobDescription,
+//       jobLocation: form.jobLocation,
+//       salary: form.salary,
+//       jobAddress:form.jobAddress,
+//       jobType: form.jobType,
+//       categoryId: form.categoryId,
+//       skills: form.skills,
+//       experience: form.experience,
+//       jobEligibility: form.jobEligibility,
+//     };
+//     const response = await axios.put(
+//       `${BACKEND_URL}/job/${form.id}`,
+//       finalForm,
+//       {
+//         headers: {
+//           Authorization: `Bearer ${form.token}`,
+//           "Content-Type": "application/json",
+//         },
+//       }
+//     );
+//     return response.data;
+//   } catch (error) {
+//     if (axios.isAxiosError(error)) {
+//       const serverMessage = error.response?.data?.message || error.message;
+//       throw new Error(serverMessage);
+//     }
+//     throw error;
+//   }
+// };
