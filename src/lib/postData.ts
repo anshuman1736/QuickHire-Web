@@ -202,6 +202,8 @@ interface IApplyJobRequest {
   jobId: number;
   userId: number;
   token: string;
+  applicationScore: number
+
 }
 
 export async function applyjob(form: IApplyJobRequest) {
@@ -211,6 +213,9 @@ export async function applyjob(form: IApplyJobRequest) {
       {
         jobId: form.jobId,
         userId: form.userId,
+        applicationScore: form.applicationScore
+        
+        // applicationScore:form.
       },
       {
         headers: {

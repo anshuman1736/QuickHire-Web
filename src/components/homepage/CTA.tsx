@@ -304,17 +304,17 @@ function CTA() {
                     <MoveLeft /> Back
                   </button>
                   <div>
-                    <div className="no-scrollbar overflow-y-auto overflow-hidden scrollbar-none w-full items-start max-h-[400px] md:max-h-[500px] pr-2">
+                    <div className="no-scrollbar  overflow-y-auto overflow-hidden scrollbar-none w-full items-start max-h-[400px] md:max-h-[500px] pr-2">
                       {data.CONTENT.map((data, idx) => (
                         <div
-                          className="border-b-2 border-blue-500 mt-3 p-2 bg-gray-100 rounded-2xl space-y-3"
+                          className="border-b-2  transition-all hover:scale-95 border-blue-500 mt-3 p-2 bg-gray-100 rounded-2xl space-y-3"
                           key={idx}
                         >
                           <p className="text-lg font-semibold rounded-full py-1">
                             {data.jobTitle}
                           </p>
-                          <p className="text-sm text-shadow-gray-600 font-medium">
-                            {data.jobDescription}
+                          <p className="text-sm text-gray-600 text-shadow-gray-600 ">
+                            {data.jobDescription?.length>100 ? data.jobDescription?.slice(0,100)+"...":data.jobDescription}
                           </p>
                           <div className="flex gap-5">
                             <p className="text-sm flex items-center gap-2">
@@ -324,7 +324,7 @@ function CTA() {
                           </div>
                           <button
                             onClick={() => router.push("/login")}
-                            className="bg-amber-500 rounded-full px-3 text-white text-lg cursor-pointer"
+                            className="bg-amber-500 rounded-full px-3 py-1 text-white text-sm cursor-pointer"
                           >
                             Apply for this position
                           </button>

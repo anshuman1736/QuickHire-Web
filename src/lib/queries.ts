@@ -1,7 +1,12 @@
 import axios from "axios";
 import { BACKEND_URL, PYTHON_BACKEND_URL } from "./config";
 import { ICategoryResponse } from "@/types/auth";
-import { JobApplication, JobPosting, MatchJobResponse } from "@/types/job";
+import {
+  IFiterJobParams,
+  JobApplication,
+  JobPosting,
+  MatchJobResponse,
+} from "@/types/job";
 import { UserProfile } from "@/types/user";
 
 export async function getCatogory() {
@@ -256,10 +261,13 @@ export async function getJobByCompanyId(
 interface IApplicationByJobIdResponse {
   STS: string;
   MSG: string;
-  CONTENT: JobApplication[]
+  CONTENT: JobApplication[];
 }
 
-export async function getApplicationByJobId(jobId: number, token: string): Promise<IApplicationByJobIdResponse> {
+export async function getApplicationByJobId(
+  jobId: number,
+  token: string
+): Promise<IApplicationByJobIdResponse> {
   try {
     const res = await axios.get(
       `${BACKEND_URL}/application/enabled/job/${jobId}`,
@@ -280,35 +288,45 @@ export async function getApplicationByJobId(jobId: number, token: string): Promi
   }
 }
 
-
-
-
 interface IJobByUserIdResponse {
   STS: string;
   MSG: string;
   CONTENT: JobApplication[];
 }
 
-
-
 export async function getAppliedJobs(
   userId: number,
   token: string
 ): Promise<IJobByUserIdResponse> {
   try {
-    const res = await axios.get(
-      `${BACKEND_URL}/application/user/${userId}`,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
+    const res = await axios.get(`${BACKEND_URL}/application/user/${userId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
     return res.data;
   } catch (error) {
     if (axios.isAxiosError(error)) {
       throw new Error(
-        error.response?.data?.message || "Failed to fetch Applied jobs by user ID"
+        error.response?.data?.message ||
+          "Failed to fetch Applied jobs by user ID"
+      );
+    }
+    throw new Error("An unexpected error occurred");
+  }
+}
+
+export async function getFilteredJob(searchParams: IFiterJobParams) {
+  try {
+    const response = await axios.get(`${BACKEND_URL}/home/filterJobs`, {
+      params: searchParams,
+    });
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      throw new Error(
+        error.response?.data?.message ||
+          "Failed to fetch Applied jobs by user ID"
       );
     }
     throw new Error("An unexpected error occurred");

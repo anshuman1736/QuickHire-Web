@@ -6,6 +6,7 @@ export interface UserProfile {
   resume: string;
   address: string;
   profile_pic: string;
+  role: string;
   majorIntrest: string;
   completeProfile: boolean;
   categoryId: number;
