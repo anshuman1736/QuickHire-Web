@@ -129,3 +129,10 @@ export interface MatchJobResponse {
   user_id: number;
   matched_jobs: MatchedJob[];
 }
+
+export interface IFiterJobParams {
+  jobTitle?: string;
+  skills?: string;
+  companyName?: string;
+  jobAddress?: string;
+}

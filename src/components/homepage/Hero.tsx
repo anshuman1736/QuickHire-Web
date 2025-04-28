@@ -53,7 +53,10 @@ function Hero() {
     setHasSearched(true);
   };
 
-  const handleInputChange = (field: keyof typeof searchParams, value: string) => {
+  const handleInputChange = (
+    field: keyof typeof searchParams,
+    value: string
+  ) => {
     setSearchParams((prev) => ({
       ...prev,
       [field]: value,
@@ -435,41 +438,39 @@ function Hero() {
             </div>
           </motion.div>
         </div>
-
-
       </div>
-            {hasSearched && (
-              <motion.div
-                className="w-full max-w-screen mx-auto mt-16"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5 }}
-              >
-                <AvailableJobs
-                  jobTitle={searchParams.jobTitle}
-                  skills={searchParams.skills}
-                  companyName={searchParams.companyName}
-                  jobAddress={searchParams.jobAddress}
-                />
-              </motion.div>
-            )}
+      {hasSearched && (
         <motion.div
-          className="mt-20 text-center max-w-6xl mx-auto px-4 sm:px-6 relative z-10"
+          className="w-full max-w-screen mx-auto mt-16"
           initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: isVisible ? 1 : 0, y: isVisible ? 0 : 20 }}
-          transition={{ duration: 0.6, delay: 0.8 }}
-          >
-          <div className="flex items-center justify-center mb-8">
-            <div className="h-px w-16 bg-amber-300 mr-4"></div>
-            <p className="text-sm font-semibold uppercase tracking-wider text-amber-800">
-              TRUSTED BY INDUSTRY LEADERS
-            </p>
-            <div className="h-px w-16 bg-amber-300 ml-4"></div>
-          </div>
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          <AvailableJobs
+            jobTitle={searchParams.jobTitle}
+            skills={searchParams.skills}
+            companyName={searchParams.companyName}
+            jobAddress={searchParams.jobAddress}
+          />
+        </motion.div>
+      )}
+      <motion.div
+        className="mt-20 text-center max-w-6xl mx-auto px-4 sm:px-6 relative z-10"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: isVisible ? 1 : 0, y: isVisible ? 0 : 20 }}
+        transition={{ duration: 0.6, delay: 0.8 }}
+      >
+        <div className="flex items-center justify-center mb-8">
+          <div className="h-px w-16 bg-amber-300 mr-4"></div>
+          <p className="text-sm font-semibold uppercase tracking-wider text-amber-800">
+            TRUSTED BY INDUSTRY LEADERS
+          </p>
+          <div className="h-px w-16 bg-amber-300 ml-4"></div>
+        </div>
 
-          <div className="flex flex-wrap justify-center items-center gap-x-12 gap-y-8">
-            {featuredCompanies.map((company, i) => (
-              <motion.div
+        <div className="flex flex-wrap justify-center items-center gap-x-12 gap-y-8">
+          {featuredCompanies.map((company, i) => (
+            <motion.div
               key={i}
               className="flex items-center text-lg font-bold text-gray-400 hover:text-amber-600 transition-colors"
               whileHover={{ scale: 1.05 }}
@@ -478,13 +479,13 @@ function Hero() {
                 opacity: isVisible ? 1 : 0,
                 transition: { delay: 0.9 + i * 0.1 },
               }}
-              >
-                <Star className="w-4 h-4 mr-2 text-amber-400" />
-                {company}
-              </motion.div>
-            ))}
-          </div>
-        </motion.div>
+            >
+              <Star className="w-4 h-4 mr-2 text-amber-400" />
+              {company}
+            </motion.div>
+          ))}
+        </div>
+      </motion.div>
     </section>
   );
 }
