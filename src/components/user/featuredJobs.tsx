@@ -270,17 +270,17 @@ export default function JobPortal() {
 
   function handleSearch() {
     const { jobTitle, skills, companyName, jobAddress } = searchParams;
-    
+
     // Create a URLSearchParams object to build the query string
     const queryParams = new URLSearchParams();
     if (jobTitle) queryParams.append("jobTitle", jobTitle);
     if (skills) queryParams.append("skills", skills);
     if (companyName) queryParams.append("companyName", companyName);
     if (jobAddress) queryParams.append("jobAddress", jobAddress);
-    
+
     const queryString = queryParams.toString();
     const url = queryString ? `/jobs?${queryString}` : "/jobs";
-    
+
     router.push(url);
   }
 
@@ -641,22 +641,28 @@ export default function JobPortal() {
                         </div>
                         s{" "}
                         <div className="mt-auto">
-                          <div className="flex flex-wrap gap-y-2 text-sm text-gray-500 mb-4">
-                            <div className="flex items-center w-1/2">
-                              <MapPin className="w-4 h-4 mr-2 text-gray-400" />
-                              <span>{job.job_location}</span>
-                            </div>
-                            <div className="flex items-center w-1/2">
-                              <DollarSign className="w-4 h-4 mr-2 text-gray-400" />
-                              <span>{job.salary}</span>
-                            </div>
-                            <div className="flex items-center w-1/2">
-                              <Briefcase className="w-4 h-4 mr-2 text-gray-400" />
-                              <span>{job.job_experience || "Entry Level"}</span>
-                            </div>
-                            <div className="flex items-center w-1/2">
-                              <Calendar className="w-4 h-4 mr-2 text-gray-400" />
-                              <span>Posted {postedDate}</span>
+                          <div className="flex flex-col gap-y-2 text-sm text-gray-500 mb-4">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                              <div className="flex items-center">
+                                <MapPin className="w-4 h-4 mr-2 flex-shrink-0 text-gray-400" />
+                                <span className="truncate">
+                                  {job.job_location}
+                                </span>
+                              </div>
+                              <div className="flex items-center">
+                                <DollarSign className="w-4 h-4 mr-2 flex-shrink-0 text-gray-400" />
+                                <span>{job.salary}</span>
+                              </div>
+                              <div className="flex items-center">
+                                <Briefcase className="w-4 h-4 mr-2 flex-shrink-0 text-gray-400" />
+                                <span>
+                                  {job.job_experience || "Entry Level"}
+                                </span>
+                              </div>
+                              <div className="flex items-center">
+                                <Calendar className="w-4 h-4 mr-2 flex-shrink-0 text-gray-400" />
+                                <span>Posted {postedDate}</span>
+                              </div>
                             </div>
                           </div>
 
