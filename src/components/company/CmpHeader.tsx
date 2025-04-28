@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import {
-  User,
+  
   Menu,
   X,
   LogOut,
@@ -185,9 +185,9 @@ function CmpHeader() {
             )}
             <div className="mt-3 space-y-1">
               <Link 
-                href="/company/settings" 
+                href="/company/account" 
                 className={`flex items-center ${sidebarCollapsed ? "justify-center" : ""} px-4 py-3 text-sm font-medium rounded-lg ${
-                  pathname === "/company/settings" 
+                  pathname === "/company/account" 
                     ? "bg-gradient-to-r from-teal-500 to-emerald-500 text-white" 
                     : "text-gray-300 hover:bg-slate-800"
                 }`}
@@ -197,18 +197,7 @@ function CmpHeader() {
                 {!sidebarCollapsed && "Company Profile"}
               </Link>
               
-              <Link 
-                href="/company/account" 
-                className={`flex items-center ${sidebarCollapsed ? "justify-center" : ""} px-4 py-3 text-sm font-medium rounded-lg ${
-                  pathname === "/company/account" 
-                    ? "bg-gradient-to-r from-teal-500 to-emerald-500 text-white" 
-                    : "text-gray-300 hover:bg-slate-800"
-                }`}
-                title={sidebarCollapsed ? "Account Settings" : ""}
-              >
-                <User className={`w-5 h-5 ${sidebarCollapsed ? "" : "mr-3"}`} />
-                {!sidebarCollapsed && "Account Settings"}
-              </Link>
+             
             </div>
           </div>
         </nav>
@@ -267,14 +256,7 @@ function CmpHeader() {
                       <p className="text-xs text-gray-500">{user.role}</p>
                     </div>
                     <div className="pt-2">
-                      <Link
-                        href="/company/account"
-                        className="flex items-center px-4 py-3 text-gray-700 hover:bg-gray-50"
-                        onClick={() => setProfileDropdownOpen(false)}
-                      >
-                        <User className="w-5 h-5 mr-3 text-teal-500" />
-                        Account Settings
-                      </Link>
+                     
                       <Link
                         href="/company/settings"
                         className="flex items-center px-4 py-3 text-gray-700 hover:bg-gray-50"
@@ -392,18 +374,7 @@ function CmpHeader() {
                       Company Profile
                     </Link>
                     
-                    <Link
-                      href="/company/account"
-                      className={`flex items-center px-4 py-3 text-base font-medium rounded-lg ${
-                        pathname === "/company/account" 
-                          ? "bg-gradient-to-r from-teal-500 to-emerald-500 text-white" 
-                          : "text-gray-700 hover:bg-gray-50"
-                      }`}
-                      onClick={() => setMobileMenuOpen(false)}
-                    >
-                      <User className="w-5 h-5 mr-3" />
-                      Account Settings
-                    </Link>
+                    
                   </div>
                 </div>
                 

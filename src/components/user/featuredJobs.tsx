@@ -153,7 +153,7 @@ export default function JobPortal() {
           return postedDate.includes("day") || postedDate === "Today";
         });
         filtered = recentJobs.length > 0 ? recentJobs : filtered;
-      } 
+      }
 
       if (searchQuery) {
         filtered = filtered.filter(
@@ -281,7 +281,7 @@ export default function JobPortal() {
     <section className="bg-gray-50 py-16 mt-16">
       <div className="container mx-auto px-4 md:px-6">
         <Header />
-        
+
         {/* Search and Filter Section */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
           <div className="mt-6 md:mt-0 w-full flex flex-col justify-center items-center">
@@ -490,7 +490,9 @@ export default function JobPortal() {
                 </div>
                 <h3 className="text-xl font-bold mb-2">No jobs found</h3>
                 <p className="text-gray-500 mb-4">
-                  {"Try adjusting your search or filters to find what you're looking for"}
+                  {
+                    "Try adjusting your search or filters to find what you're looking for"
+                  }
                 </p>
                 <button
                   className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
@@ -502,7 +504,9 @@ export default function JobPortal() {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {visibleJobs.map((job) => {
-                  const jobLevel = getJobLevelFromExperience(job.job_experience);
+                  const jobLevel = getJobLevelFromExperience(
+                    job.job_experience
+                  );
                   const postedDate = getPostedDateText(job.creation_date);
 
                   return (
@@ -515,13 +519,12 @@ export default function JobPortal() {
                         <div className="flex items-start justify-between mb-4">
                           <div className="flex items-center">
                             <div className="w-12 h-12 rounded-lg bg-gradient-to-r from-blue-500 to-blue-600 flex items-center justify-center text-white font-bold mr-4">
-                              { 'J'}
+                              {"J"}
                             </div>
                             <div>
                               <h3 className="font-bold text-lg text-gray-800 group-hover:text-blue-600 transition-colors">
                                 {job.job_title}
                               </h3>
-                              
                             </div>
                           </div>
                           <button className="text-gray-400 hover:text-blue-500 transition-colors">
@@ -538,7 +541,9 @@ export default function JobPortal() {
                             <span className="px-3 py-1 bg-green-50 text-green-700 text-xs font-medium rounded-full">
                               {jobLevel}
                             </span>
-                            {job.job_location.toLowerCase().includes('remote') && (
+                            {job.job_location
+                              .toLowerCase()
+                              .includes("remote") && (
                               <span className="px-3 py-1 bg-purple-50 text-purple-700 text-xs font-medium rounded-full">
                                 Remote
                               </span>
@@ -554,27 +559,32 @@ export default function JobPortal() {
 
                         {/* Meta Information */}
                         <div className="mt-auto">
-                          <div className="flex flex-wrap gap-y-2 text-sm text-gray-500 mb-4">
-                            <div className="flex items-center w-1/2">
-                              <MapPin className="w-4 h-4 mr-2 text-gray-400" />
-                              <span>{job.job_location}</span>
-                            </div>
-                            <div className="flex items-center w-1/2">
-                              <DollarSign className="w-4 h-4 mr-2 text-gray-400" />
-                              <span>{job.salary}</span>
-                            </div>
-                            <div className="flex items-center w-1/2">
-                              <Briefcase className="w-4 h-4 mr-2 text-gray-400" />
-                              <span>{job.job_experience || 'Entry Level'}</span>
-                            </div>
-                            <div className="flex items-center w-1/2">
-                              <Calendar className="w-4 h-4 mr-2 text-gray-400" />
-                              <span>Posted {postedDate}</span>
+                          <div className="flex flex-col gap-y-2 text-sm text-gray-500 mb-4">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                              <div className="flex items-center">
+                                <MapPin className="w-4 h-4 mr-2 flex-shrink-0 text-gray-400" />
+                                <span className="truncate">
+                                  {job.job_location}
+                                </span>
+                              </div>
+                              <div className="flex items-center">
+                                <DollarSign className="w-4 h-4 mr-2 flex-shrink-0 text-gray-400" />
+                                <span>{job.salary}</span>
+                              </div>
+                              <div className="flex items-center">
+                                <Briefcase className="w-4 h-4 mr-2 flex-shrink-0 text-gray-400" />
+                                <span>
+                                  {job.job_experience || "Entry Level"}
+                                </span>
+                              </div>
+                              <div className="flex items-center">
+                                <Calendar className="w-4 h-4 mr-2 flex-shrink-0 text-gray-400" />
+                                <span>Posted {postedDate}</span>
+                              </div>
                             </div>
                           </div>
 
                           <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-                            
                             <Link
                               href={`/user/${job.job_title}/${job.id}`}
                               className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors flex items-end"
