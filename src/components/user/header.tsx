@@ -1,24 +1,35 @@
 "use client"
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {  User, Menu, X, ChevronDown, LogOut } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter, usePathname } from "next/navigation";
+import { useQuery } from "@tanstack/react-query";
+import { getUserById } from "@/lib/queries";
 
 function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const activePath = usePathname();
+  const [userId, setuserId] = useState<number>(0);
+  const [token, setToken] = useState("");
 
   const router = useRouter()
-
+  //user profile fetching
+  const { isPending, isError, data} = useQuery({
+    queryKey: ["getuserById"],
+    queryFn: () => getUserById(userId, token),
+    enabled: !!token,
+  });
+  useEffect(() => {
+    setToken(localStorage.getItem("sessionId") || "");
+    setuserId(Number(localStorage.getItem("userId")));
+  }, []);
   const user = {
-    name: "Alex Johnson",
+    name: data?.CONTENT.fullName || '',
     avatar: null,
     role: "Software Developer",
-    unreadNotifications: 3,
-    unreadMessages: 2
   };
 
   const getInitials = (name: string): string => {
