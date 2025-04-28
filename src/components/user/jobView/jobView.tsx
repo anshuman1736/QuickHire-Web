@@ -68,6 +68,8 @@ export default function JobView({ jobId }: { jobId: number }) {
     onSuccess: (url) => {
       setResume(url);
       setHasResume(true);
+
+
     },
     onError: () => {
       errorToast("Failed to upload resume. Please try again.");
@@ -105,10 +107,12 @@ export default function JobView({ jobId }: { jobId: number }) {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
       const url = await uploadResume(file);
+      
       if (!url) {
         errorToast("Failed to upload resume. Please try again.");
         return;
       }
+
       const form: IUpdateUserRequest = {
         address: userQuery.data?.CONTENT.address,
         categoryId: userQuery.data?.CONTENT.categoryId,
@@ -123,6 +127,7 @@ export default function JobView({ jobId }: { jobId: number }) {
         resume: url,
       };
       uploadResumeMutation.mutate(form);
+      
     }
   };
 
@@ -135,6 +140,7 @@ export default function JobView({ jobId }: { jobId: number }) {
     const data = {
       userId: Number(userQuery.data?.CONTENT.id),
       jobId: Number(jobQuery.data?.CONTENT.id),
+      applicationScore: Number(atsScore),
       token: token,
     };
 
@@ -374,6 +380,8 @@ export default function JobView({ jobId }: { jobId: number }) {
                         accept=".pdf,.doc,.docx"
                         onChange={(event) => {
                           handleResumeUpload(event);
+                          handleAtsCheck()
+                          
                           const file = event.target.files?.[0];
                           if (file) {
                             localStorage.setItem("userResume", file.name);
@@ -435,7 +443,10 @@ export default function JobView({ jobId }: { jobId: number }) {
                 >
                   Cancel
                 </button>
-                <button
+
+                {atsScore && isCheckingAts=== false ?
+                  (
+                    <button
                   onClick={handleConfirmApplyJob}
                   disabled={!hasResume}
                   className={`py-3 px-6 rounded-xl font-bold text-white transition-all duration-300 shadow-md hover:shadow-lg flex-1 flex justify-center items-center ${
@@ -446,6 +457,9 @@ export default function JobView({ jobId }: { jobId: number }) {
                 >
                   Apply Now
                 </button>
+                  ):null
+                }
+                
               </div>
 
               <div className="mt-4 text-center text-xs text-gray-500">
