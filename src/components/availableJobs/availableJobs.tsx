@@ -13,10 +13,9 @@ import {
 } from "lucide-react";
 import React, { useRef } from "react";
 import Link from "next/link";
-import axios from "axios";
 import { useQuery } from "@tanstack/react-query";
-import { BACKEND_URL } from "@/lib/config";
-import { JobPosting } from "@/types/job";
+import { IFiterJobParams, JobPosting } from "@/types/job";
+import { getFilteredJob } from "@/lib/queries";
 
 interface AvailableJobsProps {
   jobTitle?: string;
@@ -33,12 +32,7 @@ function AvailableJobs({
 }: AvailableJobsProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
-  const searchParams: {
-    jobTitle?: string;
-    skills?: string;
-    companyName?: string;
-    jobAddress?: string;
-  } = {};
+  const searchParams: IFiterJobParams = {};
   if (jobTitle) searchParams.jobTitle = jobTitle;
   if (skills) searchParams.skills = skills;
   if (companyName) searchParams.companyName = companyName;
@@ -46,12 +40,7 @@ function AvailableJobs({
 
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ["jobs", searchParams],
-    queryFn: async () => {
-      const response = await axios.get(`${BACKEND_URL}/home/filterJobs`, {
-        params: searchParams,
-      });
-      return response.data;
-    },
+    queryFn: () => getFilteredJob(searchParams),
     enabled: true,
   });
 
@@ -188,7 +177,7 @@ function AvailableJobs({
             className="grid grid-cols-1 sm:flex sm:overflow-x-auto pb-6 gap-4 sm:gap-5 md:gap-6 w-full scrollbar-hide snap-x snap-mandatory"
             style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
           >
-            {jobs.map((job : JobPosting) => (
+            {jobs.map((job: JobPosting) => (
               <Link
                 href="/login"
                 key={job.id}

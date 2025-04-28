@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useEffect, useState } from "react";
-import {  User, Menu, X, ChevronDown, LogOut } from "lucide-react";
+import { User, Menu, X, ChevronDown, LogOut } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter, usePathname } from "next/navigation";
@@ -12,27 +12,50 @@ function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const activePath = usePathname();
-  const [userId, setuserId] = useState<number>(0);
+  const [userId, setUserId] = useState<number | null>(null);
   const [token, setToken] = useState("");
 
-  const router = useRouter()
-  //user profile fetching
-  const { isPending, isError, data} = useQuery({
-    queryKey: ["getuserById"],
-    queryFn: () => getUserById(userId, token),
-    enabled: !!token,
+  const router = useRouter();
+  
+  // Fetch user data with proper error handling
+  const { isPending, isError, data, error } = useQuery({
+    queryKey: ["getUserById", userId],
+    queryFn: () => getUserById(userId as number, token),
+    enabled: !!userId && !!token,
+    retry: 1,
   });
+
   useEffect(() => {
-    setToken(localStorage.getItem("sessionId") || "");
-    setuserId(Number(localStorage.getItem("userId")));
-  }, []);
+    // Use try/catch to handle potential localStorage errors
+    try {
+      const storedToken = localStorage.getItem("sessionId");
+      const storedUserId = localStorage.getItem("userId");
+      
+      if (storedToken) setToken(storedToken);
+      if (storedUserId) setUserId(Number(storedUserId));
+      
+      // If no auth data is found, redirect to login
+      if (!storedToken || !storedUserId) {
+        router.push('/');
+      }
+    } catch (error) {
+      console.error("Error accessing localStorage:", error);
+      router.push('/');
+    }
+  }, [router]);
+
+  // Use safe fallbacks for user data
+  const userName = data?.CONTENT?.fullName || 'User';
+  const userRole = data?.CONTENT?.role
+  
   const user = {
-    name: data?.CONTENT.fullName || '',
+    name: userName,
     avatar: null,
-    role: "Software Developer",
+    role: userRole,
   };
 
   const getInitials = (name: string): string => {
+    if (!name || name === 'User') return 'U';
     return name
       .split(' ')
       .map((part: string) => part[0])
@@ -65,8 +88,39 @@ function Header() {
   };
 
   const handleLogout = () => {
-    localStorage.clear()
-    router.push('/')
+    try {
+      localStorage.clear();
+      router.push('/');
+    } catch (error) {
+      console.error("Error during logout:", error);
+      router.push('/');
+    }
+  }
+
+  // Show loading state while fetching user data
+  if (isPending) {
+    return (
+      <header className="bg-white w-screen shadow-sm fixed top-0 left-0 right-0 z-10">
+        <div className="container mx-auto px-4 md:px-6">
+          <div className="flex items-center justify-between h-16">
+            <Link href="/user" className="font-bold text-xl md:text-2xl flex items-center">
+              <div className="flex items-center">
+                <span className="text-[#FFBF2F]">Q</span>
+                <span className="text-black">H</span>
+                <span className="ml-1 inline-flex items-center justify-center h-5 w-12 md:h-6 md:w-14 rounded-full text-black text-xs bg-gray-100">
+                  jobs
+                </span>
+              </div>
+            </Link>
+            <div className="w-8 h-8 bg-gray-200 rounded-full animate-pulse"></div>
+          </div>
+        </div>
+      </header>
+    );
+  }
+
+  if (isError) {
+    console.error("Error fetching user data:", error);
   }
 
   return (

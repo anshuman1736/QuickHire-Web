@@ -7,17 +7,19 @@ import {
   Filter,
   ChevronDown,
   ArrowRight,
-  LucideSearch,
   BookmarkPlus,
   Calendar,
   DollarSign,
+  Building2,
+  BookOpen,
 } from "lucide-react";
 import React, { useState, useEffect, useMemo } from "react";
 import Header from "./header";
 import Link from "next/link";
-import { MatchedJob } from "../../types/job";
+import { MatchedJob } from "@/types/job";
 import { useQuery } from "@tanstack/react-query";
 import { getRecomdedJob } from "@/lib/queries";
+import { useRouter } from "next/navigation";
 
 export default function JobPortal() {
   const [activeTab, setActiveTab] = useState("featured");
@@ -28,7 +30,15 @@ export default function JobPortal() {
   const [experienceFilter, setExperienceFilter] = useState("all");
   const [locationFilter, setLocationFilter] = useState("all");
   const [salaryFilter, setSalaryFilter] = useState("all");
-  const [advancedFiltersOpen, setAdvancedFiltersOpen] = useState(false);
+  const [focusedField, setFocusedField] = useState<string | null>(null);
+  const [searchParams, setSearchParams] = useState({
+    jobTitle: "",
+    skills: "",
+    companyName: "",
+    jobAddress: "",
+  });
+
+  const router = useRouter();
 
   const { data, isPending, isError, error } = useQuery({
     queryKey: ["getRecomdedJob"],
@@ -92,34 +102,6 @@ export default function JobPortal() {
     { value: "security", label: "Security" },
     { value: "management", label: "Management" },
     { value: "finance", label: "Finance" },
-  ];
-
-  const experienceLevels = [
-    { value: "all", label: "All Experience" },
-    { value: "entry", label: "Entry Level (0-1 years)" },
-    { value: "junior", label: "Junior (1-3 years)" },
-    { value: "mid", label: "Mid-Level (3-5 years)" },
-    { value: "senior", label: "Senior (5+ years)" },
-  ];
-
-  const locations = [
-    { value: "all", label: "All Locations" },
-    { value: "remote", label: "Remote" },
-    { value: "san francisco", label: "San Francisco, CA" },
-    { value: "new york", label: "New York, NY" },
-    { value: "austin", label: "Austin, TX" },
-    { value: "seattle", label: "Seattle, WA" },
-    { value: "chicago", label: "Chicago, IL" },
-    { value: "boston", label: "Boston, MA" },
-  ];
-
-  const salaryRanges = [
-    { value: "all", label: "All Salaries" },
-    { value: "under60k", label: "Under $60K" },
-    { value: "60k-80k", label: "$60K - $80K" },
-    { value: "80k-100k", label: "$80K - $100K" },
-    { value: "100k-120k", label: "$100K - $120K" },
-    { value: "above120k", label: "$120K+" },
   ];
 
   useEffect(() => {
@@ -264,7 +246,16 @@ export default function JobPortal() {
     setLocationFilter("all");
     setSalaryFilter("all");
     setActiveTab("featured");
-    setAdvancedFiltersOpen(false);
+  };
+
+  const handleInputChange = (
+    field: keyof typeof searchParams,
+    value: string
+  ) => {
+    setSearchParams((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
   };
 
   interface Category {
@@ -277,87 +268,184 @@ export default function JobPortal() {
     setFilterOpen(false);
   };
 
+  function handleSearch() {
+    const { jobTitle, skills, companyName, jobAddress } = searchParams;
+    
+    // Create a URLSearchParams object to build the query string
+    const queryParams = new URLSearchParams();
+    if (jobTitle) queryParams.append("jobTitle", jobTitle);
+    if (skills) queryParams.append("skills", skills);
+    if (companyName) queryParams.append("companyName", companyName);
+    if (jobAddress) queryParams.append("jobAddress", jobAddress);
+    
+    const queryString = queryParams.toString();
+    const url = queryString ? `/jobs?${queryString}` : "/jobs";
+    
+    router.push(url);
+  }
+
   return (
     <section className="bg-gray-50 py-16 mt-16">
       <div className="container mx-auto px-4 md:px-6">
         <Header />
 
-        {/* Search and Filter Section */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
-          <div className="mt-6 md:mt-0 w-full flex flex-col justify-center items-center">
-            <div className="relative w-full md:w-96 mb-4">
-              <input
-                type="text"
-                placeholder="Search jobs, companies, or locations..."
-                className="pl-12 pr-4 py-3 w-full rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-lg shadow-sm transition duration-300 ease-in-out"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-              <LucideSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-              <button
-                className="absolute right-4 top-1/2 transform -translate-y-1/2 text-blue-500 hover:text-blue-600"
-                onClick={() => setAdvancedFiltersOpen(!advancedFiltersOpen)}
-              >
-                <Filter className="w-5 h-5" />
-              </button>
-            </div>
+        <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
+          <h3 className="text-2xl font-semibold mb-6 text-gray-900">
+            Find Your Next Opportunity
+          </h3>
 
-            {advancedFiltersOpen && (
-              <div className="w-full md:w-3/4 bg-white rounded-lg shadow-md p-4 mb-6 border border-gray-200 grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Experience
-                  </label>
-                  <select
-                    className="w-full p-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                    value={experienceFilter}
-                    onChange={(e) => setExperienceFilter(e.target.value)}
-                  >
-                    {experienceLevels.map((exp) => (
-                      <option key={exp.value} value={exp.value}>
-                        {exp.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Location
-                  </label>
-                  <select
-                    className="w-full p-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                    value={locationFilter}
-                    onChange={(e) => setLocationFilter(e.target.value)}
-                  >
-                    {locations.map((loc) => (
-                      <option key={loc.value} value={loc.value}>
-                        {loc.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Salary Range
-                  </label>
-                  <select
-                    className="w-full p-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                    value={salaryFilter}
-                    onChange={(e) => setSalaryFilter(e.target.value)}
-                  >
-                    {salaryRanges.map((range) => (
-                      <option key={range.value} value={range.value}>
-                        {range.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="relative">
+              <label
+                htmlFor="jobTitle"
+                className="text-sm font-medium text-gray-700 mb-1 block"
+              >
+                Job Title
+              </label>
+              <div
+                className={`flex items-center border-2 ${
+                  focusedField === "jobTitle"
+                    ? "border-amber-500 shadow-md"
+                    : "border-gray-200"
+                } rounded-xl px-4 py-3 bg-white transition-all`}
+              >
+                <Briefcase
+                  className={`w-5 h-5 ${
+                    focusedField === "jobTitle"
+                      ? "text-amber-600"
+                      : "text-gray-400"
+                  } mr-3`}
+                />
+                <input
+                  id="jobTitle"
+                  type="text"
+                  placeholder="Software Engineer, Designer..."
+                  className="w-full bg-transparent outline-none text-gray-800 placeholder-gray-500"
+                  value={searchParams.jobTitle}
+                  onChange={(e) =>
+                    handleInputChange("jobTitle", e.target.value)
+                  }
+                  onFocus={() => setFocusedField("jobTitle")}
+                  onBlur={() => setFocusedField(null)}
+                />
               </div>
-            )}
+            </div>
+            <div className="relative">
+              <label
+                htmlFor="skills"
+                className="text-sm font-medium text-gray-700 mb-1 block"
+              >
+                Skills
+              </label>
+              <div
+                className={`flex items-center border-2 ${
+                  focusedField === "skills"
+                    ? "border-amber-500 shadow-md"
+                    : "border-gray-200"
+                } rounded-xl px-4 py-3 bg-white transition-all`}
+              >
+                <BookOpen
+                  className={`w-5 h-5 ${
+                    focusedField === "skills"
+                      ? "text-amber-600"
+                      : "text-gray-400"
+                  } mr-3`}
+                />
+                <input
+                  id="skills"
+                  type="text"
+                  placeholder="React, Python, Design..."
+                  className="w-full bg-transparent outline-none text-gray-800 placeholder-gray-500"
+                  value={searchParams.skills}
+                  onChange={(e) => handleInputChange("skills", e.target.value)}
+                  onFocus={() => setFocusedField("skills")}
+                  onBlur={() => setFocusedField(null)}
+                />
+              </div>
+            </div>
+            <div className="relative">
+              <label
+                htmlFor="companyName"
+                className="text-sm font-medium text-gray-700 mb-1 block"
+              >
+                Company
+              </label>
+              <div
+                className={`flex items-center border-2 ${
+                  focusedField === "companyName"
+                    ? "border-amber-500 shadow-md"
+                    : "border-gray-200"
+                } rounded-xl px-4 py-3 bg-white transition-all`}
+              >
+                <Building2
+                  className={`w-5 h-5 ${
+                    focusedField === "companyName"
+                      ? "text-amber-600"
+                      : "text-gray-400"
+                  } mr-3`}
+                />
+                <input
+                  id="companyName"
+                  type="text"
+                  placeholder="Google, Microsoft..."
+                  className="w-full bg-transparent outline-none text-gray-800 placeholder-gray-500"
+                  value={searchParams.companyName}
+                  onChange={(e) =>
+                    handleInputChange("companyName", e.target.value)
+                  }
+                  onFocus={() => setFocusedField("companyName")}
+                  onBlur={() => setFocusedField(null)}
+                />
+              </div>
+            </div>
+            <div className="relative">
+              <label
+                htmlFor="jobAddress"
+                className="text-sm font-medium text-gray-700 mb-1 block"
+              >
+                Location
+              </label>
+              <div
+                className={`flex items-center border-2 ${
+                  focusedField === "jobAddress"
+                    ? "border-amber-500 shadow-md"
+                    : "border-gray-200"
+                } rounded-xl px-4 py-3 bg-white transition-all`}
+              >
+                <MapPin
+                  className={`w-5 h-5 ${
+                    focusedField === "jobAddress"
+                      ? "text-amber-600"
+                      : "text-gray-400"
+                  } mr-3`}
+                />
+                <input
+                  id="jobAddress"
+                  type="text"
+                  placeholder="New York, Remote..."
+                  className="w-full bg-transparent outline-none text-gray-800 placeholder-gray-500"
+                  value={searchParams.jobAddress}
+                  onChange={(e) =>
+                    handleInputChange("jobAddress", e.target.value)
+                  }
+                  onFocus={() => setFocusedField("jobAddress")}
+                  onBlur={() => setFocusedField(null)}
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="flex justify-center mt-6">
+            <button
+              className="px-6 py-2.5 bg-gradient-to-r from-blue-500 to-blue-700 hover:from-blue-600 hover:to-blue-800 text-white rounded-lg font-medium flex items-center justify-center transition-all shadow-sm hover:shadow-md focus:ring-2 focus:ring-blue-400 focus:ring-offset-11"
+              onClick={handleSearch}
+            >
+              <Search className="w-4 h-4 mr-1.5" />
+              <span className="text-sm">Search Jobs</span>
+            </button>
           </div>
         </div>
 
-        {/* Tabs and Category Filter */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
           <div className="hidden md:flex gap-2">
             <button
@@ -439,14 +527,12 @@ export default function JobPortal() {
           </div>
         </div>
 
-        {/* Loading State */}
         {isPending && (
           <div className="flex justify-center items-center h-80">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
           </div>
         )}
 
-        {/* Error State */}
         {isError && (
           <div className="flex flex-col items-center justify-center h-64 text-center">
             <div className="bg-red-100 p-4 rounded-full mb-4">
@@ -480,7 +566,6 @@ export default function JobPortal() {
           </div>
         )}
 
-        {/* Success State */}
         {!isPending && !isError && (
           <>
             {visibleJobs.length === 0 ? (
@@ -531,8 +616,6 @@ export default function JobPortal() {
                             <BookmarkPlus className="w-5 h-5" />
                           </button>
                         </div>
-
-                        {/* Job Details */}
                         <div className="mb-4">
                           <div className="flex flex-wrap gap-2 mb-3">
                             <span className="px-3 py-1 bg-blue-50 text-blue-700 text-xs font-medium rounded-full">
@@ -556,31 +639,24 @@ export default function JobPortal() {
                             {job.job_description}
                           </p>
                         </div>
-
-                        {/* Meta Information */}
+                        s{" "}
                         <div className="mt-auto">
-                          <div className="flex flex-col gap-y-2 text-sm text-gray-500 mb-4">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                              <div className="flex items-center">
-                                <MapPin className="w-4 h-4 mr-2 flex-shrink-0 text-gray-400" />
-                                <span className="truncate">
-                                  {job.job_location}
-                                </span>
-                              </div>
-                              <div className="flex items-center">
-                                <DollarSign className="w-4 h-4 mr-2 flex-shrink-0 text-gray-400" />
-                                <span>{job.salary}</span>
-                              </div>
-                              <div className="flex items-center">
-                                <Briefcase className="w-4 h-4 mr-2 flex-shrink-0 text-gray-400" />
-                                <span>
-                                  {job.job_experience || "Entry Level"}
-                                </span>
-                              </div>
-                              <div className="flex items-center">
-                                <Calendar className="w-4 h-4 mr-2 flex-shrink-0 text-gray-400" />
-                                <span>Posted {postedDate}</span>
-                              </div>
+                          <div className="flex flex-wrap gap-y-2 text-sm text-gray-500 mb-4">
+                            <div className="flex items-center w-1/2">
+                              <MapPin className="w-4 h-4 mr-2 text-gray-400" />
+                              <span>{job.job_location}</span>
+                            </div>
+                            <div className="flex items-center w-1/2">
+                              <DollarSign className="w-4 h-4 mr-2 text-gray-400" />
+                              <span>{job.salary}</span>
+                            </div>
+                            <div className="flex items-center w-1/2">
+                              <Briefcase className="w-4 h-4 mr-2 text-gray-400" />
+                              <span>{job.job_experience || "Entry Level"}</span>
+                            </div>
+                            <div className="flex items-center w-1/2">
+                              <Calendar className="w-4 h-4 mr-2 text-gray-400" />
+                              <span>Posted {postedDate}</span>
                             </div>
                           </div>
 
@@ -603,7 +679,6 @@ export default function JobPortal() {
           </>
         )}
 
-        {/* View More Button */}
         {!isPending && !isError && visibleJobs.length > 0 && (
           <div className="mt-12 text-center">
             <button className="px-6 py-3 bg-white text-blue-600 rounded-xl font-medium border border-blue-200 hover:bg-blue-50 transition-colors flex items-center justify-center mx-auto shadow-sm hover:shadow-md">
