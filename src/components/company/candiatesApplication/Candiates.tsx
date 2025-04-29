@@ -27,9 +27,9 @@ export default function CandidatesCompo({ jobId }: { jobId: number }) {
   const [swipeDistance, setSwipeDistance] = useState(0);
   const touchStartX = useRef(0);
   const touchEndX = useRef(0);
-  const MIN_SWIPE_DISTANCE = 80; // Minimum distance to register swipe intention
-  const DECISION_THRESHOLD = 120; // Distance for accepting/rejecting
-  const MAX_SWIPE_DISTANCE = 150; // Maximum allowed swipe distance
+  const MIN_SWIPE_DISTANCE = 80; 
+  const DECISION_THRESHOLD = 120;
+  const MAX_SWIPE_DISTANCE = 150;
 
   useEffect(() => {
     const storedToken = localStorage.getItem("sessionId");

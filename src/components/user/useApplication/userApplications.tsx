@@ -13,7 +13,7 @@ import {
   DollarSign,
   Calendar,
 } from "lucide-react";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 
 export default function UserApplications() {
   const [token, setToken] = useState("");
@@ -34,9 +34,11 @@ export default function UserApplications() {
     enabled: !!token && userId > 0,
   });
 
-  const applications: JobApplication[] = data?.CONTENT || [];
+  const applications: JobApplication[] = useMemo(() => {
+    return data?.CONTENT || [];
+  }, [data]);
 
-  const filteredApplications = React.useMemo(() => {
+  const filteredApplications = useMemo(() => {
     if (!applications) return [];
   
     const statusFiltered = applications.filter((app) => {
@@ -69,7 +71,7 @@ export default function UserApplications() {
     });
   }, [applications, statusFilter, searchQuery, sortBy]);
 
-  const counts = React.useMemo(() => {
+  const counts = useMemo(() => {
     return {
       all: applications.length,
       pending: applications.filter((app) => app.status === null ).length,

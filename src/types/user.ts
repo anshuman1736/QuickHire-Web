@@ -26,3 +26,8 @@ export interface IUpdateUserRequest {
   categoryId?: number;
   categoryName?: string;
 }
+
+export enum Role {
+  ROLE_COMPANY = "ROLE_COMPANY",
+  ROLE_USER = "ROLE_USER",
+}

@@ -1,5 +1,7 @@
+import ProtectedRoute from "@/components/ProtectedRoutes";
 import Footer from "@/components/user/footer";
 import Header from "@/components/user/header";
+import { Role } from "@/types/user";
 
 export default function UserLayout({
   children,
@@ -7,10 +9,12 @@ export default function UserLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <div className="flex flex-col min-h-screen">
-      <Header/>
-      {children}
-      <Footer />
-    </div>
+    <ProtectedRoute roleType={Role.ROLE_USER}>
+      <div className="flex flex-col min-h-screen">
+        <Header />
+        {children}
+        <Footer />
+      </div>
+    </ProtectedRoute>
   );
 }
