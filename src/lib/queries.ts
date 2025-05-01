@@ -8,6 +8,7 @@ import {
   MatchJobResponse,
 } from "@/types/job";
 import { UserProfile } from "@/types/user";
+import { Companyprofile } from "@/types/company";
 
 export async function getCatogory() {
   try {
@@ -206,7 +207,32 @@ interface IUserByIdResponse {
   MSG: string;
   CONTENT: UserProfile;
 }
+interface ICompanyByIdResponse {
+  STS: string;
+  MSG: string;
+  CONTENT: Companyprofile;
+}
 
+export async function getCompanybyId(
+  companyId: number,
+  token: string
+): Promise<ICompanyByIdResponse> {
+  try {
+    const res = await axios.get(`${BACKEND_URL}/company/${companyId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return res.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      throw new Error(
+        error.response?.data?.message || "Failed to fetch user by ID"
+      );
+    }
+    throw new Error("An unexpected error occurred");
+  }
+}
 export async function getUserById(
   userId: number,
   token: string

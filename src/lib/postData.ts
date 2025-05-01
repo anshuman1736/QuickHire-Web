@@ -1,6 +1,7 @@
 import { BACKEND_URL, PYTHON_BACKEND_URL } from "@/lib/config";
 import { ILogin, IUserRegister } from "@/types/auth";
 import { ICompanyRegister } from "@/types/auth";
+import { IUpdateCompanyRequest } from "@/types/company";
 import { IJobPost, IUpdateJob } from "@/types/job";
 import { IUpdateUserRequest } from "@/types/user";
 import axios from "axios";
@@ -84,6 +85,32 @@ export const updateUser = async (
   try {
     const response = await axios.put(
       `${BACKEND_URL}/user/updateUser/${userId}`,
+      form,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      const serverMessage = error.response?.data?.message || error.message;
+      throw new Error(serverMessage);
+    }
+    throw error;
+  }
+};
+
+export const updateCompany = async (
+  form: IUpdateCompanyRequest,
+  companyId: number,
+  token: string
+) => {
+  try {
+    const response = await axios.put(
+      `${BACKEND_URL}/company/updateCompany/${companyId}`,
       form,
       {
         headers: {

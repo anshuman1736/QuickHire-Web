@@ -19,8 +19,11 @@ export default function Login() {
   const loginMutation = useMutation({
     mutationFn: loginUser,
     onSuccess: (data) => {
-      if (data.CONTENT.STS === "500") {
-        errorToast(data.CONTENT.MSG);
+      if (
+        data.MSG === " Invalid Username or Password  !!" ||
+        data.STS === "500"
+      ) {
+        errorToast("Invalid Username or Password");
         return;
       }
       if (data.CONTENT.isEmailVerified !== true) {
@@ -33,11 +36,12 @@ export default function Login() {
         localStorage.setItem("companyId", data.CONTENT.userId);
         localStorage.setItem("companyName", data.CONTENT.userName);
         router.push("/company");
+        return;
       }
       if (data.CONTENT.userRole === "ROLE_USER") {
         localStorage.setItem("userId", data.CONTENT.userId);
-        localStorage.setItem("userId", data.CONTENT.userId);
         router.push("/user");
+        return;
       }
     },
     onError(error) {
@@ -62,6 +66,7 @@ export default function Login() {
         message: error.message,
       }));
       console.error("Validation errors:", errorMessages);
+      errorToast(errorMessages[0].message);
       return;
     }
 

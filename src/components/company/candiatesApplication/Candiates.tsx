@@ -27,9 +27,9 @@ export default function CandidatesCompo({ jobId }: { jobId: number }) {
   const [swipeDistance, setSwipeDistance] = useState(0);
   const touchStartX = useRef(0);
   const touchEndX = useRef(0);
-  const MIN_SWIPE_DISTANCE = 80; // Minimum distance to register swipe intention
-  const DECISION_THRESHOLD = 120; // Distance for accepting/rejecting
-  const MAX_SWIPE_DISTANCE = 150; // Maximum allowed swipe distance
+  const MIN_SWIPE_DISTANCE = 80; 
+  const DECISION_THRESHOLD = 120;
+  const MAX_SWIPE_DISTANCE = 150;
 
   useEffect(() => {
     const storedToken = localStorage.getItem("sessionId");
@@ -99,25 +99,25 @@ export default function CandidatesCompo({ jobId }: { jobId: number }) {
 
   async function handleAcceptApplication(applicationId: number) {
     if (!applicationId || !token) return;
-    
+
     const form = {
       applicationId: applicationId,
       token: token,
       status: true,
     };
-    
+
     applicationMutation.mutate(form);
   }
 
   async function handleRejectApplication(applicationId: number) {
     if (!applicationId || !token) return;
-    
+
     const form = {
       applicationId: applicationId,
       token: token,
       status: false,
     };
-    
+
     applicationMutation.mutate(form);
   }
 
@@ -130,31 +130,29 @@ export default function CandidatesCompo({ jobId }: { jobId: number }) {
 
   const handleTouchMove = (e: React.TouchEvent) => {
     if (swipingCard === null) return;
-    
+
     touchEndX.current = e.touches[0].clientX;
     const distance = touchEndX.current - touchStartX.current;
-    
+
     // Apply boundaries to the swipe distance
     const boundedDistance = Math.max(
-      Math.min(distance, MAX_SWIPE_DISTANCE), 
+      Math.min(distance, MAX_SWIPE_DISTANCE),
       -MAX_SWIPE_DISTANCE
     );
-    
+
     setSwipeDistance(boundedDistance);
   };
 
   const handleTouchEnd = (applicationId: number) => {
     if (swipingCard === null) return;
-    
+
     const distance = touchEndX.current - touchStartX.current;
-    
+
     if (distance > DECISION_THRESHOLD) {
       handleAcceptApplication(applicationId);
-    } 
-    else if (distance < -DECISION_THRESHOLD) {
+    } else if (distance < -DECISION_THRESHOLD) {
       handleRejectApplication(applicationId);
-    } 
-    else {
+    } else {
       setSwipeDistance(0);
       setTimeout(() => {
         setSwipingCard(null);
@@ -299,7 +297,7 @@ export default function CandidatesCompo({ jobId }: { jobId: number }) {
           {filteredApplications.map((application) => {
             const isBeingSwiped = swipingCard === application.id;
             const swipeAmount = isBeingSwiped ? swipeDistance : 0;
-            
+
             return (
               <div key={application.id} className="relative overflow-hidden">
                 {/* Card container with boundaries */}
@@ -307,21 +305,25 @@ export default function CandidatesCompo({ jobId }: { jobId: number }) {
                   {/* Actual card with swipe effect */}
                   <div
                     className={`bg-white p-6 rounded-xl shadow-sm border border-gray-100 hover:shadow-md ${
-                      isBeingSwiped ? 'cursor-grabbing' : ''
+                      isBeingSwiped ? "cursor-grabbing" : ""
                     }`}
                     style={{
-                      transform: `translateX(${swipeAmount}px) rotate(${swipeAmount / 20}deg)`,
-                      transition: isBeingSwiped ? 'none' : 'transform 0.3s ease',
+                      transform: `translateX(${swipeAmount}px) rotate(${
+                        swipeAmount / 20
+                      }deg)`,
+                      transition: isBeingSwiped
+                        ? "none"
+                        : "transform 0.3s ease",
                       zIndex: isBeingSwiped ? 10 : 1,
-                      backgroundColor: isBeingSwiped 
-                        ? (swipeAmount > MIN_SWIPE_DISTANCE 
-                          ? '#f0fdf4' // Light green for accept
-                          : swipeAmount < -MIN_SWIPE_DISTANCE 
-                            ? '#fef2f2' // Light red for reject
-                            : 'white')
-                        : 'white',
-                      touchAction: 'pan-y',
-                      willChange: 'transform'
+                      backgroundColor: isBeingSwiped
+                        ? swipeAmount > MIN_SWIPE_DISTANCE
+                          ? "#f0fdf4" // Light green for accept
+                          : swipeAmount < -MIN_SWIPE_DISTANCE
+                          ? "#fef2f2" // Light red for reject
+                          : "white"
+                        : "white",
+                      touchAction: "pan-y",
+                      willChange: "transform",
                     }}
                     onTouchStart={(e) => handleTouchStart(e, application.id)}
                     onTouchMove={handleTouchMove}
@@ -342,7 +344,7 @@ export default function CandidatesCompo({ jobId }: { jobId: number }) {
                         )}
                       </>
                     )}
-                    
+
                     <div className="flex gap-4 items-start mb-6">
                       <div className="flex-shrink-0">
                         {application.userDTO.profile_pic ? (
@@ -397,24 +399,38 @@ export default function CandidatesCompo({ jobId }: { jobId: number }) {
                         </span>
                       </div>
                       <Link
-                        href={`/company/job-application/${jobId}/${application.id}`}
+                        href={{
+                          pathname: `/company/view-application/candidate-details`,
+                          query: {
+                            id: application.id,
+                            fullName: application.userDTO.fullName,
+                            email: application.userDTO.email,
+                            phoneNo: application.userDTO.phoneNo,
+                            resume: application.userDTO.resume,
+                            profile_pic: application.userDTO.profile_pic,
+                            majorIntrest: application.userDTO.majorIntrest,
+                            completeProfile:
+                              application.userDTO.completeProfile,
+                            categoryName: application.userDTO.categoryName,
+                          },
+                        }}
                       >
                         <button className="px-4 py-2 rounded-lg bg-blue-500 hover:bg-blue-600 text-white font-medium text-sm transition-colors duration-200">
                           View Application
                         </button>
                       </Link>
                     </div>
-                    
+
                     {/* Show buttons only on desktop/tablet */}
                     <div className="hidden md:flex justify-between border-t pt-4 gap-2">
-                      <button 
+                      <button
                         className="px-4 py-2 rounded-lg bg-red-100 hover:bg-red-200 text-red-600 font-medium text-sm transition-colors duration-200 cursor-pointer flex items-center gap-2"
                         onClick={() => handleRejectApplication(application.id)}
                       >
                         <CircleX className="w-4 h-4" />
                         Reject
                       </button>
-                      <button 
+                      <button
                         className="px-4 py-2 rounded-lg bg-green-100 hover:bg-green-200 text-green-600 font-medium text-sm transition-colors duration-200 cursor-pointer flex items-center gap-2"
                         onClick={() => handleAcceptApplication(application.id)}
                       >
@@ -424,7 +440,7 @@ export default function CandidatesCompo({ jobId }: { jobId: number }) {
                     </div>
                   </div>
                 </div>
-                
+
                 {/* Action feedback indicators that appear underneath the card */}
                 {isBeingSwiped && (
                   <>

@@ -1,3 +1,4 @@
+import AuthProtectedRoute from "@/components/AuthProjectedRoutes";
 import Footer from "@/components/homepage/Footer";
 import NavBar from "@/components/homepage/Navbar";
 
@@ -7,10 +8,10 @@ export default function AuthLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <>
+    <AuthProtectedRoute>
       <NavBar />
       {children}
       <Footer />
-    </>
+    </AuthProtectedRoute>
   );
 }

@@ -13,6 +13,7 @@ export interface UserProfile {
   categoryName: string;
 }
 
+
 export interface IUpdateUserRequest {
   id?: number;
   fullName?: string;
@@ -25,4 +26,9 @@ export interface IUpdateUserRequest {
   completeProfile?: boolean;
   categoryId?: number;
   categoryName?: string;
+}
+
+export enum Role {
+  ROLE_COMPANY = "ROLE_COMPANY",
+  ROLE_USER = "ROLE_USER",
 }
