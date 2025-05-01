@@ -1,6 +1,6 @@
 "use client";
 
-import { ChangeEvent, useState } from "react";
+import { ChangeEvent, useEffect, useState } from "react";
 import {
   Mail,
   Phone,
@@ -22,14 +22,21 @@ import {
   Calendar,
 } from "lucide-react";
 import { uploadCinCertificate, uploadResume } from "@/lib/uploadTofirebase";
-import { errorToast } from "@/lib/toast";
+import { errorToast, successToast } from "@/lib/toast";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { getCompanybyId } from "@/lib/queries";
+import { IUpdateCompanyRequest } from "@/types/company";
+import { updateCompany } from "@/lib/postData";
+import { useRouter } from "next/navigation";
 
 export default function ComapnyAccountCompo() {
   // State management
+  const [token, setToken] = useState("");
+  const [companyId, setcompanyId] = useState<number>(0);
   const [isEditingPhoto, setIsEditingPhoto] = useState(false);
   const [activeSection, setActiveSection] = useState("all");
   const [isUploading, setIsUploading] = useState(false);
-
+  const router=useRouter();
   // Form data with company specific fields
   const [formData, setFormData] = useState({
     comapanyName: "Alex Johnson",
@@ -38,6 +45,7 @@ export default function ComapnyAccountCompo() {
     cinNumber: "L17110MH1973PLC019786",
     cinCertificate: "",
     profile_pic: "",
+    categoryName:'',
     establishedYear: "2020",
     bio: "Passionate developer with 5+ years of experience building modern web applications. Specialized in React ecosystem and responsive design.",
     website: "https://alexjohnson.dev",
@@ -45,8 +53,62 @@ export default function ComapnyAccountCompo() {
     github: "alexjohnson",
     twitter: "alexjohnson",
   });
+  useEffect(() => {
+    setToken(localStorage.getItem("sessionId") || "");
+    setcompanyId(Number(localStorage.getItem("companyId")));
+  }, []);
 
-  // const [newSkill, setNewSkill] = useState("");
+  const { isPending, isError, data, error } = useQuery({
+    queryKey: ["getuserById"],
+     queryFn: () => getCompanybyId(companyId,token),
+    enabled: !!token,
+  });
+  
+  const updatepmution = useMutation({
+     mutationFn: (form: IUpdateCompanyRequest) => updateCompany(form, companyId, token),
+    onSuccess: () => {
+      successToast("profile Updated successfully!");
+      router.refresh();
+    },
+    onError: (error) => {
+      console.error("Error updating profile:", error);
+    },
+  });
+  
+ 
+  useEffect(() => {
+    if (data?.CONTENT) {
+      const companydata = data.CONTENT;
+
+      const formatDate = (timestamp: number): string => {
+        const date = new Date(timestamp);
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0'); 
+        const year = String(date.getFullYear()).slice(-2); 
+        return `${day}/${month}/${year}`;
+      };
+      
+      const formatted: string = formatDate(companydata.creationDate); 
+          
+      setFormData((prev) => ({
+        ...prev,
+        comapanyName: companydata.companyName || "",
+        phoneNo: companydata.phoneNo || "",
+        categoryName:companydata.categoryName || "",
+        establishedYear:formatted.toString() || "",
+        email: companydata.email || "",
+        cinNumber:companydata.cinNumber,
+        profile_pic: companydata.profile_Pic || "",
+        token: token,
+        id: companyId,
+      }));
+    }
+  }, [data, token, companyId]);
+  
+  if (isError) {
+    errorToast(error.message);
+    return;
+  }
 
   // Use type instead of empty interfaces
   type InputChangeEvent = ChangeEvent<
@@ -62,21 +124,7 @@ export default function ComapnyAccountCompo() {
     setFormData({ ...formData, [name]: value });
   };
 
-  // const handleCheckboxChange = (e: CheckboxChangeEvent): void => {
-  //   const { name, checked, value } = e.target;
-  //   let updatedValues: string[] = [
-  //     ...(formData[name as keyof typeof formData] as string[]),
-  //   ];
-
-  //   if (checked) {
-  //     updatedValues.push(value);
-  //   } else {
-  //     updatedValues = updatedValues.filter((item) => item !== value);
-  //   }
-
-  //   setFormData({ ...formData, [name]: updatedValues });
-  // };
-
+ 
   type HandleFileChange = (
     e: FileChangeEvent,
     fileType: "certificate" | "profile_pic"
@@ -112,7 +160,20 @@ export default function ComapnyAccountCompo() {
 
   const handleSubmit = (e: SubmitEvent): void => {
     e.preventDefault();
-    console.log("Company Profile updated:", formData);
+    const form: IUpdateCompanyRequest = {
+      id: data?.CONTENT.id,
+      companyName: formData.comapanyName,
+      cinNumber: formData.cinNumber,
+      cinCertificate: data?.CONTENT.cinCertificate,
+      email: formData.email,
+      phoneNo: formData.phoneNo.toString(),
+      profile_Pic: formData.profile_pic,
+      completeProfile:data?.CONTENT.completeProfile ,
+      creationDate:Number(formData.establishedYear),
+      categoryId: data?.CONTENT.categoryId,
+      categoryName: formData.categoryName
+    };
+    updatepmution.mutate(form);
   };
 
   // Company types
@@ -140,6 +201,36 @@ export default function ComapnyAccountCompo() {
     setActiveSection((prevSection) => (prevSection === section ? "" : section));
   };
 
+  if (isPending) {
+    return (
+      <div className="min-h-screen bg-gradient-to-r from-blue-100 to-white py-20 mt-6 flex items-center justify-center">
+        <div className="flex flex-col items-center space-y-4">
+          <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+          <span className="text-xl text-gray-700">Loading profile...</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="min-h-screen bg-gradient-to-r from-blue-100 to-white py-20 mt-6 flex items-center justify-center">
+        <div className="bg-white p-8 rounded-xl shadow-lg border-l-4 border-red-500 max-w-lg">
+          <h2 className="text-2xl text-red-600 font-bold mb-4">
+            Error Loading profile
+          </h2>
+          <p className="text-gray-700">{error}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="mt-6 px-6 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 transition duration-200 shadow-md"
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="w-full bg-gray-50 min-h-screen py-4 sm:py-6 md:py-8 px-2 sm:px-4 mt-12 sm:mt-20 md:mt-16">
       <div className="max-w-6xl mx-auto">
@@ -157,10 +248,10 @@ export default function ComapnyAccountCompo() {
             <div className="relative mx-auto md:mx-0">
               <div className="w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 rounded-full bg-white p-1 shadow-xl overflow-hidden border-4 border-white">
                 <div className="relative w-full h-full">
-                  <img
-                    src="/api/placeholder/400/400"
-                    alt="Company Logo"
-                    className="object-cover rounded-full"
+                <img
+                    src={formData.profile_pic ? formData.profile_pic :"/"}
+                    alt="Profile"
+                    className=" h-full w-full object-cover rounded-full"
                   />
                 </div>
               </div>
@@ -530,15 +621,15 @@ export default function ComapnyAccountCompo() {
                       Industry*
                     </h4>
                     <select
-                      name="industry"
-                      // value={formData.industry}
+                      name="categoryName"
+                      value={formData.categoryName}
                       onChange={handleInputChange}
                       required
                       className="w-full p-2 sm:p-3 text-sm sm:text-base border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     >
                       <option value="">Select Industry</option>
                       {industries.map((industry) => (
-                        <option key={industry.id} value={industry.id}>
+                        <option key={industry.id} value={industry.label}>
                           {industry.label}
                         </option>
                       ))}

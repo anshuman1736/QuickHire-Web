@@ -13,6 +13,7 @@ export interface UserProfile {
   categoryName: string;
 }
 
+
 export interface IUpdateUserRequest {
   id?: number;
   fullName?: string;

@@ -103,7 +103,7 @@ export default function UserAccount() {
   const updatepmution = useMutation({
     mutationFn: (form: IUpdateUserRequest) => updateUser(form, userId, token),
     onSuccess: () => {
-      successToast("Job Updated successfully!");
+      successToast("profile Updated successfully!");
       router.refresh();
     },
     onError: (error) => {
