@@ -358,3 +358,27 @@ export async function getFilteredJob(searchParams: IFiterJobParams) {
     throw new Error("An unexpected error occurred");
   }
 }
+
+export async function getBookmarkJobs(
+  userId: number,
+  token: string
+): Promise<IJobByCompanyIdResponse> {
+  try {
+    const response = await axios.get(
+      `${BACKEND_URL}/job/getWishlist/${userId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      throw new Error(
+        error.response?.data?.message || "Failed to fetch bookmarked jobs"
+      );
+    }
+    throw new Error("An unexpected error occurred");
+  }
+}
