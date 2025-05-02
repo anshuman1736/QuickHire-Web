@@ -17,11 +17,13 @@ import React, { useState, useEffect, useMemo } from "react";
 import Header from "./header";
 import Link from "next/link";
 import { MatchedJob } from "@/types/job";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { getRecomdedJob } from "@/lib/queries";
 import { useRouter } from "next/navigation";
+import { bookmarkJob } from "@/lib/postData";
+import { errorToast, successToast } from "@/lib/toast";
 
-export default function JobPortal() {
+export default function   JobPortal() {
   const [activeTab, setActiveTab] = useState("featured");
   const [searchQuery, setSearchQuery] = useState("");
   const [filterOpen, setFilterOpen] = useState(false);
@@ -50,6 +52,18 @@ export default function JobPortal() {
     enabled: typeof window !== "undefined" && !!localStorage.getItem("userId"),
     staleTime: 5 * 60 * 1000,
     retry: 2,
+  });
+
+  const bookemarkMutation = useMutation({
+    mutationFn: bookmarkJob,
+    onSuccess: (data) => {
+      successToast("Job bookmarked successfully!");
+      console.log("Bookmark success:", data);
+    },
+    onError: (error) => {
+      errorToast("Error bookmarking job. Please try again.");
+      console.error("Bookmark error:", error);
+    },
   });
 
   const getJobLevelFromExperience = (experience: string | null): string => {
@@ -594,6 +608,15 @@ export default function JobPortal() {
                   );
                   const postedDate = getPostedDateText(job.creation_date);
 
+                  const handleBookmarkToogle = async () => {
+                    const form = {
+                      jobId: job.id,
+                      userId: Number(localStorage.getItem("userId")),
+                      token: localStorage.getItem("sessionId") as string,
+                    };
+                    bookemarkMutation.mutate(form);
+                  };
+
                   return (
                     <div
                       key={job.id}
@@ -612,7 +635,10 @@ export default function JobPortal() {
                               </h3>
                             </div>
                           </div>
-                          <button className="text-gray-400 hover:text-blue-500 transition-colors">
+                          <button
+                            className="text-gray-400 hover:text-blue-500 transition-colors"
+                            onClick={handleBookmarkToogle}
+                          >
                             <BookmarkPlus className="w-5 h-5" />
                           </button>
                         </div>
