@@ -229,8 +229,7 @@ interface IApplyJobRequest {
   jobId: number;
   userId: number;
   token: string;
-  applicationScore: number
-
+  applicationScore: number;
 }
 
 export async function applyjob(form: IApplyJobRequest) {
@@ -240,8 +239,8 @@ export async function applyjob(form: IApplyJobRequest) {
       {
         jobId: form.jobId,
         userId: form.userId,
-        applicationScore: form.applicationScore
-        
+        applicationScore: form.applicationScore,
+
         // applicationScore:form.
       },
       {
@@ -303,6 +302,59 @@ export async function deleteJob(form: IDeleteJobRequest) {
       },
     });
     return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      const serverMessage = error.response?.data?.message || error.message;
+      throw new Error(serverMessage);
+    }
+    throw error;
+  }
+}
+
+interface IBookmarkJobRequest {
+  jobId: number;
+  userId: number;
+  token: string;
+}
+
+export async function bookmarkJob(form: IBookmarkJobRequest) {
+  try {
+    const response = await axios.post(
+      `${BACKEND_URL}/job/addToWishlist`,
+      {},
+      {
+        headers: {
+          Authorization: `Bearer ${form.token}`,
+          "Content-Type": "application/json",
+        },
+        params: { jobId: form.jobId, userId: form.userId },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      const serverMessage = error.response?.data?.message || error.message;
+      throw new Error(serverMessage);
+    }
+    throw error;
+  }
+}
+
+interface IRemoveBookmarkJobRequest {
+  userId: number;
+  jobId: number;
+  token: string;
+}
+
+export async function removeBookmarkJob(form: IRemoveBookmarkJobRequest) {
+  try {
+    await axios.delete(`${BACKEND_URL}/job/removeFromWishlist`, {
+      headers: {
+        Authorization: `Bearer ${form.token}`,
+        "Content-Type": "application/json",
+      },
+      params: { jobId: form.jobId, userId: form.userId },
+    });
   } catch (error) {
     if (axios.isAxiosError(error)) {
       const serverMessage = error.response?.data?.message || error.message;
