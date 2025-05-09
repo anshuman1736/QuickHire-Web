@@ -16,45 +16,47 @@ export default function Login() {
     const rememberMe = useRef<HTMLInputElement>(null);
     const router = useRouter();
 
-    const loginMutation = useMutation({
-        mutationFn: loginUser,
-        onSuccess: (data) => {
-            if (
-                data.MSG === " Invalid Username or Password  !!" ||
-                data.STS === "500"
-            ) {
-                errorToast("Invalid Username or Password");
-                return;
-            }
-            if (data.CONTENT.isEmailVerified !== true) {
-                router.push("/verify-email");
-                return;
-            }
-            localStorage.setItem("sessionId", data.CONTENT.token);
-            localStorage.setItem("role", data.CONTENT.userRole);
-            if (data.CONTENT.userRole === "ROLE_COMPANY") {
-                localStorage.setItem("companyId", data.CONTENT.userId);
-                localStorage.setItem("companyName", data.CONTENT.userName);
-                router.push("/company");
-                return;
-            }
-            if (data.CONTENT.userRole === "ROLE_USER") {
-                localStorage.setItem("userId", data.CONTENT.userId);
-                router.push("/user");
-                return;
-            }
-            if (data.CONTENT.userRole === "ROLE_QH") {
-                localStorage.setItem("userId", data.CONTENT.userId);
-                router.push("/sales");
-                return;
-            }
-        },
-        onError(error) {
-            if (error) {
-                console.error(error);
-            }
-        },
-    });
+  const loginMutation = useMutation({
+    mutationFn: loginUser,
+    onSuccess: (data) => {
+      if (
+        data.MSG === " Invalid Username or Password  !!" ||
+        data.STS === "500"
+      ) {
+        errorToast("Invalid Username or Password");
+        return;
+      }
+      if (data.CONTENT.isEmailVerified !== true) {
+        if(data.CONTENT.userRole !== "ROLE_QH"){
+          router.push("/verify-email");
+          return;
+        }
+      }
+      localStorage.setItem("sessionId", data.CONTENT.token);
+      localStorage.setItem("role", data.CONTENT.userRole);
+      if (data.CONTENT.userRole === "ROLE_COMPANY") {
+        localStorage.setItem("companyId", data.CONTENT.userId);
+        localStorage.setItem("companyName", data.CONTENT.userName);
+        router.push("/company");
+        return;
+      }
+      if (data.CONTENT.userRole === "ROLE_USER") {
+        localStorage.setItem("userId", data.CONTENT.userId);
+        router.push("/user");
+        return;
+      }
+      if (data.CONTENT.userRole === "ROLE_QH") {
+        localStorage.setItem("userId", data.CONTENT.userId);
+        router.push("/chatBoard");
+        return;
+      }
+    },
+    onError(error) {
+      if (error) {
+        console.error(error);
+      }
+    },
+  });
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();

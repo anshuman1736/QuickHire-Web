@@ -15,6 +15,12 @@ export interface IUserRegister extends IRegisterForm {
   profile_pic?: string;
 }
 
+export interface ISalesRegister{
+  email:string,
+  password:string,
+}
+
+
 export interface ICompanyRegister extends IRegisterForm {
   profile_Pic?: string;
   companyName: string;

@@ -4,12 +4,13 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { MessageSquare, CreditCard, LogOut } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 const Header = () => {
   const pathname = usePathname();
   const [activeTab, setActiveTab] = useState('chat');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
+  const router=useRouter();
   // Update activeTab based on the current pathname
   useEffect(() => {
     if (pathname.includes('/subscription')) {
@@ -24,9 +25,8 @@ const Header = () => {
   // Handle logout functionality
   const handleLogout = () => {
     // Add your logout logic here
-    console.log('Logging out...');
-    // Example: localStorage.removeItem('token');
-    // Example: router.push('/login');
+    localStorage.clear();
+     router.push('/login');
   };
 
   const toggleMobileMenu = () => {
