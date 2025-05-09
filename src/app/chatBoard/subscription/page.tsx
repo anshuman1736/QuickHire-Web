@@ -1,10 +1,8 @@
-import SalesSubscriptionDashboard from '@/components/chatApp/subscription'
-import React from 'react'
+import SalesSubscriptionDashboard from "@/components/chatApp/subscription";
+import React from "react";
 
 function page() {
-  return (
-    <SalesSubscriptionDashboard/>
-)
+  return <SalesSubscriptionDashboard />;
 }
 
-export default page
+export default page;
