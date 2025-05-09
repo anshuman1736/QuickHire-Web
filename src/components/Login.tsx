@@ -76,12 +76,12 @@ export default function Login() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 flex items-center justify-center px-4 sm:px-6 lg:px-8">
       <div className="w-full max-w-md space-y-6 bg-white/90 backdrop-blur-sm p-8 rounded-2xl shadow-xl border border-gray-200 mx-4 relative overflow-hidden">
-        <div className="absolute -top-10 -right-10 w-40 h-40 bg-yellow-400/20 rounded-full blur-2xl"></div>
-        <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-yellow-400/20 rounded-full blur-2xl"></div>
+        <div className="absolute -top-10 -right-10 w-40 h-40 bg-blue-400/20 rounded-full blur-2xl"></div>
+        <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-blue-400/20 rounded-full blur-2xl"></div>
 
         <div className="text-center relative">
           <div className="inline-flex items-center justify-center mb-2">
-            <span className="text-2xl font-bold text-yellow-500 transition-transform hover:scale-110 duration-300">
+            <span className="text-2xl font-bold text-blue-500 transition-transform hover:scale-110 duration-300">
               Q
             </span>
             <span className="text-2xl font-bold text-black transition-transform hover:scale-110 duration-300">
@@ -117,7 +117,7 @@ export default function Login() {
                     name="email"
                     ref={email}
                     required
-                    className="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent bg-white text-gray-900 transition-all duration-200"
+                    className="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900 transition-all duration-200"
                     placeholder="your@email.com"
                   />
                 </div>
@@ -136,7 +136,7 @@ export default function Login() {
                   </label>
                   <Link
                     href="/forgot-password"
-                    className="text-xs font-medium text-yellow-600 hover:text-yellow-700 transition-colors"
+                    className="text-xs font-medium text-blue-600 hover:text-blue-700 transition-colors"
                   >
                     Forgot password?
                   </Link>
@@ -154,7 +154,7 @@ export default function Login() {
                     name="password"
                     ref={password}
                     required
-                    className="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent bg-white text-gray-900 transition-all duration-200"
+                    className="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900 transition-all duration-200"
                     placeholder="••••••••"
                   />
                 </div>
@@ -168,7 +168,7 @@ export default function Login() {
                   name="remember_me"
                   type="checkbox"
                   ref={rememberMe}
-                  className="h-4 w-4 text-yellow-500 focus:ring-yellow-400 border-gray-300 rounded"
+                  className="h-4 w-4 text-blue-500 focus:ring-blue-400 border-gray-300 rounded"
                 />
                 <label
                   htmlFor="remember_me"
@@ -183,7 +183,7 @@ export default function Login() {
           <div>
             <button
               type="submit"
-              className="w-full px-6 py-3 text-base font-medium text-white bg-yellow-500 rounded-lg hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 shadow-md hover:shadow-lg transform transition-all duration-200 hover:scale-[1.01] disabled:opacity-70 disabled:cursor-not-allowed"
+              className="w-full px-6 py-3 text-base font-medium text-white bg-blue-500 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 shadow-md hover:shadow-lg transform transition-all duration-200 hover:scale-[1.01] disabled:opacity-70 disabled:cursor-not-allowed"
               onClick={handleLogin}
               disabled={loginMutation.isPending}
             >
@@ -204,7 +204,7 @@ export default function Login() {
             Don&apos;t have an account?{" "}
             <Link
               href="/register"
-              className="font-medium text-yellow-600 hover:text-yellow-700 transition-colors"
+              className="font-medium text-blue-600 hover:text-blue-700 transition-colors"
             >
               Sign up now
             </Link>

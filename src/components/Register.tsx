@@ -18,7 +18,7 @@ export default function Register() {
           onClick={() => setUserType("individual")}
           className={`flex items-center px-4 py-2 rounded-full text-sm font-medium transition-all ${
             userType === "individual"
-              ? "bg-yellow-500 text-white shadow-md"
+              ? "bg-blue-500 text-white shadow-md"
               : "bg-gray-100 text-gray-700 hover:bg-gray-200"
           }`}
         >
@@ -30,7 +30,7 @@ export default function Register() {
           onClick={() => setUserType("company")}
           className={`flex items-center px-4 py-2 rounded-full text-sm font-medium transition-all ${
             userType === "company"
-              ? "bg-yellow-500 text-white shadow-md"
+              ? "bg-blue-500 text-white shadow-md"
               : "bg-gray-100 text-gray-700 hover:bg-gray-200"
           }`}
         >

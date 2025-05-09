@@ -1,76 +1,28 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import "/styles/style.css";
 import {
   ArrowRight,
-  Briefcase,
-  Zap,
+  
   ChevronRight,
-  Star,
-  Shield,
-  CpuIcon,
-  Globe,
-  Rocket,
-  Award,
-  Code2,
+  
   MoveLeft,
   MapPin,
+  
 } from "lucide-react";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion } from "framer-motion";
 import axios from "axios";
 import { JobPosting } from "@/types/job";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 interface IBrowsResponse {
   STS: string;
   MSG: string;
   CONTENT: JobPosting[];
 }
-
-const TypingAnimation: React.FC<{
-  text: string;
-  duration?: number;
-  className?: string;
-  delay?: number;
-}> = ({ text, duration = 50, className = "", delay = 0 }) => {
-  const [displayedText, setDisplayedText] = useState("");
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [isTyping, setIsTyping] = useState(false);
-
-  useEffect(() => {
-    setDisplayedText("");
-    setCurrentIndex(0);
-    setIsTyping(true);
-  }, [text]);
-
-  useEffect(() => {
-    let timeout: NodeJS.Timeout | undefined;
-
-    if (isTyping && currentIndex < text.length) {
-      const initialDelay = currentIndex === 0 ? delay : 0;
-
-      timeout = setTimeout(() => {
-        setDisplayedText((prev) => prev + text[currentIndex]);
-        setCurrentIndex((prevIndex) => prevIndex + 1);
-      }, initialDelay + duration);
-    } else if (currentIndex >= text.length) {
-      setIsTyping(false);
-    }
-
-    return () => clearTimeout(timeout);
-  }, [isTyping, currentIndex, text, duration, delay]);
-
-  return (
-    <span className={className}>
-      {displayedText}
-      {isTyping && (
-        <span className="inline-block w-1 h-4 ml-0.5 bg-current animate-pulse"></span>
-      )}
-    </span>
-  );
-};
 
 function CTA() {
   const [fetchJobs, setFetchJobs] = useState(false);
@@ -88,18 +40,6 @@ function CTA() {
   });
   const [isVisible, setIsVisible] = useState(false);
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ["start end", "end start"],
-  });
-
-  // Scroll-based animations
-  const y = useTransform(scrollYProgress, [0, 1], [50, -20]);
-  const opacity = useTransform(
-    scrollYProgress,
-    [0, 0.2, 0.8, 1],
-    [0, 1, 1, 0.8]
-  );
 
   useEffect(() => {
     const handleScroll = () => {
@@ -116,327 +56,203 @@ function CTA() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  //TODO: Use Tanstack Query for API calls
-
   return (
     <section
       ref={containerRef}
-      className="bg-gradient-to-r from-white to-gray-50 py-20 px-4 sm:px-6 lg:px-8 overflow-hidden relative"
+      className="bg-white py-16 px-4 sm:px-6 lg:px-8 overflow-hidden"
     >
-      {/* Decorative elements */}
-      <motion.div
-        style={{ opacity }}
-        className="absolute top-0 left-0 w-full h-full pointer-events-none"
-      >
-        <div className="absolute top-40 left-20 w-64 h-64 rounded-full bg-amber-100 blur-3xl opacity-30"></div>
-        <div className="absolute bottom-20 right-20 w-80 h-80 rounded-full bg-blue-100 blur-3xl opacity-30"></div>
-      </motion.div>
-
-      <motion.div className="max-w-6xl mx-auto relative z-10" style={{ y }}>
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: isVisible ? 1 : 0, y: isVisible ? 0 : 30 }}
-          transition={{ duration: 0.8 }}
-          className="text-center mb-12"
-        >
-          <div className="inline-flex items-center justify-center mb-4">
-            <Rocket className="w-7 h-7 text-amber-500 mr-3 animate-pulse" />
-            <h2 className="text-4xl sm:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-amber-200 to-amber-500">
-              <TypingAnimation
-                text="Transform Your Career"
-                duration={50}
-                className="inline-block"
-              />
-            </h2>
-            <CpuIcon className="w-7 h-7 text-amber-600 ml-3 animate-spin-slow" />
-          </div>
-          <p className="text-base sm:text-lg text-gray-600 max-w-2xl mx-auto flex items-center justify-center">
-            <Code2 className="w-5 h-5 mr-2 text-gray-400" />
-            Join thousands of professionals who found their dream opportunities
-            <Globe className="w-5 h-5 ml-2 text-gray-400" />
-          </p>
-        </motion.div>
-
-        {/* Main Card Container */}
-        <motion.div
-          initial={{ opacity: 0, y: 50 }}
-          animate={{ opacity: isVisible ? 1 : 0, y: isVisible ? 0 : 50 }}
-          transition={{ duration: 0.7, delay: 0.2 }}
-          className="relative rounded-3xl overflow-hidden shadow-xl"
-        >
-          <div className="flex flex-col lg:flex-row">
-            {/* Left Content Section */}
-            <div className="bg-gradient-to-br from-amber-400 via-amber-500 to-amber-600 text-white p-8 lg:p-12 lg:w-3/5 relative overflow-hidden">
-              {/* Animated decorative elements */}
-              <div className="absolute inset-0 pointer-events-none overflow-hidden">
-                <motion.div
-                  animate={{
-                    x: [0, 10, 0],
-                    y: [0, -10, 0],
-                    transition: {
-                      duration: 8,
-                      repeat: Infinity,
-                      ease: "easeInOut",
-                    },
-                  }}
-                  className="absolute right-0 bottom-0 w-96 h-96 bg-white/10 rounded-full transform translate-x-1/3 translate-y-1/3 blur-md"
-                />
-                <motion.div
-                  animate={{
-                    x: [0, -10, 0],
-                    y: [0, 10, 0],
-                    transition: {
-                      duration: 10,
-                      repeat: Infinity,
-                      ease: "easeInOut",
-                    },
-                  }}
-                  className="absolute left-0 top-0 w-64 h-64 bg-white/10 rounded-full transform -translate-x-1/3 -translate-y-1/3 blur-md"
-                />
-              </div>
-
-              <div className="relative z-10">
-                <motion.span
-                  initial={{ opacity: 0, y: -20 }}
-                  animate={{
-                    opacity: isVisible ? 1 : 0,
-                    y: isVisible ? 0 : -20,
-                  }}
-                  transition={{ delay: 0.3 }}
-                  className="inline-flex items-center px-3 py-1 rounded-full bg-white/20 text-white text-xs font-medium mb-6"
-                >
-                  <Zap className="w-3.5 h-3.5 mr-1.5" />
-                  Take the next step
-                </motion.span>
-
-                <motion.h3
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{
-                    opacity: isVisible ? 1 : 0,
-                    y: isVisible ? 0 : 20,
-                  }}
-                  transition={{ delay: 0.4, duration: 0.5 }}
-                  className="text-3xl md:text-4xl font-bold mb-6 leading-tight"
-                >
-                  Ready to discover your{" "}
-                  <span className="text-white underline decoration-2 decoration-white/40">
-                    perfect
-                  </span>{" "}
-                  opportunity?
-                </motion.h3>
-
-                <motion.p
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{
-                    opacity: isVisible ? 1 : 0,
-                    y: isVisible ? 0 : 20,
-                  }}
-                  transition={{ delay: 0.5, duration: 0.5 }}
-                  className="text-white/90 mb-8 text-lg max-w-lg"
-                >
-                  Our AI-powered platform connects you with personalized job
-                  matches based on your unique skills and career aspirations.
-                </motion.p>
-
-                {/* Stats Cards */}
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{
-                    opacity: isVisible ? 1 : 0,
-                    y: isVisible ? 0 : 20,
-                  }}
-                  transition={{ delay: 0.6, duration: 0.5 }}
-                  className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-6"
-                >
-                  {[
-                    { value: "30K+", label: "Open Positions", icon: Briefcase },
-                    { value: "92%", label: "Success Rate", icon: Award },
-                    { value: "24hr", label: "Response Time", icon: Shield },
-                  ].map((stat, index) => (
-                    <motion.div
-                      key={index}
-                      whileHover={{ scale: 1.05 }}
-                      className="bg-white/10 rounded-xl p-4 backdrop-blur-sm"
-                    >
-                      <stat.icon className="w-5 h-5 text-amber-200 mb-2" />
-                      <div className="text-xl font-bold">{stat.value}</div>
-                      <div className="text-xs text-white/80">{stat.label}</div>
-                    </motion.div>
-                  ))}
-                </motion.div>
-
-                {/* Testimonial */}
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: isVisible ? 1 : 0 }}
-                  transition={{ delay: 0.7, duration: 0.5 }}
-                  className="bg-gradient-to-r from-white/20 to-white/10 rounded-xl p-4 mb-6"
-                >
-                  <div className="flex text-amber-200 mb-2">
-                    {[...Array(5)].map((_, i) => (
-                      <Star key={i} className="w-4 h-4" fill="currentColor" />
-                    ))}
-                  </div>
-                  <p className="text-sm italic mb-2">
-                    {
-                      '"JobPro matched me with opportunities I never would have found otherwise. The personalized approach made all the difference."'
-                    }
-                  </p>
-                  <p className="text-xs text-white/70">
-                    — Sarah T., Software Developer
-                  </p>
-                </motion.div>
-              </div>
-            </div>
-
-            {/* Right CTA Section */}
-            <div className="bg-white relative p-8 lg:p-12 lg:w-2/5 flex  flex-col justify-center">
-              {data ? (
-                <div className="flex flex-col gap-5 w-full justify-center">
-                  <button
-                    onClick={() => {
-                      queryClient.removeQueries();
-                      setFetchJobs(false);
-                    }}
-                    className="text-xl flex items-center w-fit border-2 border-amber-400 px-3 rounded-2xl bg-amber-100 cursor-pointer"
-                  >
-                    <MoveLeft /> Back
-                  </button>
-                  <div>
-                    <div className="no-scrollbar  overflow-y-auto overflow-hidden scrollbar-none w-full items-start max-h-[400px] md:max-h-[500px] pr-2">
-                      {data.CONTENT.map((data, idx) => (
-                        <div
-                          className="border-b-2  transition-all hover:scale-95 border-blue-500 mt-3 p-2 bg-gray-100 rounded-2xl space-y-3"
-                          key={idx}
-                        >
-                          <p className="text-lg font-semibold rounded-full py-1">
-                            {data.jobTitle}
-                          </p>
-                          <p className="text-sm text-gray-600 text-shadow-gray-600 ">
-                            {data.jobDescription?.length>100 ? data.jobDescription?.slice(0,100)+"...":data.jobDescription}
-                          </p>
-                          <div className="flex gap-5">
-                            <p className="text-sm flex items-center gap-2">
-                              <MapPin size={15} /> {data.jobAddress}
-                            </p>
-                            <p className="text-sm"> ₹ {data.salary}</p>
-                          </div>
-                          <button
-                            onClick={() => router.push("/login")}
-                            className="bg-amber-500 rounded-full px-3 py-1 text-white text-sm cursor-pointer"
-                          >
-                            Apply for this position
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <div>
-                  <h3 className="font-bold text-xl mb-6 text-gray-800">
-                    Get started in minutes
-                  </h3>
-
-                  {/* Feature List */}
-                  <ul className="mb-8 space-y-4">
-                    {[
-                      "AI-powered job matching",
-                      "Direct connections with hiring managers",
-                      "Personalized career guidance",
-                      "Exclusive job opportunities",
-                    ].map((item, index) => (
-                      <motion.li
-                        key={index}
-                        initial={{ opacity: 0, x: 20 }}
-                        animate={{
-                          opacity: isVisible ? 1 : 0,
-                          x: isVisible ? 0 : 20,
-                        }}
-                        transition={{ delay: 0.3 + index * 0.1 }}
-                        className="flex items-center text-gray-700"
-                      >
-                        <div className="bg-amber-100 p-1 rounded-full mr-3">
-                          <ChevronRight className="w-4 h-4 text-amber-600" />
-                        </div>
-                        {item}
-                      </motion.li>
-                    ))}
-                  </ul>
-
-                  {/* CTA Buttons */}
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{
-                      opacity: isVisible ? 1 : 0,
-                      y: isVisible ? 0 : 20,
-                    }}
-                    transition={{ delay: 0.7 }}
-                    className="space-y-4"
-                  >
-                    <motion.button
-                      whileHover={{ scale: 1.03 }}
-                      whileTap={{ scale: 0.97 }}
-                      className="w-full py-3 px-6 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-xl hover:shadow-lg transition-all font-medium flex items-center justify-center group"
-                    >
-                      <span>Create Your Profile</span>
-                      <Briefcase className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
-                    </motion.button>
-
-                    <motion.button
-                      onClick={() => setFetchJobs(true)}
-                      whileHover={{
-                        scale: 1.03,
-                        backgroundColor: "rgba(251, 191, 36, 0.1)",
-                      }}
-                      whileTap={{ scale: 0.97 }}
-                      className={`cursor-pointer w-full py-3 px-6 bg-transparent border border-amber-500/30 rounded-xl text-amber-600 transition-all font-medium flex items-center justify-center group`}
-                    >
-                      {isLoading && (
-                        <div className="w-4 mr-2 h-4 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
-                      )}
-                      <span>
-                        {isLoading ? "fetching " : "Browse Opportunities"}
-                      </span>
-                      <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
-                    </motion.button>
-                  </motion.div>
-                  {/* Trust Indicator */}
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: isVisible ? 1 : 0 }}
-                    transition={{ delay: 0.8, duration: 0.5 }}
-                    className="flex items-center mt-8 pt-6 border-t border-gray-100"
-                  >
-                    <Shield className="w-5 h-5 text-gray-400 mr-2" />
-                    <span className="text-sm text-gray-500">
-                      Trusted by 10,000+ companies worldwide
-                    </span>
-                  </motion.div>
-                </div>
-              )}
-            </div>
-          </div>
-        </motion.div>
-
-        {/* Animated footer text */}
+      <div className="max-w-7xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: isVisible ? 1 : 0, y: isVisible ? 0 : 20 }}
-          transition={{ duration: 0.5, delay: 0.9 }}
-          className="mt-12 text-center"
+          transition={{ duration: 0.6 }}
+          className="text-center mb-12"
         >
-          <div className="inline-flex items-center bg-gradient-to-r from-gray-50 to-white rounded-full px-6 py-3 shadow-inner border border-gray-200/50">
-            <Zap className="w-5 h-5 text-amber-500 mr-2 animate-pulse" />
-            <TypingAnimation
-              text="Join today and unlock your career potential!"
-              className="text-base text-gray-600 inline-block"
-              duration={30}
-            />
+          <div className="inline-block mb-2 px-4 py-1 bg-blue-50 text-blue-600 rounded-full text-sm font-medium">
+            Career Opportunities
           </div>
+          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+            Find Your Perfect Opportunity
+          </h2>
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            Our platform connects you with personalized job matches based on your skills
+          </p>
         </motion.div>
-      </motion.div>
+
+        <div className="bg-white rounded-2xl shadow-sm border border-blue-100 overflow-hidden">
+          {data ? (
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-6">
+                <button
+                  onClick={() => {
+                    queryClient.removeQueries();
+                    setFetchJobs(false);
+                  }}
+                  className="flex items-center text-blue-600 hover:text-blue-800 transition-colors"
+                >
+                  <MoveLeft className="w-4 h-4 mr-2" /> Back 
+                </button>
+                <span className="text-sm text-gray-500">
+                  {data.CONTENT.length} jobs found
+                </span>
+              </div>
+              
+              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                {data.CONTENT.slice(0, 6).map((job, idx) => (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: idx * 0.1 }}
+                    key={idx}
+                    className="bg-white p-5 rounded-xl border border-gray-100 hover:border-blue-200 hover:shadow-md transition-all group"
+                  >
+                    <div className="mb-4">
+                      <span className="inline-block bg-blue-50 text-blue-700 text-xs px-2 py-1 rounded-full mb-2">
+                        New
+                      </span>
+                      <h3 className="text-lg font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">
+                        {job.jobTitle}
+                      </h3>
+                    </div>
+                    
+                    <div className="flex items-center justify-between text-stone-900  mb-4">
+                      <span className="flex items-center">
+                        <MapPin size={14} className="mr-1" /> {job.companyDTO.companyName}
+                      </span>
+                    </div>
+                    <p className="text-sm text-gray-600 line-clamp-2 mb-4">
+                      {job.jobDescription}
+                    </p>
+                    
+                    <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
+                      <span className="flex items-center">
+                        <MapPin size={14} className="mr-1" /> {job.jobAddress}
+                      </span>
+                      <span className="font-medium">₹{job.salary}</span>
+                    </div>
+                    
+                    <button
+                      onClick={() => router.push("/login")}
+                      className="w-full flex items-center justify-center bg-white text-blue-600 border border-blue-200 hover:bg-blue-50 rounded-lg py-2 px-4 transition-colors group-hover:border-blue-400"
+                    >
+                      Apply Now
+                      <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                    </button>
+                  </motion.div>
+                ))}
+              </div>
+              
+              {data.CONTENT.length > 6 && (
+                <div className="mt-8 text-center">
+                  <Link 
+                  href={"/login"}
+                    className="text-blue-600 hover:text-blue-800 font-medium"
+                  >
+                    View all {data.CONTENT.length} jobs
+                  </Link>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="flex flex-col md:flex-row">
+              <div className="w-full md:w-1/2 p-8 md:p-10 lg:p-12">
+                <h3 className="text-2xl font-bold text-gray-900 mb-6">
+                  Find jobs that match your expertise
+                </h3>
+                
+                
+                
+                <div className="space-y-4 mb-8">
+                  {["AI-powered job matching", "Personalized career recommendations", "Direct connections with hiring managers"].map((item, index) => (
+                    <div key={index} className="flex items-start">
+                      <div className="mt-1 mr-3 flex-shrink-0 bg-blue-100  rounded-full p-1">
+                        <ChevronRight className="w-3 h-3" />
+                      </div>
+                      <span className="text-gray-700">{item}</span>
+                    </div>
+                  ))}
+                </div>
+                
+                <div className="space-y-4">
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => setFetchJobs(true)}
+                    className="w-full py-3 px-4 bg-blue-600 text-white rounded-lg  transition-colors flex items-center justify-center"
+                  >
+                    {isLoading ? (
+                      <>
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+                        Searching jobs...
+                      </>
+                    ) : (
+                      <>
+                        Find Jobs Now
+                        <ArrowRight className="w-4 h-4 ml-2" />
+                      </>
+                    )}
+                  </motion.button>
+                  
+                  
+                </div>
+                
+                
+              </div>
+              
+              <div className="hidden md:block w-1/2 text-black relative overflow-hidden">
+                <div className="absolute inset-0 pointer-events-none">
+                  <motion.div
+                    animate={{
+                      x: [0, 10, 0],
+                      y: [0, -10, 0],
+                      transition: {
+                        duration: 8,
+                        repeat: Infinity,
+                        ease: "easeInOut",
+                      },
+                    }}
+                    className="absolute right-0 bottom-0 w-96 h-96 bg-white/10 rounded-full transform translate-x-1/3 translate-y-1/3 blur-md"
+                  />
+                  <motion.div
+                    animate={{
+                      x: [0, -10, 0],
+                      y: [0, 10, 0],
+                      transition: {
+                        duration: 10,
+                        repeat: Infinity,
+                        ease: "easeInOut",
+                      },
+                    }}
+                    className="absolute left-0 top-0 w-64 h-64 bg-white/10 rounded-full transform -translate-x-1/3 -translate-y-1/3 blur-md"
+                  />
+                </div>
+                
+                <div className="relative z-10 p-12 h-full flex flex-col justify-center">
+                 
+
+                  <div className=" rounded-xl p-5 backdrop-blur-sm border border-gray-200 bg-white/30 shadow-md">
+                    <div className="flex text-yellow-200 mb-3">
+                      {[...Array(5)].map((_, i) => (
+                        <svg key={i} className="w-4 h-4 fill-current mr-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                          <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+                        </svg>
+                      ))}
+                    </div>
+                    <p className="text-sm italic  mb-3">
+                      {"JobPro matched me with opportunities I never would have found otherwise. The personalized approach made all the difference."}
+                    </p>
+                    <p className="text-xs ">
+                      — Sarah T., Software Developer
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+        
+        
+      </div>
     </section>
   );
 }

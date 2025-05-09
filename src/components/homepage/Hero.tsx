@@ -6,14 +6,12 @@ import {
   Search,
   MapPin,
   Briefcase,
-  Sparkles,
   Building,
   User,
   TrendingUp,
   CheckCircle,
   BookOpen,
   Building2,
-  Star,
   ArrowRight,
 } from "lucide-react";
 import AvailableJobs from "../availableJobs/availableJobs";
@@ -31,14 +29,7 @@ function Hero() {
     jobAddress: "",
   });
 
-  const featuredCompanies = [
-    "Google",
-    "Microsoft",
-    "Apple",
-    "Amazon",
-    "Meta",
-    "Netflix",
-  ];
+  
 
   useEffect(() => {
     const animationFrame = requestAnimationFrame(() => {
@@ -64,26 +55,26 @@ function Hero() {
   };
 
   return (
-    <section className="relative overflow-hidden py-20 lg:py-28 bg-gradient-to-b from-amber-50 to-white">
+    <section className="relative overflow-hidden py-20 lg:py-28 bg-gradient-to-b from-blue-50 to-white">
       {/* Enhanced background elements */}
       <div className="absolute top-0 left-0 w-full h-full pointer-events-none">
-        <div className="absolute top-20 left-10 w-72 h-72 rounded-full bg-amber-200 blur-3xl opacity-20"></div>
-        <div className="absolute bottom-40 right-10 w-96 h-96 rounded-full bg-amber-100 blur-3xl opacity-30"></div>
-        <div className="absolute top-40 right-20 w-48 h-48 rounded-full bg-amber-300 blur-3xl opacity-10"></div>
+        <div className="absolute top-20 left-10 w-72 h-72 rounded-full bg-blue-200 blur-3xl opacity-20"></div>
+        <div className="absolute bottom-40 right-10 w-96 h-96 rounded-full bg-blue-100 blur-3xl opacity-30"></div>
+        <div className="absolute top-40 right-20 w-48 h-48 rounded-full bg-blue-300 blur-3xl opacity-10"></div>
 
         <motion.div
-          className="absolute -bottom-16 -left-16 w-64 h-64 rounded-full border border-amber-200 opacity-20"
+          className="absolute -bottom-16 -left-16 w-64 h-64 rounded-full border border-blue-200 opacity-20"
           animate={{ rotate: 360 }}
           transition={{ duration: 40, repeat: Infinity, ease: "linear" }}
         />
 
         <motion.div
-          className="absolute top-1/4 right-1/4 w-40 h-40 rounded-full border border-amber-300 opacity-15"
+          className="absolute top-1/4 right-1/4 w-40 h-40 rounded-full border border-blue-300 opacity-15"
           animate={{ rotate: -360 }}
           transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
         />
 
-        <div className="absolute top-1/2 left-1/3 w-32 h-32 rounded-full bg-amber-100 blur-3xl opacity-20"></div>
+        <div className="absolute top-1/2 left-1/3 w-32 h-32 rounded-full bg-blue-100 blur-3xl opacity-20"></div>
       </div>
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6 relative z-10">
@@ -94,25 +85,12 @@ function Hero() {
             animate={{ opacity: isVisible ? 1 : 0, x: isVisible ? 0 : -50 }}
             transition={{ duration: 0.8, ease: "easeOut" }}
           >
-            <div className="mb-4 flex items-center">
-              <div className="mr-3 p-2 bg-amber-100 rounded-full shadow-sm">
-                <Sparkles className="w-5 h-5 text-amber-600" />
-              </div>
-              <span className="text-sm font-medium px-4 py-1.5 bg-gradient-to-r from-amber-100 to-amber-200 rounded-full text-amber-800 border border-amber-200 shadow-sm">
-                #1 Job Platform in the Industry
-              </span>
-            </div>
-
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold mb-6 leading-tight tracking-tight text-gray-900">
               Find Your{" "}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-500 to-amber-700">
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-blue-700">
                 Dream Career
               </span>
               <br />
-              Take the{" "}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-600 to-amber-800">
-                Next Step
-              </span>
             </h1>
 
             <motion.p
@@ -122,7 +100,7 @@ function Hero() {
               transition={{ duration: 0.5, delay: 0.3 }}
             >
               Connect with{" "}
-              <span className="font-semibold text-amber-700">10,000+</span>{" "}
+              <span className="font-semibold text-blue-700">10,000+</span>{" "}
               employers and discover opportunities that match your skills,
               experience, and career aspirations with our AI-powered matching
               system.
@@ -139,11 +117,11 @@ function Hero() {
                 whileHover={{ scale: 1.05 }}
                 transition={{ type: "spring", stiffness: 400, damping: 10 }}
               >
-                <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-amber-400 to-amber-500 flex items-center justify-center mr-3 shadow-md">
+                <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-blue-400 to-blue-500 flex items-center justify-center mr-3 shadow-md">
                   <TrendingUp className="w-6 h-6 text-white" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-gray-800">2.4M+</p>
+                  <p className="text-2xl font-bold text-gray-800">50+</p>
                   <p className="text-sm text-gray-600">Active Jobs</p>
                 </div>
               </motion.div>
@@ -153,11 +131,11 @@ function Hero() {
                 whileHover={{ scale: 1.05 }}
                 transition={{ type: "spring", stiffness: 400, damping: 10 }}
               >
-                <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-amber-400 to-amber-500 flex items-center justify-center mr-3 shadow-md">
+                <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-blue-400 to-blue-500 flex items-center justify-center mr-3 shadow-md">
                   <Building className="w-6 h-6 text-white" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-gray-800">75K+</p>
+                  <p className="text-2xl font-bold text-gray-800">10+</p>
                   <p className="text-sm text-gray-600">Companies</p>
                 </div>
               </motion.div>
@@ -167,11 +145,11 @@ function Hero() {
                 whileHover={{ scale: 1.05 }}
                 transition={{ type: "spring", stiffness: 400, damping: 10 }}
               >
-                <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-amber-400 to-amber-500 flex items-center justify-center mr-3 shadow-md">
+                <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-blue-400 to-blue-500 flex items-center justify-center mr-3 shadow-md">
                   <User className="w-6 h-6 text-white" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-gray-800">8.5M+</p>
+                  <p className="text-2xl font-bold text-gray-800">100+</p>
                   <p className="text-sm text-gray-600">Job Seekers</p>
                 </div>
               </motion.div>
@@ -184,13 +162,13 @@ function Hero() {
             animate={{ opacity: isVisible ? 1 : 0, y: isVisible ? 0 : 50 }}
             transition={{ duration: 0.8, delay: 0.2 }}
           >
-            <div className="bg-white shadow-2xl rounded-3xl border border-amber-100 overflow-hidden relative">
+            <div className="bg-white shadow-2xl rounded-3xl border border-blue-100 overflow-hidden relative">
               <div className="flex">
                 <button
                   className={`flex-1 py-5 font-medium text-center relative transition-colors ${
                     activeTab === "jobseeker"
-                      ? "text-amber-700 bg-amber-50"
-                      : "text-gray-600 hover:text-amber-600 hover:bg-amber-50"
+                      ? "text-blue-700 bg-blue-50"
+                      : "text-gray-600 hover:text-blue-600 hover:bg-blue-50"
                   }`}
                   onClick={() => setActiveTab("jobseeker")}
                 >
@@ -198,7 +176,7 @@ function Hero() {
                     <User
                       className={`w-5 h-5 mr-2 ${
                         activeTab === "jobseeker"
-                          ? "text-amber-600"
+                          ? "text-blue-600"
                           : "text-gray-500"
                       }`}
                     />
@@ -206,7 +184,7 @@ function Hero() {
                   </span>
                   {activeTab === "jobseeker" && (
                     <motion.div
-                      className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-500 to-amber-700"
+                      className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 to-blue-700"
                       layoutId="activeTab"
                     />
                   )}
@@ -215,8 +193,8 @@ function Hero() {
                 <button
                   className={`flex-1 py-5 font-medium text-center relative transition-colors ${
                     activeTab === "employer"
-                      ? "text-amber-700 bg-amber-50"
-                      : "text-gray-600 hover:text-amber-600 hover:bg-amber-50"
+                      ? "text-blue-700 bg-blue-50"
+                      : "text-gray-600 hover:text-blue-600 hover:bg-blue-50"
                   }`}
                   onClick={() => setActiveTab("employer")}
                 >
@@ -224,7 +202,7 @@ function Hero() {
                     <Building
                       className={`w-5 h-5 mr-2 ${
                         activeTab === "employer"
-                          ? "text-amber-600"
+                          ? "text-blue-600"
                           : "text-gray-500"
                       }`}
                     />
@@ -232,7 +210,7 @@ function Hero() {
                   </span>
                   {activeTab === "employer" && (
                     <motion.div
-                      className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-500 to-amber-700"
+                      className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 to-blue-700"
                       layoutId="activeTab"
                     />
                   )}
@@ -258,14 +236,14 @@ function Hero() {
                         <div
                           className={`flex items-center border-2 ${
                             focusedField === "jobTitle"
-                              ? "border-amber-500 shadow-md"
+                              ? "border-blue-500 shadow-md"
                               : "border-gray-200"
                           } rounded-xl px-4 py-3 bg-white transition-all`}
                         >
                           <Briefcase
                             className={`w-5 h-5 ${
                               focusedField === "jobTitle"
-                                ? "text-amber-600"
+                                ? "text-blue-600"
                                 : "text-gray-400"
                             } mr-3`}
                           />
@@ -287,14 +265,14 @@ function Hero() {
                         <div
                           className={`flex items-center border-2 ${
                             focusedField === "skills"
-                              ? "border-amber-500 shadow-md"
+                              ? "border-blue-500 shadow-md"
                               : "border-gray-200"
                           } rounded-xl px-4 py-3 bg-white transition-all`}
                         >
                           <BookOpen
                             className={`w-5 h-5 ${
                               focusedField === "skills"
-                                ? "text-amber-600"
+                                ? "text-blue-600"
                                 : "text-gray-400"
                             } mr-3`}
                           />
@@ -316,14 +294,14 @@ function Hero() {
                         <div
                           className={`flex items-center border-2 ${
                             focusedField === "companyName"
-                              ? "border-amber-500 shadow-md"
+                              ? "border-blue-500 shadow-md"
                               : "border-gray-200"
                           } rounded-xl px-4 py-3 bg-white transition-all`}
                         >
                           <Building2
                             className={`w-5 h-5 ${
                               focusedField === "companyName"
-                                ? "text-amber-600"
+                                ? "text-blue-600"
                                 : "text-gray-400"
                             } mr-3`}
                           />
@@ -345,14 +323,14 @@ function Hero() {
                         <div
                           className={`flex items-center border-2 ${
                             focusedField === "jobAddress"
-                              ? "border-amber-500 shadow-md"
+                              ? "border-blue-500 shadow-md"
                               : "border-gray-200"
                           } rounded-xl px-4 py-3 bg-white transition-all`}
                         >
                           <MapPin
                             className={`w-5 h-5 ${
                               focusedField === "jobAddress"
-                                ? "text-amber-600"
+                                ? "text-blue-600"
                                 : "text-gray-400"
                             } mr-3`}
                           />
@@ -371,7 +349,7 @@ function Hero() {
                       </div>
 
                       <motion.button
-                        className="w-full py-4 bg-gradient-to-r from-amber-500 to-amber-700 hover:from-amber-600 hover:to-amber-800 text-white rounded-xl font-medium flex items-center justify-center transition-all shadow-lg hover:shadow-xl"
+                        className="w-full py-4 bg-gradient-to-r from-blue-500 to-blue-700 hover:from-blue-600 hover:to-blue-800 text-white rounded-xl font-medium flex items-center justify-center transition-all shadow-lg hover:shadow-xl"
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
                         onClick={handleSearch}
@@ -416,7 +394,7 @@ function Hero() {
                       </div>
 
                       <motion.button
-                        className="w-full py-4 bg-gradient-to-r from-amber-500 to-amber-700 hover:from-amber-600 hover:to-amber-800 text-white rounded-xl font-medium flex items-center justify-center transition-all shadow-lg hover:shadow-xl"
+                        className="w-full py-4 bg-gradient-to-r from-blue-500 to-blue-700 hover:from-blue-600 hover:to-blue-800 text-white rounded-xl font-medium flex items-center justify-center transition-all shadow-lg hover:shadow-xl"
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
                       >
@@ -426,7 +404,7 @@ function Hero() {
 
                       <div className="mt-5 flex items-center justify-center">
                         <span className="text-gray-500">Or</span>
-                        <button className="ml-2 font-medium text-amber-700 hover:text-amber-800 flex items-center">
+                        <button className="ml-2 font-medium text-blue-700 hover:text-blue-800 flex items-center">
                           Contact our recruiting team
                           <ArrowRight className="w-4 h-4 ml-1" />
                         </button>
@@ -460,30 +438,12 @@ function Hero() {
         animate={{ opacity: isVisible ? 1 : 0, y: isVisible ? 0 : 20 }}
         transition={{ duration: 0.6, delay: 0.8 }}
       >
-        <div className="flex items-center justify-center mb-8">
-          <div className="h-px w-16 bg-amber-300 mr-4"></div>
-          <p className="text-sm font-semibold uppercase tracking-wider text-amber-800">
+        <div className="flex items-center justify-center ">
+          <div className="h-px w-16 bg-blue-300 mr-4"></div>
+          <p className="text-sm font-semibold uppercase tracking-wider text-blue-800">
             TRUSTED BY INDUSTRY LEADERS
           </p>
-          <div className="h-px w-16 bg-amber-300 ml-4"></div>
-        </div>
-
-        <div className="flex flex-wrap justify-center items-center gap-x-12 gap-y-8">
-          {featuredCompanies.map((company, i) => (
-            <motion.div
-              key={i}
-              className="flex items-center text-lg font-bold text-gray-400 hover:text-amber-600 transition-colors"
-              whileHover={{ scale: 1.05 }}
-              initial={{ opacity: 0 }}
-              animate={{
-                opacity: isVisible ? 1 : 0,
-                transition: { delay: 0.9 + i * 0.1 },
-              }}
-            >
-              <Star className="w-4 h-4 mr-2 text-amber-400" />
-              {company}
-            </motion.div>
-          ))}
+          <div className="h-px w-16 bg-blue-300 ml-4"></div>
         </div>
       </motion.div>
     </section>
