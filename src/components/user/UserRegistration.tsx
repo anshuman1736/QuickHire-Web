@@ -441,7 +441,7 @@ const UserRegistration = () => {
                 onClick={() =>
                   setshowpwd((prev) => ({ ...prev,confirm:false,  password: !prev.password }) )
                 }
-                className="text-xs text-orange-400  cursor-pointer absolute right-5 top-3.5"
+                className="text-xs text-blue-400  cursor-pointer absolute right-5 top-3.5"
               >
                 {showpwd.password ? <Eye /> : <EyeOff />}
               </span>
@@ -465,7 +465,7 @@ const UserRegistration = () => {
                 onClick={() =>
                   setshowpwd((prev) => ({ ...prev,password:false, confirm: !prev.confirm }))
                 }
-                className="text-xs text-orange-400  cursor-pointer absolute right-5 top-3.5"
+                className="text-xs text-blue-400  cursor-pointer absolute right-5 top-3.5"
               >
                 {showpwd.confirm ? <Eye /> : <EyeOff />}
               </span>
