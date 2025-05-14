@@ -31,9 +31,6 @@ function Footer() {
               </div>
             </div>
             <div className="md:w-1/3">
-              <button className="w-full py-3 bg-blue-600 text-white font-medium rounded-xl hover:bg-blue-700 transition-colors shadow-md">
-                Create Profile
-              </button>
             </div>
           </div>
         </div>
