@@ -1,2 +1,3 @@
 export const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_API_URL;
 export const PYTHON_BACKEND_URL = process.env.NEXT_PUBLIC_PYTHON_BACKEND_URL;
+export const WEBSOCKET_URL = process.env.NEXT_PUBLIC_WEBSOCKET_URL

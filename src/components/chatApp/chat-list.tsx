@@ -1,56 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Search, Settings, Plus } from "lucide-react";
+import { GetCompanyRooms } from "@/hooks/sales/GetRoomsCom";
 
-// Mock data for chat list
-const chatData = [
-  {
-    id: 1,
-    name: "Sarah Johnson",
-    avatar: "/placeholder.svg?height=40&width=40",
-    lastMessage: "Hey, are we still meeting today?",
-    time: "10:30 AM",
-    unread: 2,
-    online: true,
-  },
-  {
-    id: 2,
-    name: "Michael Chen",
-    avatar: "/placeholder.svg?height=40&width=40",
-    lastMessage: "I've sent you the files you requested",
-    time: "Yesterday",
-    unread: 0,
-    online: false,
-  },
-  {
-    id: 3,
-    name: "Emma Wilson",
-    avatar: "/placeholder.svg?height=40&width=40",
-    lastMessage: "Thanks for your help!",
-    time: "Yesterday",
-    unread: 0,
-    online: true,
-  },
-  {
-    id: 4,
-    name: "James Rodriguez",
-    avatar: "/placeholder.svg?height=40&width=40",
-    lastMessage: "Let's discuss the project tomorrow",
-    time: "Monday",
-    unread: 0,
-    online: false,
-  },
-  {
-    id: 5,
-    name: "Olivia Smith",
-    avatar: "/placeholder.svg?height=40&width=40",
-    lastMessage: "Can you review my presentation?",
-    time: "Monday",
-    unread: 3,
-    online: true,
-  },
-];
+interface Room {
+  roomId: number;
+  randomAdmin: string;
+  randomAdminId: number;
+  allocateTo: number | string;
+}
 
 interface ChatListProps {
   onSelectChat: (chatId: number) => void;
@@ -64,14 +23,32 @@ export default function ChatList({
   onOpenSettings,
 }: ChatListProps) {
   const [searchQuery, setSearchQuery] = useState("");
+  const [rooms, setRooms] = useState<Room[]>([]);
 
-  const filteredChats = chatData.filter((chat) =>
-    chat.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  useEffect(() => {
+    const userId = localStorage.getItem("userId") || "";
+    GetCompanyRooms(userId)
+      .then((response) => {
+        if (response && response.data && response.data.CONTENT) {
+          setRooms(response.data.CONTENT);
+        } else if (response && response.CONTENT) {
+          setRooms(response.CONTENT);
+        } else {
+          console.error("Unexpected response format:", response);
+        }
+      })
+      .catch((error) => {
+        console.error("Error fetching rooms:", error);
+      });
+  }, []);
+
+  const filteredRooms = rooms.filter((room) => {
+    const searchTarget = String(room.allocateTo).toLowerCase();
+    return searchTarget.includes(searchQuery.toLowerCase());
+  });
 
   return (
     <div className="flex flex-col h-full bg-white">
-      {/* Header with profile and search */}
       <div className="p-4 border-b">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
@@ -85,7 +62,6 @@ export default function ChatList({
             </div>
             <div>
               <h1 className="font-bold text-lg">Chats</h1>
-              <p className="text-xs text-gray-500">5 unread messages</p>
             </div>
           </div>
           <div className="flex gap-1">
@@ -115,47 +91,35 @@ export default function ChatList({
         </div>
       </div>
 
-      {/* Chat list */}
-      <div className="flex-1 ">
-        {filteredChats.length > 0 ? (
+      <div className="flex-1 overflow-y-auto">
+        {filteredRooms.length > 0 ? (
           <ul className="divide-y divide-gray-100">
-            {filteredChats.map((chat) => (
+            {filteredRooms.map((room) => (
               <li
-                key={chat.id}
+                key={room.roomId}
                 className={`hover:bg-gray-50 cursor-pointer transition-colors ${
-                  selectedChat === chat.id ? "bg-blue-50" : ""
+                  selectedChat === room.roomId ? "bg-blue-50" : ""
                 }`}
-                onClick={() => onSelectChat(chat.id)}
+                onClick={() => onSelectChat(room.roomId)}
               >
                 <div className="flex items-start p-4 gap-3">
                   <div className="relative flex-shrink-0">
                     <img
-                      src={chat.avatar || "/placeholder.svg"}
-                      alt={chat.name}
+                      src="/placeholder.svg?height=40&width=40"
+                      alt={`Room ${room.roomId}`}
                       className="w-12 h-12 rounded-full object-cover"
                     />
-                    {chat.online && (
-                      <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></span>
-                    )}
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex justify-between items-baseline mb-1">
-                      <h3 className="font-semibold truncate">{chat.name}</h3>
-                      <span className="text-xs text-gray-500 whitespace-nowrap ml-2">
-                        {chat.time}
-                      </span>
+                      <h3 className="font-semibold truncate">
+                        {typeof room.allocateTo === 'string' ? room.allocateTo : `User ID: ${room.allocateTo}`}
+                      </h3>
                     </div>
                     <p className="text-sm text-gray-600 truncate">
-                      {chat.lastMessage}
+                      Admin: {room.randomAdmin}
                     </p>
                   </div>
-                  {chat.unread > 0 && (
-                    <div className="ml-2 flex-shrink-0">
-                      <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-blue-500 text-white text-xs font-medium">
-                        {chat.unread}
-                      </span>
-                    </div>
-                  )}
                 </div>
               </li>
             ))}

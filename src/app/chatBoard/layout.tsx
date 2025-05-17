@@ -1,4 +1,6 @@
 import Header from "@/components/chatApp/headerChat";
+import ProtectedRoute from "@/components/ProtectedRoutes";
+import { Role } from "@/types/user";
 import type React from "react";
 
 export default function DashboardLayout({
@@ -7,9 +9,9 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div>
+    <ProtectedRoute roleType={Role.ROLE_QH}>
       <Header />
       <main>{children}</main>
-    </div>
+    </ProtectedRoute>
   );
 }

@@ -8,6 +8,7 @@ import ProfileSettings from "./profile-settings"
 export default function ChatDashboard() {
   const [selectedChat, setSelectedChat] = useState<number | null>(1)
   const [showSettings, setShowSettings] = useState(false)
+  console.log("Selected Chat:", selectedChat)
 
   return (
     <div className="flex h-screen bg-gray-100">
@@ -19,18 +20,14 @@ export default function ChatDashboard() {
         />
       </div>
 
+      {selectedChat && (
       <div className="hidden md:block flex-1 h-screen">
         <ChatWindow chatId={selectedChat} />
       </div>
+          )}
 
-      {/* Mobile chat view - shows when a chat is selected */}
-      {selectedChat && (
-        <div className="fixed inset-0 bg-white z-50 md:hidden">
-          <ChatWindow chatId={selectedChat} isMobile={true} onBack={() => setSelectedChat(null)} />
-        </div>
-      )}
+        
 
-      {/* Settings modal */}
       {showSettings && <ProfileSettings onClose={() => setShowSettings(false)} />}
     </div>
   )

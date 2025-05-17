@@ -18,6 +18,8 @@ export default function useAuth() {
         setActiveRole(Role.ROLE_COMPANY);
       } else if (roleString === Role.ROLE_USER) {
         setActiveRole(Role.ROLE_USER);
+      } else if (roleString === Role.ROLE_QH) {
+        setActiveRole(Role.ROLE_QH);
       }
     } else {
       setToken(null);

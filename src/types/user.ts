@@ -31,4 +31,6 @@ export interface IUpdateUserRequest {
 export enum Role {
   ROLE_COMPANY = "ROLE_COMPANY",
   ROLE_USER = "ROLE_USER",
+  ROLE_QH="ROLE_QH"
+
 }
